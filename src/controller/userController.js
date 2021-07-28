@@ -4,15 +4,15 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 
 //Need to change on how to get the ID of the user later.
+//This needs the user to be authenticated before adding a profile image
 exports.addProfilePic = async (req, res) => {
-    const { id } = req.body;
-
+    const userData = req.user;
     const t = await db.sequelize.transaction();
     try {
-
+        
         //From line 11 - 19 will be deleted if middleware for authentication is added
         const user = await db.User.findOne({
-            where: { id }
+            where: { id: userData.id }
         });
 
         if (!user) {
@@ -24,7 +24,7 @@ exports.addProfilePic = async (req, res) => {
             filepath: req.file.path,
             mimetype: req.file.mimetype,
             size: req.file.size,
-            userId: id
+            userId: user.id
         }, {
             transaction: t
         });
@@ -37,7 +37,7 @@ exports.addProfilePic = async (req, res) => {
     } catch (err) {
         console.log(err);
         await t.rollback();
-        return res.status(401).send({
+        return res.status(500).send({
             msg: "Something went wrong"
         });
     }
@@ -51,7 +51,8 @@ exports.signUp = async (req, res) => {
         plainPassword,
         plainConfirmPassword,
         contactNumber,
-        address
+        address,
+        role
     } = req.body;
 
     const t = await db.sequelize.transaction(); 
@@ -63,7 +64,8 @@ exports.signUp = async (req, res) => {
             plainPassword === null &&
             plainConfirmPassword === null &&
             contactNumber === null && 
-            address === null
+            address === null && 
+            role === null
         ) {
             return res.status(401).send({msg: "Error 1"}); //TO BE CHANGED SOON
         }
@@ -85,7 +87,8 @@ exports.signUp = async (req, res) => {
             email,
             password,
             contactNumber,
-            address
+            address,
+            role
         }, {
             transaction: t
         });
@@ -98,7 +101,7 @@ exports.signUp = async (req, res) => {
     } catch (err) {
         console.log(err);
         await t.rollback();
-        return res.status(401).send({
+        return res.status(500).send({
             msg: 'Something went wrong',
             err
         })
@@ -107,12 +110,17 @@ exports.signUp = async (req, res) => {
 };
 
 exports.signIn = async (req, res) => {
-    const { username, plainPassword } = req.body;
+    const { 
+        username, 
+        plainPassword, 
+        role 
+    } = req.body;
 
     try {
         if (
             username === null &&
-            plainPassword === null
+            plainPassword === null &&
+            role === null
         ) { 
             return res.status(401).send({
                 msg: "Error 1" //TO BE CHANGED SOON
@@ -120,7 +128,7 @@ exports.signIn = async (req, res) => {
         }
 
         const user = await db.User.findOne({
-            where: { username }
+            where: { username, role }
         });
 
         if (!user) {
@@ -137,17 +145,84 @@ exports.signIn = async (req, res) => {
             });
         }
 
-        const token = jwt.sign({ id: user.id, email: user.email }, config.secretKey);
+        const token = jwt.sign({ id: user.id, email: user.email, role }, config.secretKey);
 
         return res.send({
             msg: "Successfully Sign In",
+            user,
             token
         })
     } catch (err) {
         console.log(err);
-        return res.status(401).send({
+        return res.status(500).send({
             msg: "Something went wrong",
             err
         });
+    }
+};
+
+//This needs the user to be authenticated before the user view his/her profile details
+//This is not only for showing user information but also
+exports.userProfile = async (req, res) => {
+
+    try {
+        const user = req.user;
+
+        const profileImage = await db.ProfileImage.findOne({
+            where: {userId: user.id}
+        });
+
+        return res.send({
+            user,
+            profileImage
+        })
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({
+            msg: "Something went wrong",
+        })
+    }
+};
+
+//Delete functionality that an admin user can only access.
+exports.deleteUser = async (req, res) => {
+    const { id } = req.body;
+    const userData = req.user;
+
+    const t = await db.sequelize.transaction();
+    try {
+        if(userData.role !== 'admin') {
+            return res.status(401).send({
+                msg: "You are not an admin!"
+            })
+        }
+
+        const user = await db.User.findOne({
+            where: { id: id }
+        });
+        console.log('---User: ', user)
+
+        await db.User.destroy({ 
+            where: {id: user.id}
+        }, {
+            transaction: t
+        });
+
+        await db.ProfileImage.destroy({
+            where: {userId: user.id}
+        }, {
+            transaction: t
+        });
+
+        return res.send({
+            msg: "Deleted Successfully"
+        })
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong",
+            err
+        })
     }
 };
