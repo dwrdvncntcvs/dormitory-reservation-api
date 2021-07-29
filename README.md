@@ -28,7 +28,6 @@
 1. Go to the terminal of your project.
 2. Run the command "npm run start".
 
-** For more information, you may email me at:
-** edwardvincentcuevas7@gmail.com
+** For more information, you may email me at: edwardvincentcuevas7@gmail.com
 
 Thank you!
