@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
+  class Document extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,86 +11,66 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.hasOne(models.ProfileImage, {foreignKey: 'userId'});
-      this.hasMany(models.Document, { foreignKey: 'userId' });
+      this.belongsTo(models.User, {foreignKey: 'userId'});
     }
   };
-  User.init({
-    id: {
-      primaryKey: true,
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      allowNull: false
-    },
-    name: {
+  Document.init({
+    documentName: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: true,
-        notNull: true
-      }
-    },
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        notEmpty: true,
-        notNull: true
-      }
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        notEmpty: true,
         notNull: true,
-        isEmail: true
+        notEmpty: true,
       }
     },
-    password: {
+    documentType: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
+        notNull: true,
         notEmpty: true,
-        notNull: true
       }
     },
-    contactNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        notEmpty: true,
-        notNull: true
-      }
-    },
-    address: {
+    filename: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
+        notNull: true,
         notEmpty: true,
-        notNull: true
       }
     },
-    role: {
+    filepath: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
+        notNull: true,
         notEmpty: true,
-        notNull: true
       }
     },
-    isValid: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-      allowNull: false
+    mimetype: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: true,
+        notEmpty: true,
+      }
+    },
+    size: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        notNull: true,
+        notEmpty: true,
+      }
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
     }
   }, {
     sequelize,
-    modelName: 'User',
-    tableName: 'Users'
+    modelName: 'Document',
+    tableName: 'Documents'
   });
-  return User;
+  return Document;
 };

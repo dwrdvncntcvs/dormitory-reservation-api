@@ -187,51 +187,7 @@ exports.userProfile = async (req, res) => {
     }
 };
 
-//DELETE USER INFORMATION
-//Delete functionality that an admin user can only access.
-//This function is not yet complete until this comment is deleted.
-exports.deleteUser = async (req, res) => {
-    const { id } = req.body;
-    const userData = req.user;
-
-    const t = await db.sequelize.transaction();
-    try {
-        if(userData.role !== 'admin') {
-            return res.status(401).send({
-                msg: "You are not an admin!"
-            })
-        }
-
-        const user = await db.User.findOne({
-            where: { id: id }
-        });
-        console.log('---User: ', user)
-
-        await db.User.destroy({ 
-            where: {id: user.id}
-        }, {
-            transaction: t
-        });
-
-        await db.ProfileImage.destroy({
-            where: {userId: user.id}
-        }, {
-            transaction: t
-        });
-
-        return res.send({
-            msg: "Deleted Successfully"
-        })
-    } catch (err) {
-        console.log(err);
-        await t.rollback();
-        return res.status(500).send({
-            msg: "Something went wrong",
-            err
-        })
-    }
-};
-
+//DELETE PROFILE IMAGE
 exports.deleteProfileImage = async (req, res) => {
     const userData = req.user;
     
@@ -257,6 +213,7 @@ exports.deleteProfileImage = async (req, res) => {
 };
 
 //EDIT USER INFORMATION
+//EDIT ONLY NAME
 exports.editProfileName = async (req, res) => {
     const { name } = req.body;
 
@@ -284,6 +241,7 @@ exports.editProfileName = async (req, res) => {
     }
 };
 
+//EDIT ONLY USERNAME
 exports.editProfileUsername = async (req, res) => {
     const { username } = req.body;
 
@@ -321,6 +279,7 @@ exports.editProfileUsername = async (req, res) => {
     }
 };
 
+//EDIT ONLY ADDRESS
 exports.editProfileAddress = async (req, res) => {
     const { address } = req.body;
 
@@ -422,5 +381,157 @@ exports.changeUserPassword = async (req, res) => {
         return res.status(500).send({
             msg: "Something went wrong"
         });
+    }
+};
+
+//To add new documents
+exports.addUserDocuments = async (req, res) => {
+    const { 
+        documentName, 
+        documentType,
+    } = req.body;
+    const userData = req.user;
+
+    const t = await db.sequelize.transaction();
+    try {
+        const documents = await db.Document.create({
+            documentName, 
+            documentType, 
+            filename: req.file.filename, 
+            filepath: req.file.path, 
+            mimetype: req.file.mimetype, 
+            size : req.file.size,
+            userId: userData.id,
+        });
+
+        return res.send({
+            documents
+        });
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};
+
+//For ADMIN only.
+//This function will let the admins to manually or perssonaly validate 
+//users depends on the documents or ids that they will uploading.
+exports.displayAllUsers = async (req, res) => {
+    const userData = req.user;
+
+    try {
+        if (userData.role !== 'admin') {
+            return res.status(401).send({
+                msg: "You're not an admin"
+            });
+        }
+        const adminUsers = await db.User.findAll({
+            where: { role: 'admin' },
+            include: [db.ProfileImage, db.Document]
+        });
+
+        const ownerUsers = await db.User.findAll({
+            where: { role: 'owner' },
+            include: [db.ProfileImage, db.Document]
+        });
+
+        const tenantUsers = await db.User.findAll({
+            where: { role: 'tenant'},
+            include: [db.ProfileImage, db.Document]
+        });
+
+
+        return res.send({
+            adminUsers,
+            ownerUsers,
+            tenantUsers
+        })
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};
+
+//TO VERIFY THE USERS
+exports.verifyUser = async (req, res) => {
+    const { id, isValid } = req.body;
+    const userData = req.user;
+
+    const t = await db.sequelize.transaction();
+    try {
+        if (userData.role !== 'admin') {
+            return res.status(401).send({
+                msg: "You're not an admin"
+            });
+        }
+
+        await db.User.update({
+            isValid
+        }, {
+            where: {id}
+        }, {
+            transaction: t
+        });
+        await t.commit();
+
+        return res.send({
+            msg: "Account Successfully Verified"
+        });
+    } catch (error) {
+        console.log(error);
+        await t.rollback();
+        return res.status(404).send({
+            msg: "Something went wrong"
+        });
+    }
+};
+
+//DELETE USER INFORMATION
+//Delete functionality that an admin user can only access.
+//This function is not yet complete until this comment is deleted.
+exports.deleteUser = async (req, res) => {
+    const { id } = req.body;
+    const userData = req.user;
+
+    const t = await db.sequelize.transaction();
+    try {
+        if(userData.role !== 'admin') {
+            return res.status(401).send({
+                msg: "You are not an admin!"
+            })
+        }
+
+        const user = await db.User.findOne({
+            where: { id: id }
+        });
+        console.log('---User: ', user)
+
+        await db.User.destroy({ 
+            where: {id: user.id}
+        }, {
+            transaction: t
+        });
+
+        await db.ProfileImage.destroy({
+            where: {userId: user.id}
+        }, {
+            transaction: t
+        });
+
+        return res.send({
+            msg: "Deleted Successfully"
+        })
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong",
+            err
+        })
     }
 };

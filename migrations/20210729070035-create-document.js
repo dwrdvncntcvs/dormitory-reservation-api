@@ -1,47 +1,40 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('Documents', {
       id: {
         allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+      documentName: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      documentType: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      filename: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      filepath: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      mimetype: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      size: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      userId: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4
-      },
-      name: {
-        type: Sequelize.STRING,
         allowNull: false,
-      },
-      username: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      email: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      password: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      contactNumber: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      address: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      role: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      isValid: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
-        allowNull: false
       },
       createdAt: {
         allowNull: false,
@@ -54,6 +47,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Users');
+    await queryInterface.dropTable('Documents');
   }
 };
