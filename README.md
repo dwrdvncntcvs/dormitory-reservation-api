@@ -1,4 +1,4 @@
--------> Dormitory Reservation (Server) <-------
+-------------> Dormitory Reservation (Server) <-------------
 
 ** This is the server application of Dormitory Reservation. 
 
