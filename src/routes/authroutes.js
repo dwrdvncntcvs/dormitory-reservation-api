@@ -55,7 +55,6 @@ route.post('/sign-in', userController.signIn);
 
 //GET METHOD
 //This needs the user to be authenticated before the user view his/her profile details
-//Add isValid
 route.get('/user-profile', requireAuth, userController.userProfile);
 
 route.get('/find-user/:email', userController.checkUserEmail);
@@ -64,7 +63,6 @@ route.get('/find-user/:email', userController.checkUserEmail);
 route.get('/get-all-users', requireAuth, userController.displayAllUsers);
 
 //PUT METHOD
-//Add isValid
 route.put('/edit-user-name', requireAuth, userController.editProfileName);
 
 route.put('/edit-user-username', requireAuth, userController.editProfileUsername);
@@ -79,7 +77,6 @@ route.put('/verify-user', requireAuth, userController.verifyUser);
 //DELETE METHOD
 //Delete functionality that an admin user can only access.
 //This endpoint is not yet complete until this comment is deleted.
-//Add isValid
 route.delete('/delete-user-profile', requireAuth, userController.deleteUser);
 
 route.delete('/delete-profile-image', requireAuth, userController.deleteProfileImage);
