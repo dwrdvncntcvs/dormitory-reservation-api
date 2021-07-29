@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 
+//ADD PROFILE IMAGE
 //Need to change on how to get the ID of the user later.
 //This needs the user to be authenticated before adding a profile image
 exports.addProfilePic = async (req, res) => {
@@ -43,6 +44,7 @@ exports.addProfilePic = async (req, res) => {
     }
 };
 
+//CREATE NEW INFORMATION
 exports.signUp = async (req, res) => {
     const {
         name,
@@ -109,6 +111,7 @@ exports.signUp = async (req, res) => {
     }
 };
 
+//SIGN IN WITH EXISTING INFORMATION
 exports.signIn = async (req, res) => {
     const { 
         username, 
@@ -184,7 +187,9 @@ exports.userProfile = async (req, res) => {
     }
 };
 
+//DELETE USER INFORMATION
 //Delete functionality that an admin user can only access.
+//This function is not yet complete until this comment is deleted.
 exports.deleteUser = async (req, res) => {
     const { id } = req.body;
     const userData = req.user;
@@ -224,5 +229,121 @@ exports.deleteUser = async (req, res) => {
             msg: "Something went wrong",
             err
         })
+    }
+};
+
+exports.deleteProfileImage = async (req, res) => {
+    const userData = req.user;
+    
+    const t = await db.sequelize.transaction();
+    try {
+        await db.ProfileImage.destroy({
+            where: {userId: userData.id}
+        }, {
+            transaction: t
+        });
+        await t.commit();
+
+        return res.send({
+            msg: "Successfully Deleted"
+        });
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};
+
+//EDIT USER INFORMATION
+exports.editProfileName = async (req, res) => {
+    const { name } = req.body;
+
+    const t = await db.sequelize.transaction();
+    const userData = req.user;
+    try {
+        await db.User.update({
+            name
+        }, {
+            where: {id: userData.id}
+        }, {
+            transaction: t
+        });
+        await t.commit();
+
+        return res.send({
+            msg: "Name successfully updated"
+        });
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};
+
+exports.editProfileUsername = async (req, res) => {
+    const { username } = req.body;
+
+    const t = await db.sequelize.transaction();
+    const userData = req.user;
+    try {
+        const user = await db.User.count({
+            where: { username }
+        });
+
+        if (user !== 0) {
+            return res.status(401).send({ msg: "Error 1"}) // To be changed soon
+        }
+
+        await db.User.update({
+            //To be edited
+            username
+        }, {
+            //Finding what to edit
+            where: { id: userData.id }
+        }, {
+            transaction: t  
+        });
+        await t.commit();
+
+        return res.send({
+            msg: "Username successfully updated"
+        });
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};
+
+exports.editProfileAddress = async (req, res) => {
+    const { address } = req.body;
+
+    const userData = req.user;
+    const t = await db.sequelize.transaction();
+    try {
+        await db.User.update({
+            address
+        }, {    
+            where: { id: userData.id }
+        }, {
+            transaction: t
+        });
+        await t.commit();
+
+        return res.send({
+            msg: "Address updated successfully"
+        });
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
     }
 };
