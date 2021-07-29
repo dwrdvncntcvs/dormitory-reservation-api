@@ -36,12 +36,16 @@ route.post('/sign-in', userController.signIn);
 //This needs the user to be authenticated before the user view his/her profile details
 route.get('/user-profile', requireAuth, userController.userProfile);
 
+route.get('/find-user/:email', userController.checkUserEmail);
+
 //PUT METHOD
 route.put('/edit-user-name', requireAuth, userController.editProfileName);
 
 route.put('/edit-user-username', requireAuth, userController.editProfileUsername);
 
 route.put('/edit-user-address', requireAuth, userController.editProfileAddress);
+
+route.put('/change-user-password', userController.changeUserPassword);
 
 //DELETE METHOD
 //Delete functionality that an admin user can only access.

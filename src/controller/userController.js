@@ -165,7 +165,7 @@ exports.signIn = async (req, res) => {
 };
 
 //This needs the user to be authenticated before the user view his/her profile details
-//This is not only for showing user information but also
+//This is not only for showing user information but also their dormitories and some images
 exports.userProfile = async (req, res) => {
 
     try {
@@ -338,6 +338,83 @@ exports.editProfileAddress = async (req, res) => {
 
         return res.send({
             msg: "Address updated successfully"
+        });
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};
+
+//Checks email address to change user's password.
+exports.checkUserEmail = async (req, res) => {
+    const email = req.params.email;
+
+    try {
+        const user = await db.User.findOne({
+            where: {email} 
+        });
+        console.log(user)
+        if (!user) {
+            return res.status(401).send({
+                msg: "Error 1" // To be changed soon.
+            });
+        }
+
+        return res.send({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            username: user.username,
+            role: user.role
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};
+
+//Checks the uuid of the user to let them change their password.
+exports.changeUserPassword = async (req, res) => {
+    const { id, plainPassword, plainConfirmPassword } = req.body;
+
+    const t = await db.sequelize.transaction();
+    try {
+        //Checking if fields are null or not.
+        if (plainPassword === null && plainConfirmPassword === null) {
+            return res.status(401).send({
+                msg: "Error 1" // To be change soon.
+            });
+        }
+        
+        //For salting and hashing password
+        const salt = await bcrypt.genSalt(10, "a");
+        const password = await bcrypt.hash(plainPassword, salt);
+
+        const verifiedPassword = await bcrypt.compare(plainConfirmPassword, password);
+        console.log("Password to be saved: ", password);
+
+        if (!verifiedPassword) {
+            return res.status(401).send({
+                msg: "Error 2" // To be change soon.
+            });
+        }
+        
+        await db.User.update({
+            password
+        }, {
+            where: { id }
+        }, {
+            transaction: t
+        });
+        await t.commit();
+
+        return res.send({
+            msg: "Password Successfully Changed"
         });
     } catch (err) {
         console.log(err);
