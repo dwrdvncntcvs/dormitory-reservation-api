@@ -43,7 +43,6 @@ const uploadDocumentImages = multer({
 //POST METHOD
 //Need to change on how to get the ID of the user later.
 //This needs the user to be authenticated before adding a profile image.
-//Add iValid
 route.post('/add-profile-image', [requireAuth, uploadProfileImage], userController.addProfilePic);
 
 route.post('/add-user-documents', [requireAuth, uploadDocumentImages], userController.addUserDocuments);
