@@ -7,7 +7,7 @@
 1. express
 2. bcrypt
 3. jsonwebtoken
-4. multert
+4. multer
 5. nodemon
 6. pg
 7. pg-hstore
