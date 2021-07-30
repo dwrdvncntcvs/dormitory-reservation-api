@@ -1,27 +1,31 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Dormitories', {
+    await queryInterface.createTable('DormProfileImages', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
+      filename: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      address: {
+      filepath: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      contactNumber: {
+      mimetype: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      userId: {
-        type: Sequelize.UUID,
+      size: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      dormitoryId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
       createdAt: {
@@ -35,6 +39,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Dormitories');
+    await queryInterface.dropTable('DormProfileImages');
   }
 };

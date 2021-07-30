@@ -28,6 +28,8 @@
 1. Go to the terminal of your project.
 2. Run the command "npm run start".
 
+** To test the endpoints of the server, I also suggest that you install postman from https://www.postman.com/downloads/.
+
 ** For more information, you may email me at: edwardvincentcuevas7@gmail.com
 
 Thank you!

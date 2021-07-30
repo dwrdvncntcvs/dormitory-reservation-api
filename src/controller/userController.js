@@ -167,7 +167,6 @@ exports.signIn = async (req, res) => {
 //This needs the user to be authenticated before the user view his/her profile details
 //This is not only for showing user information but also their dormitories and some images
 exports.userProfile = async (req, res) => {
-
     try {
         const user = req.user;
 
@@ -175,9 +174,14 @@ exports.userProfile = async (req, res) => {
             where: {userId: user.id}
         });
 
+        const userDormitory = await db.Dormitory.findAll({
+            where: {userId: user.id}
+        });
+
         return res.send({
             user,
-            profileImage
+            profileImage,
+            userDormitory,
         })
     } catch (err) {
         console.log(err);
@@ -435,7 +439,7 @@ exports.displayAllUsers = async (req, res) => {
 
         const ownerUsers = await db.User.findAll({
             where: { role: 'owner' },
-            include: [db.ProfileImage, db.Document]
+            include: [db.ProfileImage, db.Document, db.Dormitory]
         });
 
         const tenantUsers = await db.User.findAll({
@@ -519,6 +523,19 @@ exports.deleteUser = async (req, res) => {
 
         await db.ProfileImage.destroy({
             where: {userId: user.id}
+        }, {
+            transaction: t
+        });
+
+        await db.Document.destroy({
+            where: {userId: user.id}
+        }, {
+            transaction: t
+        });
+
+        await db.Dormitory.destroy({
+            where: {userId: user.id},
+            include: [db.DormProfileImage]
         }, {
             transaction: t
         });

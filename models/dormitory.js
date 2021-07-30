@@ -11,6 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.belongsTo(models.User, { foreignKey: 'userId' });
+      this.hasOne(models.DormProfileImage, { foreignKey: 'dormitoryId' })
     }
   };
   Dormitory.init({
@@ -38,6 +40,10 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: true
       }
     },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false
+    }
   }, {
     sequelize,
     modelName: 'Dormitory',
