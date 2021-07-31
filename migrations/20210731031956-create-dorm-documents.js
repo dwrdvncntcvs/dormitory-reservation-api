@@ -1,47 +1,40 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('DormDocuments', {
       id: {
         allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4
+        type: Sequelize.INTEGER
       },
-      name: {
+      documentName: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      username: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      email: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      password: {
+      documentType: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      contactNumber: {
+      filename: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      address: {
+      filepath: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      role: {
+      mimetype: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      isVerified: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
-        allowNull: false
+      size: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      dormitoryId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -54,6 +47,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Users');
+    await queryInterface.dropTable('DormDocuments');
   }
 };

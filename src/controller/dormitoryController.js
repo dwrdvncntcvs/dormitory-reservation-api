@@ -15,7 +15,7 @@ exports.createNewDormitory = async (req, res) => {
             });
         }
 
-        if (userData.isValid !== true) {
+        if (userData.isVerified !== true) {
             return res.status(401).send({
                 msg: "Your account is not verified." //To be change soon.
             });
@@ -124,5 +124,47 @@ exports.viewUserDormitory = async (req, res) => {
         return res.status(500).send({
             msg: "Something went wrong"
         });
+    }
+};
+
+//To create or add dormitory documents to be verified by admins
+exports.addDormitoryDocuments = async (req, res) => {
+    const {
+        documentName,
+        documentType,
+        dormId
+    } = req.body;
+    const userData = req.user;
+
+    const t = await db.sequelize.transaction();
+    try {
+        const validRole = validator.isValidRole(userData.role, 'owner');
+
+        if (validRole === false) {
+            return res.status(401).send({
+                msg: "You are not an owner"
+            });
+        }
+
+        const dormDocument = await db.DormDocument.create({
+            documentName,
+            documentType,
+            dormitoryId: dormId,
+            filename: req.file.filename,
+            filepath: req.file.path,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+        });
+
+        return res.send({
+            msg: "Dormitory Documents Successfully Added",
+            dormDocument
+        })
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong"
+        })
     }
 };

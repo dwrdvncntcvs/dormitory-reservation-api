@@ -4,6 +4,17 @@ const multer = require('multer');
 const path = require('path');
 const requireAuth = require('../middlewares/requireAuth');
 
+//Engine for dorm documents storage
+const dormDocumentStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'image/dormDocumentImage');
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+//Engine for dormitory profile image
 const dormProfileImageStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'image/dormitoryProfileImage');
@@ -13,9 +24,14 @@ const dormProfileImageStorage = multer.diskStorage({
     }
 });
 
+//To upload dormitory profile image
 const uploadDormProfileImage = multer({
     storage: dormProfileImageStorage,
 }).single('dormProfileImage');
+
+const uploadDormDocument = multer({
+    storage: dormDocumentStorage,
+}).single('dormDocument');
 
 //Import Dormitory Controller || Functions
 const dormitoryController = require('../controller/dormitoryController');
@@ -28,6 +44,9 @@ route.post('/create-new-dormitory', requireAuth, dormitoryController.createNewDo
 
 //To add profile image of a dormitory
 route.post('/add-dormitory-profile-image', [ requireAuth, uploadDormProfileImage],dormitoryController.addDormitoryProfileImage);
+
+//To add Dormitory Documents that will verify by the adminUsers
+route.post('/add-dormitory-documents', [requireAuth, uploadDormDocument], dormitoryController.addDormitoryDocuments);
 
 //To get all the dormitories that the user have.
 route.get('/view-all-dormitories', requireAuth, dormitoryController.viewUserDormitory);

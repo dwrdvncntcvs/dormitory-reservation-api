@@ -175,15 +175,22 @@ exports.userProfile = async (req, res) => {
             where: {userId: user.id}
         });
 
-        const userDormitory = await db.Dormitory.findAll({
-            where: {userId: user.id}
-        });
-
-        return res.send({
-            user,
-            profileImage,
-            userDormitory,
-        })
+        if (user.role === 'owner') {
+            const userDormitory = await db.Dormitory.findAll({
+                where: {userId: user.id},
+                indclud: [db.DormDocument]
+            });
+    
+            return res.send({
+                user,
+                profileImage,
+                userDormitory,
+            });
+        } else if (user.role === 'tenant') { // To be fixed soon hehe :)
+            return res.send({
+                msg: 'tenant'
+            })
+        }
     } catch (err) {
         console.log(err);
         return res.status(500).send({
@@ -437,7 +444,7 @@ exports.displayAllUsers = async (req, res) => {
         const adminUsers = await db.User.findAll({
             where: { role: 'admin' },
             include: [db.ProfileImage, db.Document]
-        });
+        }); 
 
         const ownerUsers = await db.User.findAll({
             where: { role: 'owner' },
@@ -465,7 +472,7 @@ exports.displayAllUsers = async (req, res) => {
 
 //TO VERIFY THE USERS
 exports.verifyUser = async (req, res) => {
-    const { id, isValid } = req.body;
+    const { id, isVerified } = req.body;
     const userData = req.user;
 
     const validRole = validator.isValidRole(userData.role, 'admin');
@@ -478,7 +485,7 @@ exports.verifyUser = async (req, res) => {
         }
 
         await db.User.update({
-            isValid
+            isVerified
         }, {
             where: {id}
         }, {
@@ -553,5 +560,69 @@ exports.deleteUser = async (req, res) => {
             msg: "Something went wrong",
             err
         })
+    }
+};
+
+exports.displayAllDormitories = async (req, res) => {
+    const userData = req.user;
+
+    const validRole = validator.isValidRole(userData.role, 'admin');
+    try {
+        if (validRole === false) {
+            return res.status(401).send({
+                msg: "You are not an admin"
+            });
+        }
+
+        const dormitories = await db.Dormitory.findAll({
+            include: [db.User, db.DormDocument]
+        });
+
+        return res.send({
+            dormitories
+        });
+    }  catch (err) {
+        console.log(err);
+        return res.status(500).send({
+            msg: "Something went wrong",
+            err
+        });
+    }
+};  
+
+exports.verifyDormitory = async (req, res) => {
+    const { 
+        dormId,
+        isVerified
+    } = req.body;
+
+    const userData = req.user;
+    const validRole = validator.isValidRole(userData.role, 'admin');
+    const t = await db.sequelize.transaction();
+    try {
+        if (validRole === false) {
+            return res.status(401).send({
+                msg: "You are not an admin"
+            });  
+        }
+
+        await db.Dormitory.update({
+            isVerified
+        }, {
+            where: {id: dormId}
+        }, {
+            transaction: t
+        });
+        await t.commit();
+
+        return res.send({
+            msg: "Your dormitory is now verified"
+        });
+    } catch (error) {
+        await t.rollback();
+        console.log(error);
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
     }
 };

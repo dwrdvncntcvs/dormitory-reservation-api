@@ -59,7 +59,11 @@ route.get('/user-profile', requireAuth, userController.userProfile);
 route.get('/find-user/:email', userController.checkUserEmail);
 
 //ADMIN ONLY
+//To get or display users information
 route.get('/get-all-users', requireAuth, userController.displayAllUsers);
+
+//To get or display all dormitory information
+route.get('/get-all-dormitories', requireAuth, userController.displayAllDormitories);
 
 //PUT METHOD
 route.put('/edit-user-name', requireAuth, userController.editProfileName);
@@ -72,6 +76,8 @@ route.put('/change-user-password', userController.changeUserPassword);
 
 //ADMIN ONLY!!!
 route.put('/verify-user', requireAuth, userController.verifyUser);
+
+route.put('/verify-dormitory', requireAuth, userController.verifyDormitory);
 
 //DELETE METHOD
 //Delete functionality that an admin user can only access.

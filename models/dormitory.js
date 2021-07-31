@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.User, { foreignKey: 'userId' });
-      this.hasOne(models.DormProfileImage, { foreignKey: 'dormitoryId' })
+      this.hasOne(models.DormProfileImage, { foreignKey: 'dormitoryId' });
+      this.hasMany(models.DormDocument, { foreignKey: 'dormitoryId' });
     }
   };
   Dormitory.init({
@@ -39,6 +40,10 @@ module.exports = (sequelize, DataTypes) => {
         notNull: true,
         notEmpty: true
       }
+    },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
     userId: {
       type: DataTypes.UUID,
