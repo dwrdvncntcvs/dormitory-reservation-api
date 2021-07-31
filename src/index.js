@@ -1,14 +1,16 @@
 const express = require('express');
 const db = require('../models');
 
+//Routes
+const authRoutes = require('./routes/authRoutes');
+const dormitoryRoutes = require('./routes/dormitoryRoutes');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-    return res.send({
-        mgs: 'Hello World'
-    });
-});
+app.use(express.json());
+app.use(authRoutes);
+app.use(dormitoryRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is up: http://localhost:${PORT}`);
