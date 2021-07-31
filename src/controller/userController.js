@@ -188,8 +188,14 @@ exports.userProfile = async (req, res) => {
             });
         } else if (user.role === 'tenant') { // To be fixed soon hehe :)
             return res.send({
-                msg: 'tenant'
+                user,
+                profileImage
             })
+        } else if (user.role === 'admin') {
+            return res.send({
+                user,
+                profileImage,
+            });
         }
     } catch (err) {
         console.log(err);

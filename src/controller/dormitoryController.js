@@ -113,7 +113,7 @@ exports.viewUserDormitory = async (req, res) => {
 
         const userDormitories = await db.Dormitory.findAll({
             where: { userId: userData.id },
-            include: [db.DormProfileImage]
+            include: [db.DormProfileImage, db.DormDocument, db.Room]
         });
 
         return res.send({
@@ -146,6 +146,16 @@ exports.addDormitoryDocuments = async (req, res) => {
             });
         }
 
+        const userDorm = await db.Dormitory.findOne({
+            where: { id: dormId }
+        });
+
+        if (userDorm.userId !== userData.id) {
+            return res.status(404).send({
+                msg: "This dormitory is not yours"
+            });
+        }
+
         const dormDocument = await db.DormDocument.create({
             documentName,
             documentType,
@@ -168,3 +178,4 @@ exports.addDormitoryDocuments = async (req, res) => {
         })
     }
 };
+
