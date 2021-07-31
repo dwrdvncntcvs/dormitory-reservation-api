@@ -1,12 +1,15 @@
 const db = require('../../models');
+const validator = require('../validator/validator');
 
+//To create and input new information of a dormitory in the system.
 exports.createNewDormitory = async (req, res) => {
     const { name, address, contactNumber } = req.body;
-
     const userData = req.user;
+
+    const validRole = validator.isValidRole(userData.role, 'owner');
     const t = await db.sequelize.transaction();
     try {
-        if (userData.role !== 'owner') {
+        if (validRole === false) {
             return res.status(401).send({
                 msg: "You are not an owner."
             });
@@ -50,13 +53,15 @@ exports.createNewDormitory = async (req, res) => {
     }
 };
 
+//To add profile image of a dormitory.
 exports.addDormitoryProfileImage = async (req, res) => {
     const { id } = req.body;
     const userData = req.user;
 
+    const validRole = validator.isValidRole(userData.role, 'owner');
     const t = await db.sequelize.transaction();
     try {
-        if (userData.role !== 'owner') {
+        if (validRole === false) {
             return res.status(401).send({
                 msg: "You are not a dormitory owner"
             });
@@ -94,11 +99,13 @@ exports.addDormitoryProfileImage = async (req, res) => {
     }
 };
 
+//To view all the dormitory created by the user.
 exports.viewUserDormitory = async (req, res) => {
     const userData = req.user;
 
+    const validRole = validator.isValidRole(userData.role, 'owner');
     try {
-        if (userData.role !== 'owner') {
+        if (validRole === false) {
             return res.status(401).send({
                 msg: "You are not a dormitory owner."
             });

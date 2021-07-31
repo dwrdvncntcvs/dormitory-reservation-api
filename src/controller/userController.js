@@ -2,6 +2,7 @@ const db = require('../../models');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('../config/config');
+const validator = require('../validator/validator');
 
 //ADD PROFILE IMAGE
 //Need to change on how to get the ID of the user later.
@@ -69,7 +70,7 @@ exports.signUp = async (req, res) => {
             address === null && 
             role === null
         ) {
-            return res.status(401).send({msg: "Error 1"}); //TO BE CHANGED SOON
+            return res.status(401).send({msg: "Can't submit empty field"});
         }
 
         const salt = await bcrypt.genSalt(10, "a");
@@ -79,7 +80,7 @@ exports.signUp = async (req, res) => {
 
         if (!verifyPassword) {
             return res.status(401).send({
-                msg: "Error 2" //TO BE CHANGED SOON
+                msg: "Passwords are not the same."
             });
         }
 
@@ -126,7 +127,7 @@ exports.signIn = async (req, res) => {
             role === null
         ) { 
             return res.status(401).send({
-                msg: "Error 1" //TO BE CHANGED SOON
+                msg: "Can't submit empty fields"
             });
         }
 
@@ -136,7 +137,7 @@ exports.signIn = async (req, res) => {
 
         if (!user) {
             return res.status(401).send({
-                msg: "Error 2" //TO BE CHANGED SOON
+                msg: "Invalid Username and Password" 
             });
         }
 
@@ -144,7 +145,7 @@ exports.signIn = async (req, res) => {
 
         if (!validatedPassword) {
             return res.status(401).send({
-                msg: "Error 3" //TO BE CHANGED SOON
+                msg: "Invalid Username and Password"
             });
         }
 
@@ -426,8 +427,9 @@ exports.addUserDocuments = async (req, res) => {
 exports.displayAllUsers = async (req, res) => {
     const userData = req.user;
 
+    const validRole = validator.isValidRole(userData.role, 'admin');
     try {
-        if (userData.role !== 'admin') {
+        if (validRole === false) {
             return res.status(401).send({
                 msg: "You're not an admin"
             });
@@ -466,9 +468,10 @@ exports.verifyUser = async (req, res) => {
     const { id, isValid } = req.body;
     const userData = req.user;
 
+    const validRole = validator.isValidRole(userData.role, 'admin');
     const t = await db.sequelize.transaction();
     try {
-        if (userData.role !== 'admin') {
+        if (validRole === false) {
             return res.status(401).send({
                 msg: "You're not an admin"
             });
@@ -502,9 +505,10 @@ exports.deleteUser = async (req, res) => {
     const { id } = req.body;
     const userData = req.user;
 
+    const validRole = validator.isValidRole(userData.role, 'admin');
     const t = await db.sequelize.transaction();
     try {
-        if(userData.role !== 'admin') {
+        if(validRole === false) {
             return res.status(401).send({
                 msg: "You are not an admin!"
             })
@@ -513,7 +517,6 @@ exports.deleteUser = async (req, res) => {
         const user = await db.User.findOne({
             where: { id: id }
         });
-        console.log('---User: ', user)
 
         await db.User.destroy({ 
             where: {id: user.id}
