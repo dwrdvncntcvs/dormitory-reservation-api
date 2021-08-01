@@ -8,6 +8,7 @@ const roomRoutes = require('./routes/roomRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const divider = '=========================================';
 
 app.use(express.json());
 app.use(authRoutes);
@@ -21,7 +22,9 @@ app.use('/image/dormDocumentImage', express.static('image/dormDocumentImage'));
 app.use('/image/documentImage', express.static('image/documentImage'));
 
 app.listen(PORT, () => {
+    console.log(divider);
     console.log(`Server is up: http://localhost:${PORT}`);
     db.sequelize.authenticate();
-    console.log('Successfully connected to Postgres SQL :)')
+    console.log('Successfully connected to Postgres SQL :)');
+    console.log(divider);
 });

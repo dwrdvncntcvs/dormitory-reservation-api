@@ -152,8 +152,6 @@ exports.signIn = async (req, res) => {
         const token = jwt.sign({ id: user.id, email: user.email, role }, config.secretKey);
 
         return res.send({
-            msg: "Successfully Sign In",
-            user,
             token
         })
     } catch (err) {

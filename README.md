@@ -14,9 +14,13 @@
 8. sequelize
 9. sequelize-cli
 
-** This application uses postgresql database. 
+** This application uses postgresql database to store data. 
 
-** I recommend that you download postgresql from https://www.postgresql.org/download/windows. 
+** I recommend you download postgresql from https://www.postgresql.org/download/windows. 
+
+** (OPTIONAL) I also recommend that you download dbeaver from https://dbeaver.io/download. 
+
+** (OPTIONAL) It is a tool that we can use to visualize and interact with our postgres database or other databases.
 
 ** After installing your postgresql in your local machine, run this commands:
 
