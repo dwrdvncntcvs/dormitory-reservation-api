@@ -113,7 +113,7 @@ exports.viewUserDormitory = async (req, res) => {
 
         const userDormitories = await db.Dormitory.findAll({
             where: { userId: userData.id },
-            include: [db.User, db.DormProfileImage, db.DormDocument, db.Room, db.DormImage]
+            include: [db.User, db.DormProfileImage]
         });
 
         return res.send({
@@ -231,13 +231,6 @@ exports.viewUserDormitoryDetail = async (req, res) => {
 
         const dormitoryDetail = await db.Dormitory.findOne({
             where: { id: dormId},
-            include: [
-                db.DormProfileImage, 
-                db.Room, 
-                db.DormDocument, 
-                db.User, 
-                db.DormImage
-            ]
         });
 
         if (!dormitoryDetail) {
@@ -248,8 +241,31 @@ exports.viewUserDormitoryDetail = async (req, res) => {
             return res.status(401).send({msg: "You are not the owner of this dorm."});
         }
 
+        const room = await db.Room.findAll({
+            where: { dormitoryId: dormitoryDetail.id },
+            include: [db.RoomPayment]
+        });
+
+        const dormDocument = await db.DormDocument.findAll({
+            where: { dormitoryId: dormitoryDetail.id }
+        });
+
+        const dormImage = await db.DormImage.findAll({
+            where: { dormitoryId: dormitoryDetail.id }
+        });
+
+        const dormProfileImage = await db.DormProfileImage.findAll({
+            where: { dormitoryId: dormitoryDetail.id }
+        });
+
         return res.send({
-            dormitoryDetail
+            dormitory: {
+                dormitoryDetail,
+                dormDocument,
+                room,
+                dormImage,
+                dormProfileImage
+            }
         });
     } catch (err) {
         console.log(err);
