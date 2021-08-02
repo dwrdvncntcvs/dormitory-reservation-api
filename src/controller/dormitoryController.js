@@ -217,3 +217,44 @@ exports.deleteDormitory = async (req, res) => {
         });
     }
 };
+
+//To view the dormitories detail of an owner.
+exports.viewUserDormitoryDetail = async (req, res) => {
+    const dormId = req.params.dormId;
+    const userData = req.user;
+    const validRole = validator.isValidRole(userData.role, 'owner');
+
+    try {
+        if (validRole === false) {
+            return res.status(401).send({msg: "You are not an owner."});
+        }
+
+        const dormitoryDetail = await db.Dormitory.findOne({
+            where: { id: dormId},
+            include: [
+                db.DormProfileImage, 
+                db.Room, 
+                db.DormDocument, 
+                db.User, 
+                db.DormImage
+            ]
+        });
+
+        if (!dormitoryDetail) {
+            return res.status(401).send({msg: "Dormitory doesn't exists."});
+        }
+
+        if (dormitoryDetail.userId !== userData.id) {
+            return res.status(401).send({msg: "You are not the owner of this dorm."});
+        }
+
+        return res.send({
+            dormitoryDetail
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};
