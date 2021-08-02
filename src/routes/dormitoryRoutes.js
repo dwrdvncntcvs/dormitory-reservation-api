@@ -51,5 +51,8 @@ route.post('/add-dormitory-documents', [requireAuth, uploadDormDocument], dormit
 //To get all the dormitories that the user have.
 route.get('/view-all-dormitories', requireAuth, dormitoryController.viewUserDormitory);
 
+//To delete dormitory information
+route.delete('/delete-dormitory', requireAuth, dormitoryController.deleteDormitory);
+
 //Export Here
 module.exports = route;

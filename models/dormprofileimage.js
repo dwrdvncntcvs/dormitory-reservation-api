@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.DormProfileImage, {foreignKey: 'dormitoryId'})
+      this.belongsTo(models.DormProfileImage, {foreignKey: 'dormitoryId', onDelete: 'CASCADE' , targetKey: 'id'}) //To be fixed soon
     }
   };
   DormProfileImage.init({

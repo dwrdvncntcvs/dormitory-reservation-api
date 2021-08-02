@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Room extends Model {
+  class DormImage extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -14,26 +14,30 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.Dormitory, {foreignKey: 'dormitoryId', onDelete: 'CASCADE' , targetKey: 'id'}); //To be fixed soon
     }
   };
-  Room.init({
+  DormImage.init({
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    capacity: {
-      type: DataTypes.INTEGER,
+    filename: {
+      type: DataTypes.STRING,
       allowNull: false
     },
-    activeTenant: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    dormitoryId: {
-      type: DataTypes.INTEGER,
+    filepath: {
+      type: DataTypes.STRING,
       allowNull: false
     },
+    mimetype: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    size: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    }
   }, {
     sequelize,
-    modelName: 'Room',
+    modelName: 'DormImage',
   });
-  return Room;
+  return DormImage;
 };

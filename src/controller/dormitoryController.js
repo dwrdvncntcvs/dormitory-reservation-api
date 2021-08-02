@@ -113,7 +113,7 @@ exports.viewUserDormitory = async (req, res) => {
 
         const userDormitories = await db.Dormitory.findAll({
             where: { userId: userData.id },
-            include: [db.DormProfileImage, db.DormDocument, db.Room]
+            include: [db.User, db.DormProfileImage, db.DormDocument, db.Room, db.DormImage]
         });
 
         return res.send({
@@ -150,6 +150,12 @@ exports.addDormitoryDocuments = async (req, res) => {
             where: { id: dormId }
         });
 
+        if (!userDorm) {
+            return res.status(404).send({
+                msg: "Dorm Doesn't exist"
+            });
+        }
+
         if (userDorm.userId !== userData.id) {
             return res.status(404).send({
                 msg: "This dormitory is not yours"
@@ -179,3 +185,35 @@ exports.addDormitoryDocuments = async (req, res) => {
     }
 };
 
+//To delete dormitory
+exports.deleteDormitory = async (req, res) => {
+    const { id } = req.body;
+    const userData = req.user;
+    const validRole = validator.isValidRole(userData.role, 'owner');
+
+    const t = await db.sequelize.transaction();
+    try {
+        if (validRole === false) {
+            return res.status(401).send({
+                msg: "You are not an owner"
+            });
+        }
+
+        await db.Dormitory.destroy({
+            where: { id }
+        }, {
+            transaction: t
+        });
+        await t.commit();
+
+        return res.send({
+            msg: "Dormitory was successfully deleted"
+        });        
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};

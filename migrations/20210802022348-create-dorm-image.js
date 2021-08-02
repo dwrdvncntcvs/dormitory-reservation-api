@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Dormitories', {
+    await queryInterface.createTable('DormImages', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -10,26 +10,26 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
-      address: {
+      filename: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      contactNumber: {
+      filepath: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      isVerified: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
+      mimetype: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
-      isAccepting: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
+      size: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
-      userId: {
-        type: Sequelize.UUID,
+      dormitoryId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
       createdAt: {
@@ -43,6 +43,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Dormitories');
+    await queryInterface.dropTable('DormImages');
   }
 };

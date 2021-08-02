@@ -11,10 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, { foreignKey: 'userId' });
-      this.hasOne(models.DormProfileImage, { foreignKey: 'dormitoryId' });
-      this.hasMany(models.DormDocument, { foreignKey: 'dormitoryId' });
-      this.hasMany(models.Room, { foreignKey: 'dormitoryId' });
+      this.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE' , targetKey: 'id' }); //To be fixed soon
+      this.hasOne(models.DormProfileImage, { foreignKey: 'dormitoryId'});
+      this.hasMany(models.DormDocument, { foreignKey: 'dormitoryId'});
+      this.hasMany(models.Room, { foreignKey: 'dormitoryId'});
+      this.hasMany(models.DormImage, { foreignKey: 'dormitoryId'});
     }
   };
   Dormitory.init({
@@ -43,6 +44,10 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     isVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    isAccepting: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },

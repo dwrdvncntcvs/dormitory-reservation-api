@@ -3,30 +3,22 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 const validator = require('../validator/validator');
+const fs = require('fs');
 
 //ADD PROFILE IMAGE
 //Need to change on how to get the ID of the user later.
 //This needs the user to be authenticated before adding a profile image
 exports.addProfilePic = async (req, res) => {
     const userData = req.user;
+    
     const t = await db.sequelize.transaction();
     try {
-        
-        //From line 11 - 19 will be deleted if middleware for authentication is added
-        const user = await db.User.findOne({
-            where: { id: userData.id }
-        });
-
-        if (!user) {
-            return res.status(404).send({msg: "Not Found"});
-        }
-
         const profileImage = await db.ProfileImage.create({
             filename: req.file.filename,
             filepath: req.file.path,
             mimetype: req.file.mimetype,
             size: req.file.size,
-            userId: user.id
+            userId: userData.id
         }, {
             transaction: t
         });
@@ -167,32 +159,33 @@ exports.signIn = async (req, res) => {
 //This is not only for showing user information but also their dormitories and some images
 exports.userProfile = async (req, res) => {
     try {
-        const user = req.user;
+        const userData = req.user;
 
-        const profileImage = await db.ProfileImage.findOne({
-            where: {userId: user.id}
-        });
+        if (userData.role === 'owner') {
+            const user = await db.User.findOne({
+                where: { id: userData.id },
+                include: [db.Document, db.ProfileImage, db.Dormitory]
+            });
 
-        if (user.role === 'owner') {
-            const userDormitory = await db.Dormitory.findAll({
-                where: {userId: user.id},
-                indclud: [db.DormDocument]
-            });
-    
             return res.send({
-                user,
-                profileImage,
-                userDormitory,
+                user
             });
-        } else if (user.role === 'tenant') { // To be fixed soon hehe :)
+        } else if (userData.role === 'tenant') { // To be fixed soon hehe :)
+            const user = await db.User.findOne({
+                where: { id: userData.id }
+            });
+
             return res.send({
-                user,
-                profileImage
+                user
             })
-        } else if (user.role === 'admin') {
+        } else if (userData.role === 'admin') {
+            const user = await db.User.findOne({
+                where: { id: userData.id },
+                include: [db.ProfileImage, db.Document]
+            });
+
             return res.send({
-                user,
-                profileImage,
+                user
             });
         }
     } catch (err) {
@@ -331,19 +324,15 @@ exports.checkUserEmail = async (req, res) => {
         const user = await db.User.findOne({
             where: {email} 
         });
-        console.log(user)
+        
         if (!user) {
             return res.status(401).send({
-                msg: "Error 1" // To be changed soon.
+                msg: "Invalid Email Address" // To be changed soon.
             });
         }
 
         return res.send({
             id: user.id,
-            name: user.name,
-            email: user.email,
-            username: user.username,
-            role: user.role
         });
     } catch (err) {
         console.log(err);
@@ -535,25 +524,7 @@ exports.deleteUser = async (req, res) => {
             transaction: t
         });
 
-        await db.ProfileImage.destroy({
-            where: {userId: user.id}
-        }, {
-            transaction: t
-        });
-
-        await db.Document.destroy({
-            where: {userId: user.id}
-        }, {
-            transaction: t
-        });
-
-        await db.Dormitory.destroy({
-            where: {userId: user.id},
-            include: [db.DormProfileImage]
-        }, {
-            transaction: t
-        });
-
+        await t.commit();
         return res.send({
             msg: "Deleted Successfully"
         })
@@ -579,7 +550,7 @@ exports.displayAllDormitories = async (req, res) => {
         }
 
         const dormitories = await db.Dormitory.findAll({
-            include: [db.User, db.DormDocument]
+            include: [db.User, db.DormDocument, db.DormProfileImage, db.Room, db.DormImage]
         });
 
         return res.send({
