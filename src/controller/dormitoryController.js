@@ -242,8 +242,7 @@ exports.viewUserDormitoryDetail = async (req, res) => {
         }
 
         const room = await db.Room.findAll({
-            where: { dormitoryId: dormitoryDetail.id },
-            include: [db.RoomPayment]
+            where: { dormitoryId: dormitoryDetail.id }
         });
 
         const dormDocument = await db.DormDocument.findAll({

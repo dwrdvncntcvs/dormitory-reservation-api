@@ -20,6 +20,15 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: 0,
       },
+      roomCost: {
+        type: Sequelize.DECIMAL(16,2)
+      },
+      electricBill: {
+        type: Sequelize.DECIMAL(16,2)
+      },
+      waterBill: {
+        type: Sequelize.DECIMAL(16,2)
+      },
       dormitoryId: {
         type: Sequelize.INTEGER,
         allowNull: false,

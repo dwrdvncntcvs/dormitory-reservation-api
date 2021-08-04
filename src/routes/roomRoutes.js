@@ -11,6 +11,6 @@ const route = express.Router();
 //Endpoints
 route.post('/create-new-room', requireAuth, roomController.createNewRoom);
 
-route.post('/add-room-payment', requireAuth, roomController.addRoomPayment);
+route.put('/update-room-payment', requireAuth, roomController.updateRoomPayment)
 
 module.exports = route;

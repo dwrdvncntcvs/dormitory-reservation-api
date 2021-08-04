@@ -16,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.DormDocument, { foreignKey: 'dormitoryId'});
       this.hasMany(models.Room, { foreignKey: 'dormitoryId'});
       this.hasMany(models.DormImage, { foreignKey: 'dormitoryId'});
-      this.hasMany(models.RoomPayment, { foreignKey: 'dormitoryId'});
     }
   };
   Dormitory.init({
