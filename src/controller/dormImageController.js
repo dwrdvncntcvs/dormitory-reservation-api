@@ -2,20 +2,25 @@ const db = require('../../models');
 const validator = require('../validator/validator');
 
 exports.addDormImage = async (req, res) => {
-    const { name, dormId } = req.body;
+    const { 
+        name, 
+        dormId 
+    } = req.body;
+    
     const userData = req.user;
     const validRole = validator.isValidRole(userData.role, 'owner');
+    const validDormitory = await db.Dormitory.findOne({
+        where: { id: dormId }
+    });
 
     const t = await db.sequelize.transaction();
     try {
+        //Check user's role
         if (validRole === false) {
             return res.status(401).send({ message: 'You are not an owner.'});
         }
 
-        const validDormitory = await db.Dormitory.findOne({
-            where: { id: dormId }
-        });
-
+        //Check if the dormitory was owned by the owner user
         if (userData.id !== validDormitory.userId) {
             return res.status(401).send({ message: "You cannot add images to this dormitory."})
         }

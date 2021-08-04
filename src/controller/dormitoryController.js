@@ -3,24 +3,31 @@ const validator = require('../validator/validator');
 
 //To create and input new information of a dormitory in the system.
 exports.createNewDormitory = async (req, res) => {
-    const { name, address, contactNumber } = req.body;
+    const { 
+        name, 
+        address, 
+        contactNumber 
+    } = req.body;
+    
     const userData = req.user;
-
     const validRole = validator.isValidRole(userData.role, 'owner');
     const t = await db.sequelize.transaction();
     try {
+        //Check the user role
         if (validRole === false) {
             return res.status(401).send({
                 msg: "You are not an owner."
             });
         }
 
+        //Check if the user is verified
         if (userData.isVerified !== true) {
             return res.status(401).send({
                 msg: "Your account is not verified." //To be change soon.
             });
         }
 
+        //Check the field if not empty
         if (
             name === null &&
             address === null &&
@@ -56,22 +63,23 @@ exports.createNewDormitory = async (req, res) => {
 //To add profile image of a dormitory.
 exports.addDormitoryProfileImage = async (req, res) => {
     const { id } = req.body;
+    
     const userData = req.user;
-
     const validRole = validator.isValidRole(userData.role, 'owner');
+    const dormitory = await db.Dormitory.findOne({
+        where: { id }
+    });
+
     const t = await db.sequelize.transaction();
     try {
+        //Check the role of the user
         if (validRole === false) {
             return res.status(401).send({
                 msg: "You are not a dormitory owner"
             });
         }
 
-        const dormitory = await db.Dormitory.findOne({
-            where: { id }
-        });
-        console.log(dormitory);
-
+        //Check if the dormitory exist
         if (!dormitory) {
             return res.status(404).send({
                 msg: "Dormitory Not Found"
@@ -102,9 +110,9 @@ exports.addDormitoryProfileImage = async (req, res) => {
 //To view all the dormitory created by the user.
 exports.viewUserDormitory = async (req, res) => {
     const userData = req.user;
-
     const validRole = validator.isValidRole(userData.role, 'owner');
     try {
+        //Check user role
         if (validRole === false) {
             return res.status(401).send({
                 msg: "You are not a dormitory owner."
@@ -134,29 +142,31 @@ exports.addDormitoryDocuments = async (req, res) => {
         documentType,
         dormId
     } = req.body;
+
     const userData = req.user;
+    const userDormData = await db.Dormitory.findOne({
+        where: { id: dormId }
+    });
+    const validRole = validator.isValidRole(userData.role, 'owner');
 
     const t = await db.sequelize.transaction();
     try {
-        const validRole = validator.isValidRole(userData.role, 'owner');
-
+        // Check user's role
         if (validRole === false) {
             return res.status(401).send({
                 msg: "You are not an owner"
             });
         }
 
-        const userDorm = await db.Dormitory.findOne({
-            where: { id: dormId }
-        });
-
-        if (!userDorm) {
+        //Check if dormitory does exist
+        if (!userDormData) {
             return res.status(404).send({
                 msg: "Dorm Doesn't exist"
             });
         }
 
-        if (userDorm.userId !== userData.id) {
+        //Check if the dormitory exists owned by the right owner
+        if (userDormData.userId !== userData.id) {
             return res.status(404).send({
                 msg: "This dormitory is not yours"
             });
@@ -165,7 +175,7 @@ exports.addDormitoryDocuments = async (req, res) => {
         const dormDocument = await db.DormDocument.create({
             documentName,
             documentType,
-            dormitoryId: dormId,
+            dormitoryId: userDormData.id,
             filename: req.file.filename,
             filepath: req.file.path,
             mimetype: req.file.mimetype,
@@ -193,6 +203,7 @@ exports.deleteDormitory = async (req, res) => {
 
     const t = await db.sequelize.transaction();
     try {
+        //Check the role of the user
         if (validRole === false) {
             return res.status(401).send({
                 msg: "You are not an owner"
@@ -221,45 +232,48 @@ exports.deleteDormitory = async (req, res) => {
 //To view the dormitories detail of an owner.
 exports.viewUserDormitoryDetail = async (req, res) => {
     const dormId = req.params.dormId;
+
     const userData = req.user;
+    const dormitoryData = await db.Dormitory.findOne({
+        where: { id: dormId},
+    });
     const validRole = validator.isValidRole(userData.role, 'owner');
 
     try {
+        //Check the role of the user
         if (validRole === false) {
             return res.status(401).send({msg: "You are not an owner."});
         }
 
-        const dormitoryDetail = await db.Dormitory.findOne({
-            where: { id: dormId},
-        });
-
-        if (!dormitoryDetail) {
+        //Check if the dormitory does exist
+        if (!dormitoryData) {
             return res.status(401).send({msg: "Dormitory doesn't exists."});
         }
 
-        if (dormitoryDetail.userId !== userData.id) {
+        //Check if the dormitory exists owned by the right owner
+        if (dormitoryData.userId !== userData.id) {
             return res.status(401).send({msg: "You are not the owner of this dorm."});
         }
 
         const room = await db.Room.findAll({
-            where: { dormitoryId: dormitoryDetail.id }
+            where: { dormitoryId: dormitoryData.id }
         });
 
         const dormDocument = await db.DormDocument.findAll({
-            where: { dormitoryId: dormitoryDetail.id }
+            where: { dormitoryId: dormitoryData.id }
         });
 
         const dormImage = await db.DormImage.findAll({
-            where: { dormitoryId: dormitoryDetail.id }
+            where: { dormitoryId: dormitoryData.id }
         });
 
         const dormProfileImage = await db.DormProfileImage.findAll({
-            where: { dormitoryId: dormitoryDetail.id }
+            where: { dormitoryId: dormitoryData.id }
         });
 
         return res.send({
             dormitory: {
-                dormitoryDetail,
+                dormitoryData,
                 dormDocument,
                 room,
                 dormImage,
