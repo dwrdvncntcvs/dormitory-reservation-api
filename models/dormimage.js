@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.Dormitory, {
         foreignKey: {
           name: "dormitoryId",
-          allowNull: false
+          allowNull: false,
         },
         onDelete: "CASCADE",
         targetKey: "id",

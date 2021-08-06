@@ -1,16 +1,20 @@
-const express = require('express');
+const express = require("express");
 
 //Authentication Middleware
-const requireAuth = require('../middlewares/requireAuth');
+const requireAuth = require("../middlewares/requireAuth");
 
 //Controller
-const roomController = require('../controller/roomController');
+const roomController = require("../controller/roomController");
 
 const route = express.Router();
 
 //Endpoints
-route.post('/create-new-room', requireAuth, roomController.createNewRoom);
+route.post("/create-new-room", requireAuth, roomController.createNewRoom);
 
-route.put('/update-room-payment', requireAuth, roomController.updateRoomPayment);
+route.put(
+  "/update-room-payment",
+  requireAuth,
+  roomController.updateRoomPayment
+);
 
 module.exports = route;

@@ -12,11 +12,11 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.User, {
         foreignKey: {
           name: "userId",
-          allowNull: false
+          allowNull: false,
         },
         onDelete: "CASCADE",
         targetKey: "id",
-        hooks: true
+        hooks: true,
       });
 
       this.hasOne(models.DormProfileImage, { foreignKey: "dormitoryId" });
@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
 
       this.hasMany(models.DormImage, { foreignKey: "dormitoryId" });
 
-      this.hasMany(models.Reservation, { foreignKey: "dormitoryId"});
+      this.hasMany(models.Reservation, { foreignKey: "dormitoryId" });
     }
   }
   Dormitory.init(
