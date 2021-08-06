@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Room extends Model {
+  class Reservation extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,6 +9,16 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.belongsTo(models.Room, {
+        foreignKey: {
+          name: "roomId",
+          allowNull: false,
+        },
+        onDelete: "CASCADE",
+        targetKey: "id",
+        hooks: true,
+      });
+
       this.belongsTo(models.Dormitory, {
         foreignKey: {
           name: "dormitoryId",
@@ -18,45 +28,37 @@ module.exports = (sequelize, DataTypes) => {
         targetKey: "id",
         hooks: true,
       });
-
-      this.hasMany(models.Reservation, { foreignKey: "roomId"});
     }
   }
-  Room.init(
+  Reservation.init(
     {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      capacity: {
-        type: DataTypes.INTEGER,
+      address: {
+        type: DataTypes.STRING,
         allowNull: false,
       },
-      activeTenant: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-      },
-      dormitoryId: {
-        type: DataTypes.INTEGER,
+      email: {
+        type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true,
+        },
       },
-      roomCost: {
-        type: DataTypes.DECIMAL(16, 2),
+      contactNumber: {
+        type: DataTypes.STRING,
         allowNull: false,
-      },
-      electricBill: {
-        type: DataTypes.DECIMAL(16, 2),
-        allowNull: true,
-      },
-      waterBill: {
-        type: DataTypes.DECIMAL(16, 2),
-        allowNull: true,
+        unique: true,
       },
     },
     {
       sequelize,
-      modelName: "Room",
+      modelName: "Reservation",
+      tableName: "Reservations"
     }
   );
-  return Room;
+  return Reservation;
 };
