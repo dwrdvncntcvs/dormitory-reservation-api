@@ -129,7 +129,7 @@ exports.updateRoomPayment = async (req, res) => {
         }
 
         //To update the payment bills of the specific room
-        const newRoomPayment = await db.Room.update({
+        await db.Room.update({
             roomCost,
             electricBill,
             waterBill, 
@@ -141,8 +141,7 @@ exports.updateRoomPayment = async (req, res) => {
         await t.commit();
 
         return res.send({
-            msg: "Room Payment Update Success",
-            newRoomPayment
+            msg: "Room Payment Update Success"
         });  
     } catch (err) {
         console.log(err);

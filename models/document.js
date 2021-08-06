@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Document extends Model {
     /**
@@ -11,66 +9,77 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, {foreignKey: 'userId', onDelete: 'CASCADE' , targetKey: 'id'}); //To be fixed soon
+      this.belongsTo(models.User, {
+        foreignKey: {
+          name: "userId",
+          allowNull: false,
+        },
+        onDelete: "CASCADE",
+        targetKey: "id",
+        hooks: true,
+      });
     }
-  };
-  Document.init({
-    documentName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notNull: true,
-        notEmpty: true,
-      }
+  }
+  Document.init(
+    {
+      documentName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+        },
+      },
+      documentType: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+        },
+      },
+      filename: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+        },
+      },
+      filepath: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+        },
+      },
+      mimetype: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+        },
+      },
+      size: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+        },
+      },
+      userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
     },
-    documentType: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notNull: true,
-        notEmpty: true,
-      }
-    },
-    filename: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notNull: true,
-        notEmpty: true,
-      }
-    },
-    filepath: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notNull: true,
-        notEmpty: true,
-      }
-    },
-    mimetype: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notNull: true,
-        notEmpty: true,
-      }
-    },
-    size: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        notNull: true,
-        notEmpty: true,
-      }
-    },
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: false,
+    {
+      sequelize,
+      modelName: "Document",
+      tableName: "Documents",
     }
-  }, {
-    sequelize,
-    modelName: 'Document',
-    tableName: 'Documents'
-  });
+  );
   return Document;
 };

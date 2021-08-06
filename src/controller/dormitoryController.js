@@ -237,6 +237,7 @@ exports.viewUserDormitoryDetail = async (req, res) => {
     const dormitoryData = await db.Dormitory.findOne({
         where: { id: dormId},
     });
+    console.log(userData)
     const validRole = validator.isValidRole(userData.role, 'owner');
 
     try {
@@ -282,6 +283,62 @@ exports.viewUserDormitoryDetail = async (req, res) => {
         });
     } catch (err) {
         console.log(err);
+        return res.status(500).send({
+            msg: "Something went wrong"
+        });
+    }
+};
+
+exports.dormitorySwitch = async (req, res) => {
+    const { 
+        dormId,
+        isAccepting
+    } = req.body;
+
+    const userData = req.user;
+    const dormitoryData = await db.Dormitory.findOne({
+        where: { id: dormId }
+    });
+    const validRole = validator.isValidRole(userData.role, 'owner');
+
+    const t = await db.sequelize.transaction();
+    try {
+        //Check the role of the userData
+        if (validRole === false) {
+            return res.status(401).send({
+                msg: "You are not an owner"
+            });
+        }
+
+        //Check if the dormitory does exist in the database
+        if (!dormitoryData) {
+            return res.status(404).send({
+                msg: "Dormitory does not exist in the database"
+            });
+        }
+
+        //Check if the dormitory is owned by the user
+        if (dormitoryData.userId !== userData.id) {
+            return res.status(401).send({
+                msg: "You are not the owner of this dormitory"
+            });
+        }
+
+        await db.Dormitory.update({
+            isAccepting
+        }, {
+            where: {id: dormitoryData.id}
+        }, {
+            transaction: t
+        });
+        await t.commit();
+
+        return res.send({ 
+            msg: "Your dormitory availability status has been updated"
+        });
+    } catch (err) {
+        console.log(err);
+        await t.rollback();
         return res.status(500).send({
             msg: "Something went wrong"
         });

@@ -35,6 +35,11 @@ module.exports = {
       dormitoryId: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        onDelete: "CASCADE",
+        references: {
+          model: "Dormitories",
+          key: "id",
+        },
       },
       createdAt: {
         allowNull: false,

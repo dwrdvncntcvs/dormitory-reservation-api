@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class ProfileImage extends Model {
     /**
@@ -11,30 +9,41 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, {foreignKey: 'userId', onDelete: 'CASCADE' , targetKey: 'id'}); //To be fixed soon
+      this.belongsTo(models.User, {
+        foreignKey: {
+          name: "userId",
+          allowNull: false,
+        },
+        onDelete: "CASCADE",
+        targetKey: "id",
+        hooks: true,
+      });
     }
-  };
-  ProfileImage.init({
-    filename: {
-      type: DataTypes.STRING,
-      allowNull: false,
+  }
+  ProfileImage.init(
+    {
+      filename: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      filepath: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      mimetype: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      size: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
     },
-    filepath: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    mimetype: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    size: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-  }, {
-    sequelize,
-    modelName: 'ProfileImage',
-    tableName: 'ProfileImages'
-  });
+    {
+      sequelize,
+      modelName: "ProfileImage",
+      tableName: "ProfileImages",
+    }
+  );
   return ProfileImage;
 };
