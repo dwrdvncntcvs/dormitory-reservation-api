@@ -26,6 +26,11 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
+      isAccepted: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
       dormitoryId: {
         type: Sequelize.INTEGER,
         allowNull: false,
