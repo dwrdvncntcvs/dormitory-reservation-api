@@ -292,6 +292,7 @@ exports.viewUserDormitoryDetail = async (req, res) => {
 };
 
 //For Owner Users
+//To determine if the availability of the dormitory
 exports.dormitorySwitch = async (req, res) => {
   const { dormId, isAccepting } = req.body;
 

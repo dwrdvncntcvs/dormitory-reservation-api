@@ -55,6 +55,7 @@ route.post(
   userController.addProfilePic
 );
 
+//To add user documents like valid Ids
 route.post(
   "/add-user-documents",
   [requireAuth, uploadDocumentImages],
@@ -84,28 +85,37 @@ route.get(
 );
 
 //PUT METHOD
+//To edit the name of the user
 route.put("/edit-user-name", requireAuth, userController.editProfileName);
 
+//To edit the username of the user
 route.put(
   "/edit-user-username",
   requireAuth,
   userController.editProfileUsername
 );
 
+//To edit the address of the user
 route.put("/edit-user-address", requireAuth, userController.editProfileAddress);
 
+//To change the password of the user
 route.put("/change-user-password", userController.changeUserPassword);
 
 //ADMIN ONLY!!!
+//To verify the account of the user
 route.put("/verify-user", requireAuth, userController.verifyUser);
 
+//To verify the dormitory created by the owner user
 route.put("/verify-dormitory", requireAuth, userController.verifyDormitory);
 
 //DELETE METHOD
 //Delete functionality that an admin user can only access.
 //This endpoint is not yet complete until this comment is deleted.
+
+//To delete a user
 route.delete("/delete-user-profile", requireAuth, userController.deleteUser);
 
+//To delete the profile image of the user
 route.delete(
   "/delete-profile-image",
   requireAuth,

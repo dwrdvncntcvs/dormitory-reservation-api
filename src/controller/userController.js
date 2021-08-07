@@ -566,6 +566,7 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+//To display all the dormitories with their user information
 exports.displayAllDormitories = async (req, res) => {
   const userData = req.user;
 
@@ -599,6 +600,7 @@ exports.displayAllDormitories = async (req, res) => {
   }
 };
 
+//To verify a dormitory to add things such as rooms and payments
 exports.verifyDormitory = async (req, res) => {
   const { dormId, isVerified } = req.body;
 

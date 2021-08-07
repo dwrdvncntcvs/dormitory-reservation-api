@@ -9,6 +9,8 @@ const reservationController = require("../controller/reservationController");
 const route = express.Router();
 
 //Request Methods
+
+//To create new reservation
 route.post(
   "/create-new-reservation",
   requireAuth,

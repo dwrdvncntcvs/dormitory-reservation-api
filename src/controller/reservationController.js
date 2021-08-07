@@ -1,6 +1,7 @@
 const db = require("../../models");
 
 //For Tenant Users
+//To create new reservation for tenants
 exports.createNewReservation = async (req, res) => {
     const {
         dormId,

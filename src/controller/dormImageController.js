@@ -1,6 +1,7 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 
+//To add dorm images
 exports.addDormImage = async (req, res) => {
   const { name, dormId } = req.body;
 
@@ -51,6 +52,7 @@ exports.addDormImage = async (req, res) => {
   }
 };
 
+//To delete dorm images
 exports.deleteDormImage = async (req, res) => {
   const { imageId, dormId } = req.body;
   const userData = req.user;
