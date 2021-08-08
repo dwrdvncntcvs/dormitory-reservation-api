@@ -19,9 +19,7 @@ This is the server application of Dormitory Reservation.
 **This application uses postgresql database to store data.**
 > Download postgresql from https://www.postgresql.org/download/windows. 
 
-> (OPTIONAL) I also recommend that you download dbeaver from https://dbeaver.io/download. 
-
-> (OPTIONAL) It is a tool that we can use to visualize and interact with our postgres database or other databases.
+> (OPTIONAL) I also recommend that you download dbeaver from https://dbeaver.io/download. It is a tool that we can use to visualize and interact with our postgres database or other databases.
 
 
 **After installing your postgresql in your local machine, run this commands:**
