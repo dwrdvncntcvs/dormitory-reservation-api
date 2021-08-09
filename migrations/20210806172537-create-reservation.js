@@ -19,17 +19,20 @@ module.exports = {
       email: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
       contactNumber: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
       isAccepted: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
+      },
+      isCancelled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
       },
       dormitoryId: {
         type: Sequelize.INTEGER,
@@ -46,6 +49,15 @@ module.exports = {
         onDelete: "CASCADE",
         references: {
           model: "Rooms",
+          key: "id"
+        }
+      },
+      userId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        onDelete: "CASCADE",
+        references: {
+          model: "Users",
           key: "id"
         }
       },

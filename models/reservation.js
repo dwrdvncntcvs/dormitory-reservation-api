@@ -28,6 +28,16 @@ module.exports = (sequelize, DataTypes) => {
         targetKey: "id",
         hooks: true,
       });
+
+      this.belongsTo(models.User, {
+        foreignKey: {
+          name: "userId",
+          allowNull: false,
+        },
+        onDelete: "CASCADE",
+        targetKey: "id",
+        hooks: true,
+      });
     }
   }
   Reservation.init(
@@ -43,7 +53,6 @@ module.exports = (sequelize, DataTypes) => {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: {
           isEmail: true,
         },
@@ -51,9 +60,13 @@ module.exports = (sequelize, DataTypes) => {
       contactNumber: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
       },
       isAccepted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
+      isCancelled: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
         allowNull: false,

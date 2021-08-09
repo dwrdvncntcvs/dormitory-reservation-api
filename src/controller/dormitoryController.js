@@ -119,7 +119,7 @@ exports.viewUserDormitory = async (req, res) => {
 
     const userDormitories = await db.Dormitory.findAll({
       where: { userId: userData.id },
-      include: [db.User, db.DormProfileImage],
+      include: [db.User, db.DormProfileImage, db.Reservation],
     });
 
     return res.send({
@@ -175,7 +175,10 @@ exports.addDormitoryDocuments = async (req, res) => {
       filepath: req.file.path,
       mimetype: req.file.mimetype,
       size: req.file.size,
+    }, {
+      transaction: t,
     });
+    await t.commit();
 
     return res.send({
       msg: "Dormitory Documents Successfully Added",
@@ -274,6 +277,10 @@ exports.viewUserDormitoryDetail = async (req, res) => {
       where: { dormitoryId: dormitoryData.id },
     });
 
+    const dormReservation = await db.Reservation.findAll({
+      where: { dormitoryId: dormitoryData.id }
+    });
+
     return res.send({
       dormitory: {
         dormitoryData,
@@ -281,6 +288,7 @@ exports.viewUserDormitoryDetail = async (req, res) => {
         room,
         dormImage,
         dormProfileImage,
+        dormReservation,
       },
     });
   } catch (err) {

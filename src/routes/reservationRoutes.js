@@ -17,4 +17,11 @@ route.post(
   reservationController.createNewReservation
 );
 
+//To view all new reservations by the tenant users
+route.get(
+  "/view-all-new-reservations/dorm-:dormId-room-:roomId",
+  requireAuth,
+  reservationController.viewAllRoomReservations
+);
+
 module.exports = route;

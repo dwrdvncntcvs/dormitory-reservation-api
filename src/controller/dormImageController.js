@@ -55,6 +55,7 @@ exports.addDormImage = async (req, res) => {
 //To delete dorm images
 exports.deleteDormImage = async (req, res) => {
   const { imageId, dormId } = req.body;
+
   const userData = req.user;
   const dormitoryData = await db.Dormitory.findOne({
     where: { id: dormId },
@@ -84,7 +85,7 @@ exports.deleteDormImage = async (req, res) => {
       });
     }
 
-    if (dormitoryData.userId !== user.id) {
+    if (dormitoryData.userId !== userData.id) {
       return res.status(404).send({
         msg: "This dormitory is not yours",
       });
