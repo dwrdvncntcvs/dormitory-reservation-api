@@ -15,7 +15,7 @@ exports.createNewReservation = async (req, res) => {
     where: { id: roomId },
   });
   const userData = await db.User.findOne({
-    where: { id: user.id }
+    where: { id: user.id },
   });
 
   const t = await db.sequelize.transaction();
@@ -188,43 +188,132 @@ exports.viewAllRoomReservations = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "Invalid Role"
+        msg: "Invalid Role",
       });
     }
 
     if (!dormitoryData) {
       return res.status(404).send({
-        msg: "Dormitory not found"
+        msg: "Dormitory not found",
       });
     }
 
     if (!roomData) {
       return res.status(404).send({
-        msg: "Roomy not found"
+        msg: "Roomy not found",
       });
     }
 
     if (dormitoryData.id !== roomData.dormitoryId) {
       return res.status(401).send({
-        msg: "Room doesn't belongs to the dormitory'"
+        msg: "Room doesn't belongs to the dormitory'",
       });
     }
 
     const newReservations = await db.Reservation.findAll({
-      where: { 
+      where: {
         dormitoryId: dormitoryData.id,
         roomId: roomData.id,
         isAccepted: false,
         isCancelled: false,
       },
-      include: [db.Dormitory, db.Room]
+      include: [db.Dormitory, db.Room],
     });
 
     return res.send({
-      newReservations
+      newReservations,
     });
   } catch (err) {
     console.log(err);
+    return res.status(500).send({
+      msg: "Something went wrong",
+    });
+  }
+};
+
+exports.acceptReservations = async (req, res) => {
+  const { dormId, roomId, reservationId, isAccepted } = req.body;
+
+  const userData = req.user;
+  const dormitoryData = await db.Dormitory.findOne({
+    where: { id: dormId },
+  });
+  const roomData = await db.Room.findOne({
+    where: { id: roomId },
+  });
+  const reservationData = await db.Reservation.findOne({
+    where: { id: reservationId },
+  });
+
+  const validRole = validator.isValidRole(userData.role, "owner");
+  const t = await db.sequelize.transaction();
+  try {
+    if (validRole === false) {
+      return res.status(401).send({
+        message: "You are not an owner.",
+      });
+    }
+
+    if (!dormitoryData) {
+      return res.status(404).send({
+        message: "Dormitory not found.",
+      });
+    }
+
+    if (!roomData) {
+      return res.status(404).send({
+        message: "Room not found.",
+      });
+    }
+
+    if (!reservationData) {
+      return res.status(404).send({
+        message: "Reservation not found.",
+      });
+    }
+
+    if (dormitoryData.userId !== userData.id) {
+      return res.status(401).send({
+        message: "You are not the owner of this dormitory.",
+      });
+    }
+
+    if (dormitoryData.id !== roomData.dormitoryId) {
+      return res.status(401).send({
+        message: "This room doesn't belong to this dormitory.",
+      });
+    }
+
+    if (reservationData.roomId !== roomData.id) {
+      return res.status(401).send({
+        message: "This reservation doesn't belong to this room.",
+      });
+    }
+
+    const updatedReservation = await db.Reservation.update({
+      isAccepted
+    }, {
+      where: { id: reservationData.id }
+    }, {
+      transaction: t
+    });
+
+    const updatedRoom = await db.Room.update({
+      activeTenant: roomData.activeTenant + 1
+    }, {
+      where: { id: roomData.id }
+    }, {
+      transaction: t
+    });
+    await t.commit();
+
+    return res.send({
+      updatedReservation,
+      updatedRoom,
+    });
+  } catch (err) {
+    console.error(err);
+    await t.rollback();
     return res.status(500).send({
       msg: "Something went wrong",
     });

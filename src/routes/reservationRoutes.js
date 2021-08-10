@@ -24,4 +24,10 @@ route.get(
   reservationController.viewAllRoomReservations
 );
 
+route.put(
+  "/accept-new-reservation",
+  requireAuth,
+  reservationController.acceptReservations
+);
+
 module.exports = route;
