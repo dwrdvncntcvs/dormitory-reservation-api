@@ -40,6 +40,7 @@ const uploadDormDocument = multer({
 
 //Import Dormitory Controller || Functions
 const dormitoryController = require("../controller/dormitoryController");
+const dormImageController = require("../controller/dormImageController");
 
 const route = express.Router();
 
@@ -55,14 +56,14 @@ route.post(
 route.post(
   "/add-dormitory-profile-image",
   [requireAuth, uploadDormProfileImage],
-  dormitoryController.addDormitoryProfileImage
+  dormImageController.addDormitoryProfileImage
 );
 
 //To add Dormitory Documents that will verify by the adminUsers
 route.post(
   "/add-dormitory-documents",
   [requireAuth, uploadDormDocument],
-  dormitoryController.addDormitoryDocuments
+  dormImageController.addDormitoryDocuments
 );
 
 //To get all the dormitories that the user have.
