@@ -118,3 +118,111 @@ exports.deleteDormImage = async (req, res) => {
     });
   }
 };
+
+//For Owner Users
+//To add profile image of a dormitory.
+exports.addDormitoryProfileImage = async (req, res) => {
+  const { id } = req.body;
+
+  const userData = req.user;
+  const validRole = validator.isValidRole(userData.role, "owner");
+  const dormitory = await db.Dormitory.findOne({
+    where: { id },
+  });
+
+  const t = await db.sequelize.transaction();
+  try {
+    //Check the role of the user
+    if (validRole === false) {
+      return res.status(401).send({
+        msg: "You are not a dormitory owner",
+      });
+    }
+
+    //Check if the dormitory exist
+    if (!dormitory) {
+      return res.status(404).send({
+        msg: "Dormitory Not Found",
+      });
+    }
+
+    const dormitoryImage = await db.DormProfileImage.create({
+      filename: req.file.filename,
+      filepath: req.file.path,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      dormitoryId: dormitory.id,
+    });
+
+    return res.send({
+      msg: "Dorm Profile Image Successfully Added",
+      dormitoryImage,
+    });
+  } catch (error) {
+    console.log(error);
+    await t.rollback();
+    return res.status(500).send({
+      msg: "Something went wrong",
+    });
+  }
+};
+
+//For Owner Users
+//To create or add dormitory documents to be verified by admins
+exports.addDormitoryDocuments = async (req, res) => {
+  const { documentName, documentType, dormId } = req.body;
+
+  const userData = req.user;
+  const userDormData = await db.Dormitory.findOne({
+    where: { id: dormId },
+  });
+  const validRole = validator.isValidRole(userData.role, "owner");
+
+  const t = await db.sequelize.transaction();
+  try {
+    // Check user's role
+    if (validRole === false) {
+      return res.status(401).send({
+        msg: "You are not an owner",
+      });
+    }
+
+    //Check if dormitory does exist
+    if (!userDormData) {
+      return res.status(404).send({
+        msg: "Dorm Doesn't exist",
+      });
+    }
+
+    //Check if the dormitory exists owned by the right owner
+    if (userDormData.userId !== userData.id) {
+      return res.status(404).send({
+        msg: "This dormitory is not yours",
+      });
+    }
+
+    const dormDocument = await db.DormDocument.create({
+      documentName,
+      documentType,
+      dormitoryId: userDormData.id,
+      filename: req.file.filename,
+      filepath: req.file.path,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+    }, {
+      transaction: t,
+    });
+    await t.commit();
+
+    return res.send({
+      msg: "Dormitory Documents Successfully Added",
+      dormDocument,
+    });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res.status(500).send({
+      msg: "Something went wrong",
+    });
+  }
+};
