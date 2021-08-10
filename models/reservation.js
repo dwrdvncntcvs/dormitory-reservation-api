@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Document extends Model {
+  class Reservation extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,6 +9,26 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.belongsTo(models.Room, {
+        foreignKey: {
+          name: "roomId",
+          allowNull: false,
+        },
+        onDelete: "CASCADE",
+        targetKey: "id",
+        hooks: true,
+      });
+
+      this.belongsTo(models.Dormitory, {
+        foreignKey: {
+          name: "dormitoryId",
+          allowNull: false,
+        },
+        onDelete: "CASCADE",
+        targetKey: "id",
+        hooks: true,
+      });
+
       this.belongsTo(models.User, {
         foreignKey: {
           name: "userId",
@@ -20,66 +40,43 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  Document.init(
+  Reservation.init(
     {
-      documentName: {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      address: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      email: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notNull: true,
-          notEmpty: true,
+          isEmail: true,
         },
       },
-      documentType: {
+      contactNumber: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-          notNull: true,
-          notEmpty: true,
-        },
       },
-      filename: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: true,
-          notEmpty: true,
-        },
-      },
-      filepath: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: true,
-          notEmpty: true,
-        },
-      },
-      mimetype: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: true,
-          notEmpty: true,
-        },
-      },
-      size: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-          notNull: true,
-          notEmpty: true,
-        },
-      },
-      userId: {
-        type: DataTypes.UUID,
+      isAccepted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
         allowNull: false,
       },
+      isCancelled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      }
     },
     {
       sequelize,
-      modelName: "Document",
-      tableName: "Documents",
+      modelName: "Reservation",
+      tableName: "Reservations",
     }
   );
-  return Document;
+  return Reservation;
 };

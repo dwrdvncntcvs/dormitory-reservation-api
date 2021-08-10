@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 
 module.exports = (req, res, next) => {
+    //Desctructure "authorization" from headers
     const { authorization } = req.headers;
 
     if (!authorization) {
@@ -10,6 +11,7 @@ module.exports = (req, res, next) => {
         return res.status(401).send({ msg: "Please sign in first." })
     }
 
+    //Replacing token . . .
     const token = authorization.replace('Bearer ', '');
     jwt.verify(token, config.secretKey, async (err, payload) => {
         if (err) {

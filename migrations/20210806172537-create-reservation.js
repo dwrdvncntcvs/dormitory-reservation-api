@@ -1,36 +1,56 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Documents', {
+    await queryInterface.createTable('Reservations', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      documentName: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      documentType: {
+      address: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      filename: {
+      email: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      filepath: {
+      contactNumber: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      mimetype: {
-        type: Sequelize.STRING,
+      isAccepted: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      isCancelled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
         allowNull: false,
       },
-      size: {
+      dormitoryId: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        onDelete: "CASCADE",
+        references: {
+          model: "Dormitories",
+          key: "id"
+        }
+      },
+      roomId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        onDelete: "CASCADE",
+        references: {
+          model: "Rooms",
+          key: "id"
+        }
       },
       userId: {
         type: Sequelize.UUID,
@@ -38,8 +58,8 @@ module.exports = {
         onDelete: "CASCADE",
         references: {
           model: "Users",
-          key: "id",
-        },
+          key: "id"
+        }
       },
       createdAt: {
         allowNull: false,
@@ -52,6 +72,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Documents');
+    await queryInterface.dropTable('Reservations');
   }
 };

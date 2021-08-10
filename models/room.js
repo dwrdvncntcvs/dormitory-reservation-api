@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class DormProfileImage extends Model {
+  class Room extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.DormProfileImage, {
+      this.belongsTo(models.Dormitory, {
         foreignKey: {
           name: "dormitoryId",
           allowNull: false,
@@ -18,31 +18,45 @@ module.exports = (sequelize, DataTypes) => {
         targetKey: "id",
         hooks: true,
       });
+
+      this.hasMany(models.Reservation, { foreignKey: "roomId"});
     }
   }
-  DormProfileImage.init(
+  Room.init(
     {
-      filename: {
+      name: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
-      filepath: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      mimetype: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      size: {
+      capacity: {
         type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      activeTenant: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+      },
+      dormitoryId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      roomCost: {
+        type: DataTypes.DECIMAL(16, 2),
+        allowNull: false,
+      },
+      electricBill: {
+        type: DataTypes.DECIMAL(16, 2),
+        allowNull: true,
+      },
+      waterBill: {
+        type: DataTypes.DECIMAL(16, 2),
         allowNull: true,
       },
     },
     {
       sequelize,
-      modelName: "DormProfileImage",
+      modelName: "Room",
     }
   );
-  return DormProfileImage;
+  return Room;
 };

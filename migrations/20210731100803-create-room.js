@@ -1,43 +1,40 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Documents', {
+    await queryInterface.createTable('Rooms', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      documentName: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      documentType: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      filename: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      filepath: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      mimetype: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      size: {
+      capacity: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      userId: {
-        type: Sequelize.UUID,
+      activeTenant: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+      },
+      roomCost: {
+        type: Sequelize.DECIMAL(16,2)
+      },
+      electricBill: {
+        type: Sequelize.DECIMAL(16,2)
+      },
+      waterBill: {
+        type: Sequelize.DECIMAL(16,2)
+      },
+      dormitoryId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
         onDelete: "CASCADE",
         references: {
-          model: "Users",
+          model: "Dormitories",
           key: "id",
         },
       },
@@ -52,6 +49,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Documents');
+    await queryInterface.dropTable('Rooms');
   }
 };
