@@ -4,7 +4,7 @@ const validator = require("../validator/validator");
 //For Owner Users
 //To create and input new information of a dormitory in the system.
 exports.createNewDormitory = async (req, res) => {
-  const { name, address, contactNumber } = req.body;
+  const { name, address, contactNumber, allowedGender } = req.body;
 
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
@@ -25,7 +25,7 @@ exports.createNewDormitory = async (req, res) => {
     }
 
     //Check the field if not empty
-    if (name === null && address === null && contactNumber === null) {
+    if (name === null && address === null && contactNumber === null && allowedGender === null) {
       return res.status(401).send({
         msg: "Can't submit empty field.", //To be change soon.
       });
@@ -36,6 +36,7 @@ exports.createNewDormitory = async (req, res) => {
         name,
         address,
         contactNumber,
+        allowedGender,
         userId: userData.id,
       },
       {
@@ -357,3 +358,4 @@ exports.dormitorySwitch = async (req, res) => {
     });
   }
 };
+

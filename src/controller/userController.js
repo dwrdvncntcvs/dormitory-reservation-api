@@ -50,6 +50,7 @@ exports.signUp = async (req, res) => {
     plainConfirmPassword,
     contactNumber,
     address,
+    gender,
     role,
   } = req.body;
 
@@ -63,6 +64,7 @@ exports.signUp = async (req, res) => {
       plainConfirmPassword === null &&
       contactNumber === null &&
       address === null &&
+      gender === null &&
       role === null
     ) {
       return res.status(401).send({ msg: "Can't submit empty field" });
@@ -87,6 +89,7 @@ exports.signUp = async (req, res) => {
         password,
         contactNumber,
         address,
+        gender,
         role,
       },
       {

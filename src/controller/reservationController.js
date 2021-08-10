@@ -32,6 +32,18 @@ exports.createNewReservation = async (req, res) => {
       });
     }
 
+    if (dormitoryData.isVerified !== true) {
+      return res.status(401).send({
+        msg: "Dormitory is not available", //To be change soon.
+      });
+    }
+
+    if (dormitoryData.allowedGender !== userData.gender) {
+      return res.status(401).send({
+        msg: `This dormitory only for ${dormitoryData.allowedGender}`, //To be change soon.
+      });
+    }
+
     if (!dormitoryData) {
       return res.status(404).send({
         msg: "Dormitory doesn't exist",
@@ -202,7 +214,8 @@ exports.viewAllRoomReservations = async (req, res) => {
         roomId: roomData.id,
         isAccepted: false,
         isCancelled: false,
-      }
+      },
+      include: [db.Dormitory, db.Room]
     });
 
     return res.send({
