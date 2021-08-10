@@ -7,6 +7,7 @@ const requireAuth = require("../middlewares/requireAuth");
 
 //Controllers || Functions that will do of the endpoints
 const userController = require("../controller/userController");
+const userImageController = require("../controller/userImageController");
 
 const route = express.Router();
 
@@ -52,7 +53,7 @@ const uploadDocumentImages = multer({
 route.post(
   "/add-profile-image",
   [requireAuth, uploadProfileImage],
-  userController.addProfilePic
+  userImageController.addProfilePic
 );
 
 //To add user documents like valid Ids
@@ -119,7 +120,7 @@ route.delete("/delete-user-profile", requireAuth, userController.deleteUser);
 route.delete(
   "/delete-profile-image",
   requireAuth,
-  userController.deleteProfileImage
+  userImageController.deleteProfileImage
 );
 
 module.exports = route;
