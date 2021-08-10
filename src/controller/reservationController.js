@@ -290,6 +290,12 @@ exports.acceptReservations = async (req, res) => {
       });
     }
 
+    if (roomData.activeTenant >= roomData.capacity) {
+      return res.status(401).send({
+        message: "Room is currently full",
+      });
+    }
+
     const updatedReservation = await db.Reservation.update({
       isAccepted
     }, {
@@ -319,3 +325,4 @@ exports.acceptReservations = async (req, res) => {
     });
   }
 };
+
