@@ -8,6 +8,7 @@ const requireAuth = require("../middlewares/requireAuth");
 //Controllers || Functions that will do of the endpoints
 const userController = require("../controller/userController");
 const userImageController = require("../controller/userImageController");
+const adminUserController = require("../controller/adminUserController");
 
 const route = express.Router();
 
@@ -76,13 +77,13 @@ route.get("/find-user/:email", userController.checkUserEmail);
 
 //ADMIN ONLY
 //To get or display users information
-route.get("/get-all-users", requireAuth, userController.displayAllUsers);
+route.get("/get-all-users", requireAuth, adminUserController.displayAllUsers);
 
 //To get or display all dormitory information
 route.get(
   "/get-all-dormitories",
   requireAuth,
-  userController.displayAllDormitories
+  adminUserController.displayAllDormitories
 );
 
 //PUT METHOD
@@ -104,17 +105,17 @@ route.put("/change-user-password", userController.changeUserPassword);
 
 //ADMIN ONLY!!!
 //To verify the account of the user
-route.put("/verify-user", requireAuth, userController.verifyUser);
+route.put("/verify-user", requireAuth, adminUserController.verifyUser);
 
 //To verify the dormitory created by the owner user
-route.put("/verify-dormitory", requireAuth, userController.verifyDormitory);
+route.put("/verify-dormitory", requireAuth, adminUserController.verifyDormitory);
 
 //DELETE METHOD
 //Delete functionality that an admin user can only access.
 //This endpoint is not yet complete until this comment is deleted.
 
 //To delete a user
-route.delete("/delete-user-profile", requireAuth, userController.deleteUser);
+route.delete("/delete-user-profile", requireAuth, adminUserController.deleteUser);
 
 //To delete the profile image of the user
 route.delete(
