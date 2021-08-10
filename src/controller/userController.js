@@ -354,35 +354,6 @@ exports.changeUserPassword = async (req, res) => {
   }
 };
 
-//To add new documents
-exports.addUserDocuments = async (req, res) => {
-  const { documentName, documentType } = req.body;
-  const userData = req.user;
-
-  const t = await db.sequelize.transaction();
-  try {
-    const documents = await db.Document.create({
-      documentName,
-      documentType,
-      filename: req.file.filename,
-      filepath: req.file.path,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      userId: userData.id,
-    });
-
-    return res.send({
-      documents,
-    });
-  } catch (err) {
-    console.log(err);
-    await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
-  }
-};
-
 //For ADMIN only.
 //This function will let the admins to manually or perssonaly validate
 //users depends on the documents or ids that they will uploading.

@@ -60,7 +60,7 @@ route.post(
 route.post(
   "/add-user-documents",
   [requireAuth, uploadDocumentImages],
-  userController.addUserDocuments
+  userImageController.addUserDocuments
 );
 
 //Create Account and Sign In
