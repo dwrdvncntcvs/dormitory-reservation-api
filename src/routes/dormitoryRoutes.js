@@ -77,7 +77,7 @@ route.get(
 route.get(
   "/view-dormitory-detail/:dormId",
   requireAuth,
-  dormitoryController.viewUserDormitoryDetail
+  dormitoryController.viewDormitoryDetail
 );
 
 //To edit the status of the availability of the dormitory

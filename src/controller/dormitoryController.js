@@ -126,7 +126,7 @@ exports.deleteDormitory = async (req, res) => {
 
 //For Owner Users
 //To view the dormitories detail of an owner.
-exports.viewUserDormitoryDetail = async (req, res) => {
+exports.viewDormitoryDetail = async (req, res) => {
   const dormId = req.params.dormId;
 
   const userData = req.user;
