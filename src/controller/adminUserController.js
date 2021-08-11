@@ -125,40 +125,6 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-//To display all the dormitories with their user information
-exports.displayAllDormitories = async (req, res) => {
-  const userData = req.user;
-
-  const validRole = validator.isValidRole(userData.role, "admin");
-  try {
-    if (validRole === false) {
-      return res.status(401).send({
-        msg: "You are not an admin",
-      });
-    }
-
-    const dormitories = await db.Dormitory.findAll({
-      include: [
-        db.User,
-        db.DormDocument,
-        db.DormProfileImage,
-        db.Room,
-        db.DormImage,
-      ],
-    });
-
-    return res.send({
-      dormitories,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      msg: "Something went wrong",
-      err,
-    });
-  }
-};
-
 //To verify a dormitory to add things such as rooms and payments
 exports.verifyDormitory = async (req, res) => {
   const { dormId, isVerified } = req.body;

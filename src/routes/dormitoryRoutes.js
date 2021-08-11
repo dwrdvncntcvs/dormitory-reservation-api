@@ -80,6 +80,13 @@ route.get(
   dormitoryController.viewDormitoryDetail
 );
 
+//To get or display all dormitory information
+route.get(
+  "/get-all-dormitories/:gender",
+  requireAuth,
+ dormitoryController.displayAllDormitories
+);
+
 //To edit the status of the availability of the dormitory
 route.put(
   "/dormitory-switch",

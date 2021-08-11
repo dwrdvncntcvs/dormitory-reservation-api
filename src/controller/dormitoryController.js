@@ -251,3 +251,42 @@ exports.dormitorySwitch = async (req, res) => {
   }
 };
 
+//For Tenant and Admin Users
+//To View all dormitories depends on filter with their user information
+exports.displayAllDormitories = async (req, res) => {
+  const gender = req.params.gender
+  const userData = req.user;
+
+  const adminRole = validator.isValidRole(userData.role, "admin");
+  const tenantRole = validator.isValidRole(userData.role, "tenant")
+  try {
+    if (adminRole === false) {
+      if (tenantRole === false) {
+        return res.status(401).send({
+          msg: "You have no right to view all the dormitories"
+        });
+      }
+    }
+
+    const dormitories = await db.Dormitory.findAll({
+      where: { allowedGender: gender, isAccepting: true },
+      include: [
+        db.User,
+        db.DormDocument,
+        db.DormProfileImage,
+        db.Room,
+        db.DormImage,
+      ],
+    });
+
+    return res.send({
+      dormitories,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      msg: "Something went wrong",
+      err,
+    });
+  }
+};

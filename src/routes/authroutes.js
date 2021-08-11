@@ -79,13 +79,6 @@ route.get("/find-user/:email", userController.checkUserEmail);
 //To get or display users information
 route.get("/get-all-users", requireAuth, adminUserController.displayAllUsers);
 
-//To get or display all dormitory information
-route.get(
-  "/get-all-dormitories",
-  requireAuth,
-  adminUserController.displayAllDormitories
-);
-
 //PUT METHOD
 //To edit the name of the user
 route.put("/edit-user-name", requireAuth, userController.editProfileName);
