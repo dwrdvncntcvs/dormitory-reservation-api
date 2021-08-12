@@ -21,7 +21,7 @@ route.post(
 route.get(
   "/view-all-new-reservations/dorm-:dormId-room-:roomId",
   requireAuth,
-  reservationController.viewAllRoomReservations
+  reservationController.viewAllPendingRoomReservations
 );
 
 route.put(

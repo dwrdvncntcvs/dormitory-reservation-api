@@ -178,7 +178,7 @@ exports.cancelReservation = async (req, res) => {
 
 //For Owner users
 //To see all the new reservation of tenant Users
-exports.viewAllRoomReservations = async (req, res) => {
+exports.viewAllPendingRoomReservations = async (req, res) => {
   const roomId = req.params.roomId;
   const dormId = req.params.dormId;
 
@@ -237,6 +237,7 @@ exports.viewAllRoomReservations = async (req, res) => {
   }
 };
 
+//To accept new reservations
 exports.acceptReservations = async (req, res) => {
   const { dormId, roomId, reservationId, isAccepted } = req.body;
 
