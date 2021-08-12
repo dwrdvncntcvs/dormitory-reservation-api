@@ -44,6 +44,12 @@ exports.createNewReservation = async (req, res) => {
       });
     }
 
+    if (dormitoryData.isAccepting !== true) {
+      return res.status(401).send({
+        msg: "Dormitory is not accepting right now", //To be change soon.
+      });
+    }
+
     if (dormitoryData.allowedGender !== "both") {
       if (dormitoryData.allowedGender !== userData.gender) {
         return res.status(401).send({
