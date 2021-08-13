@@ -9,7 +9,6 @@ const reservationController = require("../controller/reservationController");
 const route = express.Router();
 
 //Request Methods
-
 //To create new reservation
 route.post(
   "/create-new-reservation",
@@ -28,6 +27,12 @@ route.put(
   "/accept-new-reservation",
   requireAuth,
   reservationController.acceptReservations
+);
+
+route.put(
+  "/cancel-reservation",
+  requireAuth,
+  reservationController.cancelReservation
 );
 
 module.exports = route;

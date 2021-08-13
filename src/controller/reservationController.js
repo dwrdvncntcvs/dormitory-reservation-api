@@ -1,23 +1,24 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 
+//To Find Values in Database
+const {
+  findDormitoryData,
+  findRoomData,
+  findReservationData,
+} = require("../database/find");
+
 //For Tenant Users
 //To create new reservation for tenants
 exports.createNewReservation = async (req, res) => {
   const { dormId, roomId } = req.body;
 
-  const user = req.user;
-  const validRole = validator.isValidRole(user.role, "tenant");
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
-  const roomData = await db.Room.findOne({
-    where: { id: roomId },
-  });
-  const userData = await db.User.findOne({
-    where: { id: user.id },
-  });
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormId);
+  const roomData = await findRoomData(roomId);
+  const validRole = validator.isValidRole(userData.role, "tenant");
 
+  console.log(dormitoryData);
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
@@ -87,8 +88,7 @@ exports.createNewReservation = async (req, res) => {
     await t.commit();
 
     return res.send({
-      msg: "Reservation Created.",
-      reservation,
+      msg: "Reservation Created."
     });
   } catch (err) {
     console.log(err);
@@ -100,72 +100,84 @@ exports.createNewReservation = async (req, res) => {
 };
 
 //To cancel tenant's current reservations
-/*
 exports.cancelReservation = async (req, res) => {
-  const { 
-    reservationId, 
-    dormitoryId,
-    roomId
-  } = req.body;
+  const { reservationId, dormitoryId, roomId } = req.body;
+
   const userData = req.user;
-  const reservationData = await db.Reservation.findOne({
-    where: { id: reservationId },
-  });
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormitoryId },
-  });
-  const roomData = await db.Room.findOne({
-    where: { id: roomId },
-  });
+  const dormitoryData = findDormitoryData(dormitoryId);
+  const roomData = findRoomData(roomId);
+  const reservationData = findReservationData(reservationId);
   const validRole = validator.isValidRole(userData.role, "tenant");
 
-  const t = await db.sequelize.transation();
+  const t = await db.sequelize.transaction();
+  console.log("Hello");
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not a tenant"
+        msg: "You are not a tenant",
       });
     }
 
     if (!dormitoryData) {
       return res.status(404).send({
-        msg: "Dormitory doesn't exist"
+        msg: "Dormitory doesn't exist",
       });
     }
 
     if (!roomData) {
       return res.status(404).send({
-        msg: "Room doesn't exist"
+        msg: "Room doesn't exist",
       });
     }
 
     if (!reservationData) {
       return res.status(404).send({
-        msg: "Reservation doesn't exist"
+        msg: "Reservation doesn't exist",
       });
     }
 
     if (reservationData.roomId !== roomData.id) {
       return res.status(401).send({
-        msg: "You can't cancel reservation"
+        msg: "You can't cancel reservation",
       });
     }
 
     if (reservationData.dormitoryId !== dormitoryData.id) {
       return res.status(401).send({
-        msg: "You can't cancel reservation"
+        msg: "You can't cancel reservation",
       });
     }
 
-    await db.Reservation.update({
-      isCancelled
-    }, {
-      where: { id: reservationData.id }
-    }, {
-      transaction: t,
-    });
+    await db.Reservation.update(
+      {
+        isCancelled: true,
+        isAccepted: false,
+      },
+      {
+        where: { id: reservationData.id },
+      },
+      {
+        transaction: t,
+      }
+    );
 
-    return res.send({  })
+    await db.Room.update(
+      {
+        activeTenant: roomData.activeTenant - 1,
+      },
+      {
+        where: { id: roomData.id },
+      },
+      {
+        transaction: t,
+      }
+    );
+
+    await t.commit();
+
+    return res.send({
+      msg: "Reservation was successfully cancelled",
+    });
   } catch (err) {
     console.log(err);
     await t.rollback();
@@ -174,7 +186,6 @@ exports.cancelReservation = async (req, res) => {
     });
   }
 };
-*/
 
 //For Owner users
 //To see all the new reservation of tenant Users
@@ -183,12 +194,8 @@ exports.viewAllPendingRoomReservations = async (req, res) => {
   const dormId = req.params.dormId;
 
   const userData = req.user;
-  const roomData = await db.Room.findOne({
-    where: { id: roomId },
-  });
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
+  const roomData = await findRoomData(roomId);
+  const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
   try {
@@ -237,20 +244,29 @@ exports.viewAllPendingRoomReservations = async (req, res) => {
   }
 };
 
+//To see all the accepted reservations of tenant users
+exports.viewAllAcceptedRoomReservations = async (req, res) => {
+  const dormId = req.params.dormId;
+  const roomdId = req.params.roomdId;
+  const reservationId = req.params.reservationId;
+
+  const userData = req.user;
+  const dormitoryData = await db.Dormitory.findOne({});
+};
+
+//To remove reservation of the user
+exports.removeReservation = async (req, res) => {
+  //To be created
+};
+
 //To accept new reservations
 exports.acceptReservations = async (req, res) => {
   const { dormId, roomId, reservationId, isAccepted } = req.body;
 
   const userData = req.user;
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
-  const roomData = await db.Room.findOne({
-    where: { id: roomId },
-  });
-  const reservationData = await db.Reservation.findOne({
-    where: { id: reservationId },
-  });
+  const dormitoryData = await findDormitoryData(dormId);
+  const roomData = await findRoomData(roomId);
+  const reservationData = await findReservationData(reservationId);
 
   const validRole = validator.isValidRole(userData.role, "owner");
   const t = await db.sequelize.transaction();
@@ -303,21 +319,29 @@ exports.acceptReservations = async (req, res) => {
       });
     }
 
-    const updatedReservation = await db.Reservation.update({
-      isAccepted
-    }, {
-      where: { id: reservationData.id }
-    }, {
-      transaction: t
-    });
+    const updatedReservation = await db.Reservation.update(
+      {
+        isAccepted,
+      },
+      {
+        where: { id: reservationData.id },
+      },
+      {
+        transaction: t,
+      }
+    );
 
-    const updatedRoom = await db.Room.update({
-      activeTenant: roomData.activeTenant + 1
-    }, {
-      where: { id: roomData.id }
-    }, {
-      transaction: t
-    });
+    const updatedRoom = await db.Room.update(
+      {
+        activeTenant: roomData.activeTenant + 1,
+      },
+      {
+        where: { id: roomData.id },
+      },
+      {
+        transaction: t,
+      }
+    );
     await t.commit();
 
     return res.send({
@@ -332,4 +356,3 @@ exports.acceptReservations = async (req, res) => {
     });
   }
 };
-
