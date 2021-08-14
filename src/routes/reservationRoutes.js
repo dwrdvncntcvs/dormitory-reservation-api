@@ -41,6 +41,12 @@ route.put(
   reservationController.cancelReservation
 );
 
+route.put(
+  "/add-tenant-reservation",
+  requireAuth,
+  reservationController.addUser
+);
+
 // route.delete(
 //   "/remove-tenant-user",
 //   requireAuth,
