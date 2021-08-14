@@ -41,4 +41,10 @@ route.put(
   reservationController.cancelReservation
 );
 
+route.delete(
+  "/remove-tenant-user",
+  requireAuth,
+  reservationController.removeUser
+);
+
 module.exports = route;
