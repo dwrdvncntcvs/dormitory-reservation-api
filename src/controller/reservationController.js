@@ -275,76 +275,84 @@ exports.viewAllAcceptedRoomReservations = async (req, res) => {
 };
 
 //To remove reservation of the user
-// exports.removeUser = async (req, res) => {
-//   const { dormId, roomId, reservationId } = req.body;
+exports.removeUser = async (req, res) => {
+  const { dormId, roomId, reservationId } = req.body;
 
-//   const userData = req.user;
-//   const dormitoryData = await findDormitoryData(dormId);
-//   const roomData = await findRoomData(roomId);
-//   const reservationData = await findReservationData(reservationId);
-//   const validRole = validator.isValidRole(userData.role, "owner");
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormId);
+  const roomData = await findRoomData(roomId);
+  const reservationData = await findReservationData(reservationId);
+  const validRole = validator.isValidRole(userData.role, "owner");
 
-//   const t = await db.sequelize.transaction();
-//   try {
-//     if (validRole === false) {
-//       return res.status(401).send({
-//         msg: "Invalid role",
-//       });
-//     }
+  const t = await db.sequelize.transaction();
+  try {
+    if (validRole === false) {
+      return res.status(401).send({
+        msg: "Invalid role",
+      });
+    }
 
-//     if (!dormitoryData) {
-//       return res.status(404).send({
-//         msg: "Dormitory does not exist",
-//       });
-//     }
+    if (!dormitoryData) {
+      return res.status(404).send({
+        msg: "Dormitory does not exist",
+      });
+    }
 
-//     if (!roomData) {
-//       return res.status(404).send({
-//         msg: "Room does not exist",
-//       });
-//     }
+    if (!roomData) {
+      return res.status(404).send({
+        msg: "Room does not exist",
+      });
+    }
 
-//     if (!reservationData) {
-//       return res.status(404).send({
-//         msg: "Reservation does not exist",
-//       });
-//     }
+    if (!reservationData) {
+      return res.status(404).send({
+        msg: "Reservation does not exist",
+      });
+    }
 
-//     if (dormitoryData.id !== roomData.dormitoryId) {
-//       return res.status(401).send({
-//         msg: "Room does not belongs to the dormitory",
-//       });
-//     }
+    if (dormitoryData.id !== roomData.dormitoryId) {
+      return res.status(401).send({
+        msg: "Room does not belongs to the dormitory",
+      });
+    }
 
-//     if (
-//       reservationData.roomId !== roomData.id &&
-//       reservationData.dormitoryId !== dormitoryData.id
-//     ) {
-//       return res.status(401).send({
-//         msg: "Reservation does not belong to this dormitory and room",
-//       });
-//     }
+    if (
+      reservationData.roomId !== roomData.id &&
+      reservationData.dormitoryId !== dormitoryData.id
+    ) {
+      return res.status(401).send({
+        msg: "Reservation does not belong to this dormitory and room",
+      });
+    }
 
-//     await db.Reservation.destroy({
-//       where: {
-//         isAccepted: true,
-//         isCancelled: false,
-//         id: reservationData.id,
-//       },
-//     }, {
-//       transaction: t,
-//     });
-//     await t.commit();
+    await db.Reservation.destroy(
+      {
+        where: {
+          isAccepted: true,
+          isCancelled: false,
+          id: reservationData.id,
+        },
+      },
+      {
+        transaction: t,
+      }
+    );
+    await db.Room.update(
+      { activeTenant: roomData.activeTenant - 1 },
+      { where: { id: roomData.id } },
+      { transaction: t }
+    );
+    await t.commit();
 
-//     return res.send({ msg: "Reservation removed." });
-//   } catch (err) {
-//     console.log(err);
-//     await t.rollback();
-//     return res.status(500).send({
-//       msg: "Something went wrong",
-//     });
-//   }
-// };
+    return res.send({ msg: "Reservation removed." });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res.status(500).send({
+      msg: "Something went wrong",
+    });
+  }
+};
 
 exports.addUser = async (req, res) => {
   const { dormId, roomId, reservationId } = req.body;
@@ -397,13 +405,13 @@ exports.addUser = async (req, res) => {
     }
 
     if (reservationData.isAccepted === false) {
-      return res.status(401).send({ msg: "You are not yet accepted"})
+      return res.status(401).send({ msg: "You are not yet accepted" });
     }
 
     if (reservationData.isAdded === true) {
       return res.send({ msg: "User Already added" });
     }
-    
+
     const updatedRoom = await db.Room.update(
       { activeTenant: roomData.activeTenant + 1 },
       { where: { id: roomData.id } },
