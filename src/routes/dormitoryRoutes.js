@@ -77,7 +77,7 @@ route.get(
 route.get(
   "/get-all-dormitories",
   requireAuth,
- dormitoryController.displayAllDormitories
+  dormitoryController.displayAllDormitories
 );
 
 //To edit the status of the availability of the dormitory

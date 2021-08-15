@@ -1,9 +1,6 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const {
-  findDormitoryData,
-  findDormImageData,
-} = require("../database/find");
+const { findDormitoryData, findDormImageData } = require("../database/find");
 
 //To add dorm images
 exports.addDormImage = async (req, res) => {

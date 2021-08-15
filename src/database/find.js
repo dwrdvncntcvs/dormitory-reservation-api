@@ -10,16 +10,16 @@ module.exports = {
   },
   findRoomData: (roomId) => {
     const roomData = db.Room.findOne({
-      where: { id: roomId }
+      where: { id: roomId },
     });
-  
+
     return roomData;
   },
   findReservationData: (reservationId) => {
     const reservationData = db.Reservation.findOne({
-      where: { id: reservationId }
+      where: { id: reservationId },
     });
-  
+
     return reservationData;
   },
   findDormImageData: (dormImageId) => {
@@ -28,5 +28,5 @@ module.exports = {
     });
 
     return dormImageData;
-  }
+  },
 };

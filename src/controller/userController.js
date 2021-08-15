@@ -144,7 +144,7 @@ exports.userProfile = async (req, res) => {
       // To be fixed soon hehe :)
       const user = await db.User.findOne({
         where: { id: userData.id },
-        include: [db.Document, db.ProfileImage]
+        include: [db.Document, db.ProfileImage],
       });
 
       return res.send({

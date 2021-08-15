@@ -275,11 +275,7 @@ exports.displayAllDormitories = async (req, res) => {
     if (ownerRole === true) {
       const userDormitories = await db.Dormitory.findAll({
         where: { userId: userData.id },
-        include: [
-          db.User, 
-          db.DormProfileImage, 
-          db.Reservation
-        ],
+        include: [db.User, db.DormProfileImage, db.Reservation],
       });
 
       return res.send({

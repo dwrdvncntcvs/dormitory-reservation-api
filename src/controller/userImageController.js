@@ -66,7 +66,7 @@ exports.deleteProfileImage = async (req, res) => {
 };
 
 //To add new documents
-exports. addUserDocuments = async (req, res) => {
+exports.addUserDocuments = async (req, res) => {
   const { documentName, documentType } = req.body;
   const userData = req.user;
 
