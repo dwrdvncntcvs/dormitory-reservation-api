@@ -66,13 +66,6 @@ route.post(
   dormImageController.addDormitoryDocuments
 );
 
-//To get all the dormitories that the user have.
-route.get(
-  "/view-all-dormitories",
-  requireAuth,
-  dormitoryController.viewUserDormitory
-);
-
 //To get specific dormitory information created by the user.
 route.get(
   "/view-dormitory-detail/:dormId",
@@ -82,7 +75,7 @@ route.get(
 
 //To get or display all dormitory information
 route.get(
-  "/get-all-dormitories/:gender",
+  "/get-all-dormitories",
   requireAuth,
  dormitoryController.displayAllDormitories
 );

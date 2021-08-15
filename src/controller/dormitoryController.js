@@ -1,7 +1,6 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 
-//For Owner Users
 //To create and input new information of a dormitory in the system.
 exports.createNewDormitory = async (req, res) => {
   const { name, address, contactNumber, allowedGender } = req.body;
@@ -25,7 +24,12 @@ exports.createNewDormitory = async (req, res) => {
     }
 
     //Check the field if not empty
-    if (name === null && address === null && contactNumber === null && allowedGender === null) {
+    if (
+      name === null &&
+      address === null &&
+      contactNumber === null &&
+      allowedGender === null
+    ) {
       return res.status(401).send({
         msg: "Can't submit empty field.", //To be change soon.
       });
@@ -57,36 +61,6 @@ exports.createNewDormitory = async (req, res) => {
   }
 };
 
-//For Owner Users
-//To view all the dormitory created by the user.
-exports.viewUserDormitory = async (req, res) => {
-  const userData = req.user;
-  const validRole = validator.isValidRole(userData.role, "owner");
-  try {
-    //Check user role
-    if (validRole === false) {
-      return res.status(401).send({
-        msg: "You are not a dormitory owner.",
-      });
-    }
-
-    const userDormitories = await db.Dormitory.findAll({
-      where: { userId: userData.id },
-      include: [db.User, db.DormProfileImage, db.Reservation],
-    });
-
-    return res.send({
-      userDormitories,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
-  }
-};
-
-//For Owner Users
 //To delete dormitory
 exports.deleteDormitory = async (req, res) => {
   const { id } = req.body;
@@ -124,7 +98,6 @@ exports.deleteDormitory = async (req, res) => {
   }
 };
 
-//For Owner Users
 //To view the dormitories detail of an owner.
 exports.viewDormitoryDetail = async (req, res) => {
   const dormId = req.params.dormId;
@@ -171,7 +144,7 @@ exports.viewDormitoryDetail = async (req, res) => {
     });
 
     const dormReservation = await db.Reservation.findAll({
-      where: { dormitoryId: dormitoryData.id }
+      where: { dormitoryId: dormitoryData.id },
     });
 
     return res.send({
@@ -192,7 +165,6 @@ exports.viewDormitoryDetail = async (req, res) => {
   }
 };
 
-//For Owner Users
 //To determine if the availability of the dormitory
 exports.dormitorySwitch = async (req, res) => {
   const { dormId, isAccepting } = req.body;
@@ -251,37 +223,63 @@ exports.dormitorySwitch = async (req, res) => {
   }
 };
 
-//For Tenant and Admin Users
 //To View all dormitories depends on filter with their user information
 exports.displayAllDormitories = async (req, res) => {
-  const gender = req.params.gender
   const userData = req.user;
 
+  const ownerRole = validator.isValidRole(userData.role, "owner");
   const adminRole = validator.isValidRole(userData.role, "admin");
-  const tenantRole = validator.isValidRole(userData.role, "tenant")
+  const tenantRole = validator.isValidRole(userData.role, "tenant");
+
   try {
-    if (adminRole === false) {
-      if (tenantRole === false) {
-        return res.status(401).send({
-          msg: "You have no right to view all the dormitories"
-        });
-      }
+    if (adminRole === true) {
+      const dormitories = await db.Dormitory.findAll({
+        where: { isAccepting: true },
+        include: [
+          db.User,
+          db.DormDocument,
+          db.DormProfileImage,
+          db.Room,
+          db.DormImage,
+        ],
+      });
+
+      return res.send({
+        adminView: dormitories,
+      });
     }
 
-    const dormitories = await db.Dormitory.findAll({
-      where: { allowedGender: gender, isAccepting: true },
-      include: [
-        db.User,
-        db.DormDocument,
-        db.DormProfileImage,
-        db.Room,
-        db.DormImage,
-      ],
-    });
+    if (tenantRole === true) {
+      const dormitories = await db.Dormitory.findAll({
+        where: { isAccepting: true },
+        include: [
+          db.User,
+          db.DormDocument,
+          db.DormProfileImage,
+          db.Room,
+          db.DormImage,
+        ],
+      });
 
-    return res.send({
-      dormitories,
-    });
+      return res.send({
+        tenantView: dormitories,
+      });
+    }
+
+    if (ownerRole === true) {
+      const userDormitories = await db.Dormitory.findAll({
+        where: { userId: userData.id },
+        include: [
+          db.User, 
+          db.DormProfileImage, 
+          db.Reservation
+        ],
+      });
+
+      return res.send({
+        ownerView: userDormitories,
+      });
+    }
   } catch (err) {
     console.log(err);
     return res.status(500).send({
