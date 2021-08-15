@@ -193,7 +193,7 @@ exports.cancelReservation = async (req, res) => {
 
 //For Owner users
 //To see all the new reservation of tenant Users
-exports.viewAllPendingRoomReservations = async (req, res) => {
+exports.viewAllReservations = async (req, res) => {
   const dormId = req.params.dormId;
 
   const userData = req.user;
@@ -213,58 +213,22 @@ exports.viewAllPendingRoomReservations = async (req, res) => {
       });
     }
 
-    const newReservations = await db.Reservation.findAll({
-      where: {
-        dormitoryId: dormitoryData.id,
-        isAccepted: false,
-        isCancelled: false,
-      },
-      include: [db.Dormitory, db.Room],
-    });
-
-    return res.send({
-      newReservations,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
-  }
-};
-
-//To see all the accepted reservations of tenant users
-exports.viewAllAcceptedRoomReservations = async (req, res) => {
-  const dormId = req.params.dormId;
-
-  const userData = req.user;
-  const dormitoryData = await findDormitoryData(dormId);
-  const validRole = validator.isValidRole(userData.role, "owner");
-
-  try {
-    if (validRole === false) {
-      return res.status(401).send({
-        msg: "You are not an owner",
-      });
-    }
-
-    if (!dormitoryData) {
+    if (userData.id !== dormitoryData.userId) {
       return res.status(404).send({
         msg: "Dormitory not found",
       });
     }
 
-    const acceptedReservations = await db.Reservation.findAll({
+    const reservations = await db.Reservation.findAll({
       where: {
         dormitoryId: dormitoryData.id,
-        isAccepted: true,
         isCancelled: false,
       },
-      include: [db.Dormitory, db.Room],
+      include: [db.Dormitory, db.Room, db.User],
     });
 
     return res.send({
-      acceptedReservations,
+      reservations,
     });
   } catch (err) {
     console.log(err);

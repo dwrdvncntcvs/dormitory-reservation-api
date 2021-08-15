@@ -18,15 +18,9 @@ route.post(
 
 //To view all new reservations by the tenant users
 route.get(
-  "/view-all-new-reservations/dorm-:dormId",
+  "/view-all-reservations/dorm-:dormId",
   requireAuth,
-  reservationController.viewAllPendingRoomReservations
-);
-
-route.get(
-  "/view-all-accepted-reservations/dorm-:dormId",
-  requireAuth,
-  reservationController.viewAllAcceptedRoomReservations
+  reservationController.viewAllReservations
 );
 
 route.put(
