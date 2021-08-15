@@ -10,16 +10,23 @@ module.exports = {
   },
   findRoomData: (roomId) => {
     const roomData = db.Room.findOne({
-        where: { id: roomId }
-      });
-    
-      return roomData;
+      where: { id: roomId }
+    });
+  
+    return roomData;
   },
   findReservationData: (reservationId) => {
     const reservationData = db.Reservation.findOne({
-        where: { id: reservationId }
-      });
-    
-      return reservationData;
+      where: { id: reservationId }
+    });
+  
+    return reservationData;
+  },
+  findDormImageData: (dormImageData) => {
+    const dormImageData = db.DormImage.findOne({
+      where: { id: imageId },
+    });
+
+    return dormImageData;
   }
 };

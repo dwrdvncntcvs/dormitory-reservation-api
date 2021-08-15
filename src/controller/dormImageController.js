@@ -1,5 +1,9 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
+const {
+  findDormitoryData,
+  findDormImageData,
+} = require("../database/find");
 
 //To add dorm images
 exports.addDormImage = async (req, res) => {
@@ -7,9 +11,7 @@ exports.addDormImage = async (req, res) => {
 
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
-  const validDormitory = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
+  const dormitoryData = await findDormitoryData(dormId);
 
   const t = await db.sequelize.transaction();
   try {
@@ -19,7 +21,7 @@ exports.addDormImage = async (req, res) => {
     }
 
     //Check if the dormitory was owned by the owner user
-    if (userData.id !== validDormitory.userId) {
+    if (userData.id !== dormitoryData.userId) {
       return res
         .status(401)
         .send({ message: "You cannot add images to this dormitory." });
@@ -57,12 +59,8 @@ exports.deleteDormImage = async (req, res) => {
   const { imageId, dormId } = req.body;
 
   const userData = req.user;
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
-  const dormImageData = await db.DormImage.findOne({
-    where: { id: imageId },
-  });
+  const dormitoryData = await findDormitoryData(dormId);
+  const dormImageData = await findDormImageData(imageId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const t = await db.sequelize.transaction();
@@ -126,9 +124,7 @@ exports.addDormitoryProfileImage = async (req, res) => {
 
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
-  const dormitory = await db.Dormitory.findOne({
-    where: { id },
-  });
+  const dormitory = await findDormitoryData(id);
 
   const t = await db.sequelize.transaction();
   try {
@@ -173,9 +169,7 @@ exports.addDormitoryDocuments = async (req, res) => {
   const { documentName, documentType, dormId } = req.body;
 
   const userData = req.user;
-  const userDormData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
+  const userDormData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const t = await db.sequelize.transaction();
@@ -201,17 +195,20 @@ exports.addDormitoryDocuments = async (req, res) => {
       });
     }
 
-    const dormDocument = await db.DormDocument.create({
-      documentName,
-      documentType,
-      dormitoryId: userDormData.id,
-      filename: req.file.filename,
-      filepath: req.file.path,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-    }, {
-      transaction: t,
-    });
+    const dormDocument = await db.DormDocument.create(
+      {
+        documentName,
+        documentType,
+        dormitoryId: userDormData.id,
+        filename: req.file.filename,
+        filepath: req.file.path,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+      },
+      {
+        transaction: t,
+      }
+    );
     await t.commit();
 
     return res.send({
