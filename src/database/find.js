@@ -22,9 +22,9 @@ module.exports = {
   
     return reservationData;
   },
-  findDormImageData: (dormImageData) => {
+  findDormImageData: (dormImageId) => {
     const dormImageData = db.DormImage.findOne({
-      where: { id: imageId },
+      where: { id: dormImageId },
     });
 
     return dormImageData;
