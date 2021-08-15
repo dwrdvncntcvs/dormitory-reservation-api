@@ -1,5 +1,6 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
+const { findDormitoryData, findRoomData } = require("../database/find");
 
 // To create new room in a dormitory
 exports.createNewRoom = async (req, res) => {
@@ -7,9 +8,7 @@ exports.createNewRoom = async (req, res) => {
     req.body;
 
   const userData = req.user;
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
+  const dormitoryData = await findDormitoryData(dormId);
 
   const validRole = validator.isValidRole(userData.role, "owner");
   const t = await db.sequelize.transaction();
@@ -74,12 +73,8 @@ exports.updateRoomPayment = async (req, res) => {
   const { dormId, roomId, roomCost, electricBill, waterBill } = req.body;
 
   const userData = req.user;
-  const roomData = await db.Room.findOne({
-    where: { id: roomId },
-  });
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
+  const roomData = await findRoomData(roomId);
+  const dormitoryData = await findDormitoryData(dormId);
 
   const validRole = validator.isValidRole(userData.role, "owner");
   const t = await db.sequelize.transaction();
