@@ -198,6 +198,12 @@ exports.dormitorySwitch = async (req, res) => {
       });
     }
 
+    if (dormitoryData.isVerified === false) {
+      return res.status(401).send({
+        msg: "Dormitory is not verified",
+      });
+    }
+
     await db.Dormitory.update(
       {
         isAccepting,
