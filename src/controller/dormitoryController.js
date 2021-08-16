@@ -147,6 +147,10 @@ exports.viewDormitoryDetail = async (req, res) => {
       where: { dormitoryId: dormitoryData.id },
     });
 
+    const dormAmenity = await db.Amenity.findAll({
+      where: { dormitoryId: dormitoryData.id },
+    });
+
     return res.send({
       dormitory: {
         dormitoryData,
@@ -155,6 +159,7 @@ exports.viewDormitoryDetail = async (req, res) => {
         dormImage,
         dormProfileImage,
         dormReservation,
+        dormAmenity,
       },
     });
   } catch (err) {
