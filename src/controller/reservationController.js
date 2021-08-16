@@ -22,19 +22,25 @@ exports.createNewReservation = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not a tenant user",
+        msg: "Invalid User",
       });
     }
 
     if (userData.isVerified === false) {
       return res.status(401).send({
-        msg: "Your account is not verified.", //To be change soon.
+        msg: "Account not verified", //To be change soon.
       });
     }
 
     if (!dormitoryData) {
       return res.status(404).send({
-        msg: "Dormitory doesn't exist",
+        msg: "Dormitory not found",
+      });
+    }
+
+    if (dormitoryData.userId !== userData.id) {
+      return res.status(404).send({
+        msg: "Dormitory not found"
       });
     }
 
@@ -53,24 +59,24 @@ exports.createNewReservation = async (req, res) => {
     if (dormitoryData.allowedGender !== "both") {
       if (dormitoryData.allowedGender !== userData.gender) {
         return res.status(401).send({
-          msg: `This dormitory only for ${dormitoryData.allowedGender}`, //To be change soon.
+          msg: `Dormitory only accepting ${dormitoryData.allowedGender} tenants`, //To be change soon.
         });
       }
     }
 
     if (!roomData) {
       return res.status(404).send({
-        msg: "Room doesn't exist",
+        msg: "Room not found",
       });
     }
 
     if (roomData.dormitoryId !== dormitoryData.id) {
-      return res.status(401).send({
-        msg: "This room doesn't belongs to the dormitory",
+      return res.status(404).send({
+        msg: "Room not found",
       });
     }
 
-    const reservation = await db.Reservation.create(
+    await db.Reservation.create(
       {
         dormitoryId: dormId,
         roomId,
@@ -112,25 +118,25 @@ exports.cancelReservation = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not a tenant",
+        msg: "Invalid User",
       });
     }
 
     if (!dormitoryData) {
       return res.status(404).send({
-        msg: "Dormitory doesn't exist",
+        msg: "Dormitory not found",
       });
     }
 
     if (!roomData) {
       return res.status(404).send({
-        msg: "Room doesn't exist",
+        msg: "Room not found",
       });
     }
 
     if (!reservationData) {
       return res.status(404).send({
-        msg: "Reservation doesn't exist",
+        msg: "Reservation not found",
       });
     }
 
@@ -203,7 +209,7 @@ exports.viewAllReservations = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "Invalid Role",
+        msg: "Invalid User",
       });
     }
 
@@ -252,31 +258,31 @@ exports.removeUser = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "Invalid role",
+        msg: "Invalid User",
       });
     }
 
     if (!dormitoryData) {
       return res.status(404).send({
-        msg: "Dormitory does not exist",
+        msg: "Dormitory not found",
       });
     }
 
     if (!roomData) {
       return res.status(404).send({
-        msg: "Room does not exist",
+        msg: "Room not found",
       });
     }
 
     if (!reservationData) {
       return res.status(404).send({
-        msg: "Reservation does not exist",
+        msg: "Reservation not found",
       });
     }
 
     if (dormitoryData.id !== roomData.dormitoryId) {
-      return res.status(401).send({
-        msg: "Room does not belongs to the dormitory",
+      return res.status(404).send({
+        msg: "Room not found",
       });
     }
 
@@ -284,8 +290,8 @@ exports.removeUser = async (req, res) => {
       reservationData.roomId !== roomData.id &&
       reservationData.dormitoryId !== dormitoryData.id
     ) {
-      return res.status(401).send({
-        msg: "Reservation does not belong to this dormitory and room",
+      return res.status(404).send({
+        msg: "Reservation not found",
       });
     }
 
@@ -331,37 +337,37 @@ exports.addUser = async (req, res) => {
 
   try {
     if (validRole === false) {
-      return res.status(401).send({ message: "Invalid Role" });
+      return res.status(401).send({ message: "Invalid User" });
     }
 
     if (!dormitoryData) {
-      return res.status(404).send({ msg: "Dormitory does not exist" });
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (!roomData) {
-      return res.status(404).send({ msg: "Room does not exist" });
+      return res.status(404).send({ msg: "Room not found" });
     }
 
     if (!reservationData) {
-      return res.status(404).send({ msg: "Reservation does not exist" });
+      return res.status(404).send({ msg: "Reservation not found" });
     }
 
     if (userData.id !== dormitoryData.userId) {
       return res
-        .status(401)
-        .send({ msg: "Dormitory doesn't belong to this user" });
+        .status(404)
+        .send({ msg: "Dormitory not found" });
     }
 
     if (dormitoryData.id !== roomData.dormitoryId) {
       return res
-        .status(401)
-        .send({ msg: "Room doesn't belong to this dormitory" });
+        .status(404)
+        .send({ msg: "Room not found" });
     }
 
     if (roomData.id !== reservationData.roomId) {
       return res
-        .status(401)
-        .send({ msg: "Reservation doesn't belong to this room" });
+        .status(404)
+        .send({ msg: "Reservation not found" });
     }
 
     if (roomData.activeTenant >= roomData.capacity) {
@@ -414,7 +420,7 @@ exports.acceptReservations = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        message: "You are not an owner.",
+        message: "Invalid User",
       });
     }
 
@@ -437,20 +443,20 @@ exports.acceptReservations = async (req, res) => {
     }
 
     if (dormitoryData.userId !== userData.id) {
-      return res.status(401).send({
-        message: "You are not the owner of this dormitory.",
+      return res.status(404).send({
+        message: "Dormitory not found",
       });
     }
 
     if (dormitoryData.id !== roomData.dormitoryId) {
-      return res.status(401).send({
-        message: "This room doesn't belong to this dormitory.",
+      return res.status(404).send({
+        message: "Room not found",
       });
     }
 
     if (reservationData.roomId !== roomData.id) {
-      return res.status(401).send({
-        message: "This reservation doesn't belong to this room.",
+      return res.status(404).send({
+        message: "Reservation not found",
       });
     }
 

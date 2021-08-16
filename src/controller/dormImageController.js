@@ -14,14 +14,14 @@ exports.addDormImage = async (req, res) => {
   try {
     //Check user's role
     if (validRole === false) {
-      return res.status(401).send({ message: "You are not an owner." });
+      return res.status(401).send({ message: "Invalid User" });
     }
 
     //Check if the dormitory was owned by the owner user
     if (userData.id !== dormitoryData.userId) {
       return res
         .status(401)
-        .send({ message: "You cannot add images to this dormitory." });
+        .send({ message: "Dormitory not found" });
     }
 
     await db.DormImage.create(
@@ -64,31 +64,31 @@ exports.deleteDormImage = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not a owner user",
+        msg: "Invalid User",
       });
     }
 
     if (!dormitoryData) {
       return res.status(404).send({
-        msg: "Dormitory does not exist",
+        msg: "Dormitory not found",
       });
     }
 
     if (!dormImageData) {
       return res.status(404).send({
-        msg: "Dormitory Image does not exist",
+        msg: "Dormitory Image not found",
       });
     }
 
     if (dormitoryData.userId !== userData.id) {
       return res.status(404).send({
-        msg: "This dormitory is not yours",
+        msg: "Dormitory not found",
       });
     }
 
     if (dormitoryData.id !== dormImageData.dormitoryId) {
       return res.status(404).send({
-        msg: "This image doesn't belong to this dormitory",
+        msg: "Dormitory Image not found",
       });
     }
 
@@ -128,14 +128,14 @@ exports.addDormitoryProfileImage = async (req, res) => {
     //Check the role of the user
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not a dormitory owner",
+        msg: "Invalid User",
       });
     }
 
     //Check if the dormitory exist
     if (!dormitory) {
       return res.status(404).send({
-        msg: "Dormitory Not Found",
+        msg: "Dormitory not found",
       });
     }
 
@@ -174,21 +174,21 @@ exports.addDormitoryDocuments = async (req, res) => {
     // Check user's role
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not an owner",
+        msg: "Invalid User",
       });
     }
 
     //Check if dormitory does exist
     if (!userDormData) {
       return res.status(404).send({
-        msg: "Dorm Doesn't exist",
+        msg: "Dormitory not found",
       });
     }
 
     //Check if the dormitory exists owned by the right owner
     if (userDormData.userId !== userData.id) {
       return res.status(404).send({
-        msg: "This dormitory is not yours",
+        msg: "Dormitory not found",
       });
     }
 

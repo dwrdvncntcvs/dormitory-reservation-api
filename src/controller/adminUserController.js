@@ -12,7 +12,7 @@ exports.displayAllUsers = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You're not an admin",
+        msg: "Invalid User",
       });
     }
     const adminUsers = await db.User.findAll({
@@ -53,7 +53,7 @@ exports.verifyUser = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You're not an admin",
+        msg: "Invalid User",
       });
     }
 
@@ -135,7 +135,7 @@ exports.verifyDormitory = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not an admin",
+        msg: "Invalid User",
       });
     }
 

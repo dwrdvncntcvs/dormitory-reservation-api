@@ -16,28 +16,28 @@ exports.createNewRoom = async (req, res) => {
     //Check Role
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not an owner.",
+        msg: "Invalid User",
       });
     }
 
     //Check if the dorm exists
     if (!dormitoryData) {
       return res.status(401).send({
-        msg: "Dormitory doesn't exists",
+        msg: "Dormitory not found",
       });
     }
 
     //Check if right user
     if (userData.id !== dormitoryData.userId) {
       return res.status(401).send({
-        msg: "You can't create a room for this dormitory.",
+        msg: "Dormitory not found",
       });
     }
 
     //Check if dorm is verified
     if (dormitoryData.isVerified === false) {
       return res.status(401).send({
-        msg: "Your dormitory is not verified",
+        msg: "Dormitory is not verified",
       });
     }
 
@@ -79,38 +79,38 @@ exports.updateRoomPayment = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
   const t = await db.sequelize.transaction();
   try {
+    //Checks if the role of the signed in user is owner
+    if (validRole == false) {
+      return res.status(401).send({
+        msg: "Invalid User",
+      });
+    }
+
     // Checks if the dormitory does exist in the database
     if (!dormitoryData) {
       return res.status(401).send({
-        msg: "Dormitory doesn't exist",
+        msg: "Dormitory not found",
       });
     }
 
     //Checks if the room does exist in the database
     if (!roomData) {
       return res.status(401).send({
-        msg: "Room doesn't exist",
-      });
-    }
-
-    //Checks if the role of the signed in user is owner
-    if (validRole == false) {
-      return res.status(401).send({
-        msg: "You are not an owner",
-      });
-    }
-
-    //Checks if the room belongs to the dormitory
-    if (dormitoryData.id !== roomData.dormitoryId) {
-      return res.status(401).send({
-        msg: "This room doesn't belongs to this dormitory",
+        msg: "Room not found",
       });
     }
 
     // Checks if the dormitory is owned by the signed in user
     if (dormitoryData.userId !== userData.id) {
       return res.status(401).send({
-        msg: "This dormitory is not yours",
+        msg: "Dormitory not found",
+      });
+    }
+
+    //Checks if the room belongs to the dormitory
+    if (dormitoryData.id !== roomData.dormitoryId) {
+      return res.status(401).send({
+        msg: "Room not found",
       });
     }
 

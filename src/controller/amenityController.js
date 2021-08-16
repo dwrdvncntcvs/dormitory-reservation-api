@@ -14,7 +14,7 @@ exports.addAmenities = async (req, res) => {
   try {
     if (validRole === false) {
       return res.status(401).send({
-        msg: "Invalid Role",
+        msg: "Invalid User",
       });
     }
 
@@ -26,7 +26,7 @@ exports.addAmenities = async (req, res) => {
 
     if (dormitoryData.userId !== userData.id) {
       return res.status(401).send({
-        msg: "Invalid Owner",
+        msg: "Dormitory not found",
       });
     }
 

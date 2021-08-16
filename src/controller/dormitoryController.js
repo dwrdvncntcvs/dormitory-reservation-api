@@ -1,5 +1,6 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
+const { findDormitoryData } = require("../database/find");
 
 //To create and input new information of a dormitory in the system.
 exports.createNewDormitory = async (req, res) => {
@@ -12,14 +13,14 @@ exports.createNewDormitory = async (req, res) => {
     //Check the user role
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not an owner.",
+        msg: "Invalid User",
       });
     }
 
     //Check if the user is verified
     if (userData.isVerified !== true) {
       return res.status(401).send({
-        msg: "Your account is not verified.", //To be change soon.
+        msg: "Account not verified", //To be change soon.
       });
     }
 
@@ -31,7 +32,7 @@ exports.createNewDormitory = async (req, res) => {
       allowedGender === null
     ) {
       return res.status(401).send({
-        msg: "Can't submit empty field.", //To be change soon.
+        msg: "Invalid Value", //To be change soon.
       });
     }
 
@@ -65,6 +66,7 @@ exports.createNewDormitory = async (req, res) => {
 exports.deleteDormitory = async (req, res) => {
   const { id } = req.body;
   const userData = req.user;
+  const dormitoryData = await db.Dormitory.findOne({where: {id}});
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const t = await db.sequelize.transaction();
@@ -76,9 +78,21 @@ exports.deleteDormitory = async (req, res) => {
       });
     }
 
+    if (!dormitoryData) {
+      return res.status(404).send({
+        msg: "Dormitory not found"
+      });
+    }
+
+    if (dormitoryData.userId !== userData.id) {
+      return res.status(401).send({
+        msg: "Dormitory not found"
+      });
+    }
+
     await db.Dormitory.destroy(
       {
-        where: { id },
+        where: { id: dormitoryData.id },
       },
       {
         transaction: t,
@@ -103,28 +117,25 @@ exports.viewDormitoryDetail = async (req, res) => {
   const dormId = req.params.dormId;
 
   const userData = req.user;
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
-  console.log(userData);
+  const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
   try {
     //Check the role of the user
     if (validRole === false) {
-      return res.status(401).send({ msg: "You are not an owner." });
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     //Check if the dormitory does exist
     if (!dormitoryData) {
-      return res.status(401).send({ msg: "Dormitory doesn't exists." });
+      return res.status(401).send({ msg: "Dormitory not found" });
     }
 
     //Check if the dormitory exists owned by the right owner
     if (dormitoryData.userId !== userData.id) {
       return res
         .status(401)
-        .send({ msg: "You are not the owner of this dorm." });
+        .send({ msg: "Dormitory not found" });
     }
 
     const room = await db.Room.findAll({
@@ -185,27 +196,27 @@ exports.dormitorySwitch = async (req, res) => {
     //Check the role of the userData
     if (validRole === false) {
       return res.status(401).send({
-        msg: "You are not an owner",
+        msg: "Invalid User",
       });
     }
 
     //Check if the dormitory does exist in the database
     if (!dormitoryData) {
       return res.status(404).send({
-        msg: "Dormitory does not exist in the database",
+        msg: "Dormitory not found",
       });
     }
 
     //Check if the dormitory is owned by the user
     if (dormitoryData.userId !== userData.id) {
       return res.status(401).send({
-        msg: "You are not the owner of this dormitory",
+        msg: "Dormitory not found",
       });
     }
 
     if (dormitoryData.isVerified === false) {
       return res.status(401).send({
-        msg: "Dormitory is not verified",
+        msg: "Dormitory not verified",
       });
     }
 
