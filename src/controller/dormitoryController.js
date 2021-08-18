@@ -256,7 +256,6 @@ exports.displayAllDormitories = async (req, res) => {
   try {
     if (adminRole === true) {
       const dormitories = await db.Dormitory.findAll({
-        where: { isAccepting: true },
         include: [
           db.User,
           db.DormDocument,

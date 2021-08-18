@@ -31,7 +31,7 @@ exports.createNewReservation = async (req, res) => {
         msg: "Account not verified", //To be change soon.
       });
     }
-
+    
     if (!dormitoryData) {
       return res.status(404).send({
         msg: "Dormitory not found",
@@ -44,7 +44,7 @@ exports.createNewReservation = async (req, res) => {
       });
     }
 
-    if (dormitoryData.isVerified !== true) {
+    if (dormitoryData.isVerified === false) {
       return res.status(401).send({
         msg: "Dormitory is not available", //To be change soon.
       });
