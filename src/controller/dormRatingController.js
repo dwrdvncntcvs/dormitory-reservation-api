@@ -2,7 +2,7 @@ const db = require("../../models");
 const validator = require("../validator/validator");
 const { findDormitoryData } = require("../database/find");
 
-exports.addRating = (req, res) => {
+exports.addRating = async (req, res) => {
   const { rating, dormId } = req.body;
 
   const userData = req.user;

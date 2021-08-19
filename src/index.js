@@ -7,7 +7,8 @@ const dormitoryRoutes = require("./routes/dormitoryRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const dormImageRoutes = require("./routes/dormImageRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
-const amenityController = require("./routes/amenityRoutes");
+const amenityRoutes = require("./routes/amenityRoutes");
+const dormRatingRoutes = require("./routes/dormRatingRoutes");
 
 //Initializing express in variable app.
 const app = express();
@@ -33,7 +34,8 @@ app.use(dormitoryRoutes);
 app.use(roomRoutes);
 app.use(dormImageRoutes);
 app.use(reservationRoutes);
-app.use(amenityController);
+app.use(amenityRoutes);
+app.use(dormRatingRoutes);
 
 //To render the images using their paths.
 app.use("/image/profileImage", express.static("image/profileImage"));
