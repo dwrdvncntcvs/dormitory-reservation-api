@@ -9,6 +9,25 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.belongsTo(models.Dormitory, {
+        foreignKey: {
+          name: "dormitoryId",
+          allowNull: false,
+        },
+        onDelete: "CASCADE",
+        hooks: true,
+        targetKey: "id",
+      });
+
+      this.belongsTo(models.userId, { 
+        foreignKey: {
+          name: "userId", 
+          allowNull: false
+        },
+        onDelete: "CASCADE",
+        hooks: true,
+        targetKey: "id",
+      });
     }
   }
   DormRating.init(

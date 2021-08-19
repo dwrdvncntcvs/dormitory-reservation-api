@@ -15,10 +15,20 @@ module.exports = {
       dormitoryId: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        onDelete: "CASCADE",
+        references: {
+          model: "Dormitories",
+          key: "id"
+        }
       },
       userId: {
         type: Sequelize.UUID,
         allowNull: false,
+        onDelete: "CASCADE",
+        references: {
+          model: "Users",
+          key: "id"
+        }
       },
       createdAt: {
         allowNull: false,
