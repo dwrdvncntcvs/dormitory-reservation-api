@@ -66,7 +66,7 @@ exports.createNewDormitory = async (req, res) => {
 exports.deleteDormitory = async (req, res) => {
   const { id } = req.body;
   const userData = req.user;
-  const dormitoryData = await db.Dormitory.findOne({where: {id}});
+  const dormitoryData = await db.Dormitory.findOne({ where: { id } });
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const t = await db.sequelize.transaction();
@@ -80,13 +80,13 @@ exports.deleteDormitory = async (req, res) => {
 
     if (!dormitoryData) {
       return res.status(404).send({
-        msg: "Dormitory not found"
+        msg: "Dormitory not found",
       });
     }
 
     if (dormitoryData.userId !== userData.id) {
       return res.status(401).send({
-        msg: "Dormitory not found"
+        msg: "Dormitory not found",
       });
     }
 
@@ -118,14 +118,33 @@ exports.viewDormitoryDetail = async (req, res) => {
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
-  const validRole = validator.isValidRole(userData.role, "owner");
+  const adminRole = validator.isValidRole(userData.role, "admin");
+  const ownerRole = validator.isValidRole(userData.role, "owner");
+  const tenantRole = validator.isValidRole(userData.role, "tenant");
 
   try {
-    //Check the role of the user
-    if (validRole === false) {
-      return res.status(401).send({ msg: "Invalid User" });
-    }
+    if (adminRole === true) {
+      if (!dormitoryData) {
+        return res.status(404).send({ msg: "Dormitory not found" });
+      }
 
+      const dormitory = await db.Dormitory.findOne({
+        where: { id: dormitoryData.id },
+        include: [
+          db.DormProfileImage,
+          db.DormDocument,
+          db.Amenity,
+          db.Room,
+          db.DormImage,
+          db.Reservation,
+        ],
+      });
+
+      return res.send({
+        dormitory
+      });
+    } else if (ownerRole === true) {
+      
     //Check if the dormitory does exist
     if (!dormitoryData) {
       return res.status(401).send({ msg: "Dormitory not found" });
@@ -138,41 +157,50 @@ exports.viewDormitoryDetail = async (req, res) => {
         .send({ msg: "Dormitory not found" });
     }
 
-    const room = await db.Room.findAll({
-      where: { dormitoryId: dormitoryData.id },
-    });
-
-    const dormDocument = await db.DormDocument.findAll({
-      where: { dormitoryId: dormitoryData.id },
-    });
-
-    const dormImage = await db.DormImage.findAll({
-      where: { dormitoryId: dormitoryData.id },
-    });
-
-    const dormProfileImage = await db.DormProfileImage.findAll({
-      where: { dormitoryId: dormitoryData.id },
-    });
-
-    const dormReservation = await db.Reservation.findAll({
-      where: { dormitoryId: dormitoryData.id },
-    });
-
-    const dormAmenity = await db.Amenity.findAll({
-      where: { dormitoryId: dormitoryData.id },
+    const dormitory = await db.Dormitory.findOne({
+      where: { id: dormitoryData.id },
+      include: [
+        db.DormProfileImage,
+        db.DormDocument,
+        db.Amenity,
+        db.Room,
+        db.DormImage,
+        db.Reservation,
+      ],
     });
 
     return res.send({
-      dormitory: {
-        dormitoryData,
-        dormDocument,
-        room,
-        dormImage,
-        dormProfileImage,
-        dormReservation,
-        dormAmenity,
-      },
+      dormitory
     });
+    } else if (tenantRole === true) {
+      if (!dormitoryData) {
+        return res.status(404).send({ msg: "Dormitory not found" });
+      }
+
+      if (dormitoryData.isVerified === false) {
+        return res.status(404).send({ msg: "Dormitory not found" });
+      }
+
+      if (dormitoryData.isAccepting === false) {
+        return res.status(404).send({ msg: "Dormitory not found" });
+      }
+
+      const dormitory = await db.Dormitory.findOne({
+        where: { id: dormitoryData.id },
+        include: [
+          db.DormProfileImage,
+          db.DormDocument,
+          db.Amenity,
+          db.Room,
+          db.DormImage,
+          db.Reservation,
+        ],
+      });
+
+      return res.send({
+        dormitory
+      });
+    }
   } catch (err) {
     console.log(err);
     return res.status(500).send({
@@ -256,6 +284,7 @@ exports.displayAllDormitories = async (req, res) => {
   try {
     if (adminRole === true) {
       const dormitories = await db.Dormitory.findAll({
+        where: { isAccepting: true },
         include: [
           db.User,
           db.DormDocument,
