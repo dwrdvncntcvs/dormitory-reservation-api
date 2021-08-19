@@ -6,8 +6,11 @@ exports.addRating = async (req, res) => {
   const { rating, dormId } = req.body;
 
   const userData = req.user;
-  const dormitoryData = await findDormitoryData(dormitoryId);
+  const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "tenant");
+  const isActive = await db.Reservation.findOne({
+      where: { userId: userData.id, isActive: true}
+  });
 
   const t = await db.sequelize.transaction();
   try {
@@ -23,6 +26,12 @@ exports.addRating = async (req, res) => {
         return res.status(404).send({
             msg: "Dormitory not found"
         })
+    }
+
+    if (!isActive) {
+        return res.status(404).send({
+            msg: "Reservation not active"
+        });
     }
 
     await db.DormRating.create({
