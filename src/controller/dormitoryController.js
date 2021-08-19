@@ -301,7 +301,7 @@ exports.displayAllDormitories = async (req, res) => {
 
     if (tenantRole === true) {
       const dormitories = await db.Dormitory.findAll({
-        where: { isAccepting: true },
+        where: { isAccepting: true, isVerified: true },
         include: [
           db.User,
           db.DormDocument,
