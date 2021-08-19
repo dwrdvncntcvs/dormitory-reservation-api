@@ -137,6 +137,7 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.Room,
           db.DormImage,
           db.Reservation,
+          db.DormRating
         ],
       });
 
@@ -166,6 +167,7 @@ exports.viewDormitoryDetail = async (req, res) => {
         db.Room,
         db.DormImage,
         db.Reservation,
+        db.DormRating
       ],
     });
 
@@ -194,6 +196,7 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.Room,
           db.DormImage,
           db.Reservation,
+          db.DormRating
         ],
       });
 
@@ -287,6 +290,7 @@ exports.displayAllDormitories = async (req, res) => {
         include: [
           db.User,
           db.DormProfileImage,
+          db.DormRating
         ],
       });
 
@@ -301,6 +305,7 @@ exports.displayAllDormitories = async (req, res) => {
         include: [
           db.User,
           db.DormProfileImage,
+          db.DormRating
         ],
       });
 
@@ -312,7 +317,11 @@ exports.displayAllDormitories = async (req, res) => {
     if (ownerRole === true) {
       const userDormitories = await db.Dormitory.findAll({
         where: { userId: userData.id },
-        include: [db.User, db.DormProfileImage, db.Reservation],
+        include: [
+          db.User, 
+          db.DormProfileImage, 
+          db.Reservation,
+          db.DormRating],
       });
 
       return res.send({

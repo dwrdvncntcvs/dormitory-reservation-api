@@ -41,6 +41,7 @@ exports.addRating = async (req, res) => {
     }, {
         transaction: t
     });
+    await t.commit();
 
     return res.send({
         msg: "Rated Successfully"
