@@ -38,12 +38,6 @@ exports.createNewReservation = async (req, res) => {
       });
     }
 
-    if (dormitoryData.userId !== userData.id) {
-      return res.status(404).send({
-        msg: "Dormitory not found"
-      });
-    }
-
     if (dormitoryData.isVerified === false) {
       return res.status(401).send({
         msg: "Dormitory is not available", //To be change soon.
