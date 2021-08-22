@@ -12,40 +12,31 @@ exports.addAmenities = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+    if (validRole === false){
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
-
+      
     if (!dormitoryData) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
-    if (dormitoryData.userId !== userData.id) {
-      return res.status(401).send({
-        msg: "Dormitory not found",
-      });
+    if (dormitoryData.userId !== userData.id){
+      await t.rollback();
+      return res.status(401).send({ msg: "Dormitory not found" });
     }
 
-    await db.Amenity.create({
-        name: amenity,
-        dormitoryId: dormId
-    }, {
-        transaction: t
-    });
+    await db.Amenity.create(
+      { name: amenity, dormitoryId: dormId },
+      { transaction: t }
+    );
     await t.commit();
 
-    return res.send({
-        msg: "Amenity Successfully Added"
-    });
+    return res.send({ msg: "Amenity Successfully Added" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };

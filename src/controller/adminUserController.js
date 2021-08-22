@@ -10,11 +10,9 @@ exports.displayAllUsers = async (req, res) => {
 
   const validRole = validator.isValidRole(userData.role, "admin");
   try {
-    if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
-    }
+    if (validRole === false)
+      return res.status(401).send({ msg: "Invalid User" });
+
     const adminUsers = await db.User.findAll({
       where: { role: "admin" },
       include: [db.ProfileImage, db.Document],
@@ -30,16 +28,10 @@ exports.displayAllUsers = async (req, res) => {
       include: [db.ProfileImage, db.Document],
     });
 
-    return res.send({
-      adminUsers,
-      ownerUsers,
-      tenantUsers,
-    });
+    return res.send({ adminUsers, ownerUsers, tenantUsers });
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -52,33 +44,18 @@ exports.verifyUser = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
-    await db.User.update(
-      {
-        isVerified,
-      },
-      {
-        where: { id },
-      },
-      {
-        transaction: t,
-      }
-    );
+    await db.User.update({ isVerified }, { where: { id } }, { transaction: t });
     await t.commit();
 
-    return res.send({
-      msg: "Account Successfully Verified",
-    });
+    return res.send({ msg: "Account Successfully Verified" });
   } catch (error) {
     console.log(error);
     await t.rollback();
-    return res.status(404).send({
-      msg: "Something went wrong",
-    });
+    return res.status(404).send({ msg: "Something went wrong" });
   }
 };
 
@@ -93,35 +70,20 @@ exports.deleteUser = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "You are not an admin!",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "You are not an admin!" });
     }
 
-    const user = await db.User.findOne({
-      where: { id: id },
-    });
+    const user = await db.User.findOne({ where: { id: id } });
 
-    await db.User.destroy(
-      {
-        where: { id: user.id },
-      },
-      {
-        transaction: t,
-      }
-    );
+    await db.User.destroy({ where: { id: user.id } }, { transaction: t });
 
     await t.commit();
-    return res.send({
-      msg: "Deleted Successfully",
-    });
+    return res.send({ msg: "Deleted Successfully" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-      err,
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -134,32 +96,21 @@ exports.verifyDormitory = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     await db.Dormitory.update(
-      {
-        isVerified,
-      },
-      {
-        where: { id: dormId },
-      },
-      {
-        transaction: t,
-      }
+      { isVerified },
+      { where: { id: dormId } },
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Your dormitory is now verified",
-    });
+    return res.send({ msg: "Your dormitory is now verified" });
   } catch (error) {
     await t.rollback();
     console.log(error);
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };

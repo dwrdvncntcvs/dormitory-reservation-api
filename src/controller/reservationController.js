@@ -21,53 +21,49 @@ exports.createNewReservation = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     if (userData.isVerified === false) {
-      return res.status(401).send({
-        msg: "Account not verified", //To be change soon.
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Account not verified" });
     }
-    
+
     if (!dormitoryData) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (dormitoryData.isVerified === false) {
-      return res.status(401).send({
-        msg: "Dormitory is not available", //To be change soon.
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Dormitory is not available" });
     }
 
     if (dormitoryData.isAccepting !== true) {
-      return res.status(401).send({
-        msg: "Dormitory is not accepting right now", //To be change soon.
-      });
+      await t.rollback();
+      return res
+        .status(401)
+        .send({ msg: "Dormitory is not accepting right now" });
     }
 
     if (dormitoryData.allowedGender !== "both") {
       if (dormitoryData.allowedGender !== userData.gender) {
+        await t.rollback();
         return res.status(401).send({
-          msg: `Dormitory only accepting ${dormitoryData.allowedGender} tenants`, //To be change soon.
+          msg: `Dormitory only accepting ${dormitoryData.allowedGender} tenants`,
         });
       }
     }
 
     if (!roomData) {
-      return res.status(404).send({
-        msg: "Room not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Room not found" });
     }
 
     if (roomData.dormitoryId !== dormitoryData.id) {
-      return res.status(404).send({
-        msg: "Room not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Room not found" });
     }
 
     await db.Reservation.create(
@@ -80,21 +76,15 @@ exports.createNewReservation = async (req, res) => {
         address: userData.address,
         contactNumber: userData.contactNumber,
       },
-      {
-        transaction: t,
-      }
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Reservation Created.",
-    });
+    return res.send({ msg: "Reservation Created." });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -111,83 +101,59 @@ exports.cancelReservation = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     if (!dormitoryData) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (!roomData) {
-      return res.status(404).send({
-        msg: "Room not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Room not found" });
     }
 
     if (!reservationData) {
-      return res.status(404).send({
-        msg: "Reservation not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Reservation not found" });
     }
 
     if (reservationData.roomId !== roomData.id) {
-      return res.status(401).send({
-        msg: "You can't cancel reservation",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "You can't cancel reservation" });
     }
 
     if (reservationData.dormitoryId !== dormitoryData.id) {
-      return res.status(401).send({
-        msg: "You can't cancel reservation",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "You can't cancel reservation" });
     }
 
     if (reservationData.userId !== userData.id) {
-      return res.status(401).send({
-        msg: "You can't cancel reservation",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "You can't cancel reservation" });
     }
 
     await db.Reservation.update(
-      {
-        isCancelled: true,
-        isAccepted: false,
-      },
-      {
-        where: { id: reservationData.id },
-      },
-      {
-        transaction: t,
-      }
+      { isCancelled: true, isAccepted: false },
+      { where: { id: reservationData.id } },
+      { transaction: t }
     );
 
     await db.Room.update(
-      {
-        activeTenant: roomData.activeTenant - 1,
-      },
-      {
-        where: { id: roomData.id },
-      },
-      {
-        transaction: t,
-      }
+      { activeTenant: roomData.activeTenant - 1 },
+      { where: { id: roomData.id } },
+      { transaction: t }
     );
 
     await t.commit();
 
-    return res.send({
-      msg: "Reservation was successfully cancelled",
-    });
+    return res.send({ msg: "Reservation was successfully cancelled" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.send({
-      msg: "Something went wrong",
-    });
+    return res.send({ msg: "Something went wrong" });
   }
 };
 
@@ -201,23 +167,14 @@ exports.viewAllReservations = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
 
   try {
-    if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
-    }
+    if (validRole === false)
+      return res.status(401).send({ msg: "Invalid User" });
 
-    if (!dormitoryData) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
-    }
+    if (!dormitoryData)
+      return res.status(404).send({ msg: "Dormitory not found" });
 
-    if (userData.id !== dormitoryData.userId) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
-    }
+    if (userData.id !== dormitoryData.userId)
+      return res.status(404).send({ msg: "Dormitory not found" });
 
     const reservations = await db.Reservation.findAll({
       where: {
@@ -227,14 +184,10 @@ exports.viewAllReservations = async (req, res) => {
       include: [db.Dormitory, db.Room, db.User],
     });
 
-    return res.send({
-      reservations,
-    });
+    return res.send({ reservations });
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -251,42 +204,36 @@ exports.removeUser = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     if (!dormitoryData) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (!roomData) {
-      return res.status(404).send({
-        msg: "Room not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Room not found" });
     }
 
     if (!reservationData) {
-      return res.status(404).send({
-        msg: "Reservation not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Reservation not found" });
     }
 
     if (dormitoryData.id !== roomData.dormitoryId) {
-      return res.status(404).send({
-        msg: "Room not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Room not found" });
     }
 
     if (
       reservationData.roomId !== roomData.id &&
       reservationData.dormitoryId !== dormitoryData.id
     ) {
-      return res.status(404).send({
-        msg: "Reservation not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Reservation not found" });
     }
 
     await db.Reservation.destroy(
@@ -297,10 +244,9 @@ exports.removeUser = async (req, res) => {
           id: reservationData.id,
         },
       },
-      {
-        transaction: t,
-      }
+      { transaction: t }
     );
+
     await db.Room.update(
       { activeTenant: roomData.activeTenant - 1 },
       { where: { id: roomData.id } },
@@ -312,9 +258,7 @@ exports.removeUser = async (req, res) => {
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -331,48 +275,52 @@ exports.addUser = async (req, res) => {
 
   try {
     if (validRole === false) {
+      await t.rollback();
       return res.status(401).send({ message: "Invalid User" });
     }
 
     if (!dormitoryData) {
+      await t.rollback();
       return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (!roomData) {
+      await t.rollback();
       return res.status(404).send({ msg: "Room not found" });
     }
 
     if (!reservationData) {
+      await t.rollback();
       return res.status(404).send({ msg: "Reservation not found" });
     }
 
     if (userData.id !== dormitoryData.userId) {
-      return res
-        .status(404)
-        .send({ msg: "Dormitory not found" });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (dormitoryData.id !== roomData.dormitoryId) {
-      return res
-        .status(404)
-        .send({ msg: "Room not found" });
+      await t.rollback();
+      return res.status(404).send({ msg: "Room not found" });
     }
 
     if (roomData.id !== reservationData.roomId) {
-      return res
-        .status(404)
-        .send({ msg: "Reservation not found" });
+      await t.rollback();
+      return res.status(404).send({ msg: "Reservation not found" });
     }
 
     if (roomData.activeTenant >= roomData.capacity) {
+      await t.rollback();
       return res.status(401).send({ msg: "Room is full" });
     }
 
     if (reservationData.isAccepted === false) {
+      await t.rollback();
       return res.status(401).send({ msg: "You are not yet accepted" });
     }
 
     if (reservationData.isAdded === true) {
+      await t.rollback();
       return res.send({ msg: "User Already added" });
     }
 
@@ -381,22 +329,20 @@ exports.addUser = async (req, res) => {
       { where: { id: roomData.id } },
       { transaction: t }
     );
+
     await db.Reservation.update(
       { isActive: true },
       { where: { id: reservationData.id } },
       { transaction: t }
     );
+
     await t.commit();
 
-    return res.send({
-      updatedRoom,
-    });
+    return res.send({ updatedRoom });
   } catch (err) {
     console.error(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -413,69 +359,52 @@ exports.acceptReservations = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
-      return res.status(401).send({
-        message: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ message: "Invalid User" });
     }
 
     if (!dormitoryData) {
-      return res.status(404).send({
-        message: "Dormitory not found.",
-      });
+      await t.rollback();
+      return res.status(404).send({ message: "Dormitory not found." });
     }
 
     if (!roomData) {
-      return res.status(404).send({
-        message: "Room not found.",
-      });
+      await t.rollback();
+      return res.status(404).send({ message: "Room not found." });
     }
 
     if (!reservationData) {
-      return res.status(404).send({
-        message: "Reservation not found.",
-      });
+      await t.rollback();
+      return res.status(404).send({ message: "Reservation not found." });
     }
 
     if (dormitoryData.userId !== userData.id) {
-      return res.status(404).send({
-        message: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ message: "Dormitory not found" });
     }
 
     if (dormitoryData.id !== roomData.dormitoryId) {
-      return res.status(404).send({
-        message: "Room not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ message: "Room not found" });
     }
 
     if (reservationData.roomId !== roomData.id) {
-      return res.status(404).send({
-        message: "Reservation not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ message: "Reservation not found" });
     }
 
     const updatedReservation = await db.Reservation.update(
-      {
-        isAccepted,
-      },
-      {
-        where: { id: reservationData.id },
-      },
-      {
-        transaction: t,
-      }
+      { isAccepted },
+      { where: { id: reservationData.id } },
+      { transaction: t }
     );
 
     await t.commit();
 
-    return res.send({
-      updatedReservation,
-    });
+    return res.send({ updatedReservation });
   } catch (err) {
     console.error(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };

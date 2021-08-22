@@ -12,28 +12,25 @@ exports.createNewDormitory = async (req, res) => {
   try {
     //Check the user role
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     //Check if the user is verified
     if (userData.isVerified !== true) {
-      return res.status(401).send({
-        msg: "Account not verified", //To be change soon.
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Account not verified" });
     }
 
     //Check the field if not empty
     if (
-      name === null &&
-      address === null &&
-      contactNumber === null &&
-      allowedGender === null
+      name === "" &&
+      address === "" &&
+      contactNumber === "" &&
+      allowedGender === ""
     ) {
-      return res.status(401).send({
-        msg: "Invalid Value", //To be change soon.
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Value" });
     }
 
     await db.Dormitory.create(
@@ -44,21 +41,15 @@ exports.createNewDormitory = async (req, res) => {
         allowedGender,
         userId: userData.id,
       },
-      {
-        transaction: t,
-      }
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Dormitory Successfully Created.",
-    });
+    return res.send({ msg: "Dormitory Successfully Created." });
   } catch (error) {
     console.log(error);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -73,42 +64,31 @@ exports.deleteDormitory = async (req, res) => {
   try {
     //Check the role of the user
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "You are not an owner",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "You are not an owner" });
     }
 
     if (!dormitoryData) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (dormitoryData.userId !== userData.id) {
-      return res.status(401).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Dormitory not found" });
     }
 
     await db.Dormitory.destroy(
-      {
-        where: { id: dormitoryData.id },
-      },
-      {
-        transaction: t,
-      }
+      { where: { id: dormitoryData.id } },
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Dormitory was successfully deleted",
-    });
+    return res.send({ msg: "Dormitory was successfully deleted" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -124,9 +104,8 @@ exports.viewDormitoryDetail = async (req, res) => {
 
   try {
     if (adminRole === true) {
-      if (!dormitoryData) {
+      if (!dormitoryData)
         return res.status(404).send({ msg: "Dormitory not found" });
-      }
 
       const dormitory = await db.Dormitory.findOne({
         where: { id: dormitoryData.id },
@@ -137,55 +116,19 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.Room,
           db.DormImage,
           db.Reservation,
-          db.DormRating
+          db.DormRating,
         ],
       });
 
-      return res.send({
-        dormitory
-      });
+      return res.send({ dormitory });
     } else if (ownerRole === true) {
-      
-    //Check if the dormitory does exist
-    if (!dormitoryData) {
-      return res.status(401).send({ msg: "Dormitory not found" });
-    }
+      //Check if the dormitory does exist
+      if (!dormitoryData)
+        return res.status(401).send({ msg: "Dormitory not found" });
 
-    //Check if the dormitory exists owned by the right owner
-    if (dormitoryData.userId !== userData.id) {
-      return res
-        .status(401)
-        .send({ msg: "Dormitory not found" });
-    }
-
-    const dormitory = await db.Dormitory.findOne({
-      where: { id: dormitoryData.id },
-      include: [
-        db.DormProfileImage,
-        db.DormDocument,
-        db.Amenity,
-        db.Room,
-        db.DormImage,
-        db.Reservation,
-        db.DormRating
-      ],
-    });
-
-    return res.send({
-      dormitory
-    });
-    } else if (tenantRole === true) {
-      if (!dormitoryData) {
-        return res.status(404).send({ msg: "Dormitory not found" });
-      }
-
-      if (dormitoryData.isVerified === false) {
-        return res.status(404).send({ msg: "Dormitory not found" });
-      }
-
-      if (dormitoryData.isAccepting === false) {
-        return res.status(404).send({ msg: "Dormitory not found" });
-      }
+      //Check if the dormitory exists owned by the right owner
+      if (dormitoryData.userId !== userData.id)
+        return res.status(401).send({ msg: "Dormitory not found" });
 
       const dormitory = await db.Dormitory.findOne({
         where: { id: dormitoryData.id },
@@ -196,19 +139,39 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.Room,
           db.DormImage,
           db.Reservation,
-          db.DormRating
+          db.DormRating,
         ],
       });
 
-      return res.send({
-        dormitory
+      return res.send({ dormitory });
+    } else if (tenantRole === true) {
+      if (!dormitoryData)
+        return res.status(404).send({ msg: "Dormitory not found" });
+
+      if (dormitoryData.isVerified === false)
+        return res.status(404).send({ msg: "Dormitory not found" });
+
+      if (dormitoryData.isAccepting === false)
+        return res.status(404).send({ msg: "Dormitory not found" });
+
+      const dormitory = await db.Dormitory.findOne({
+        where: { id: dormitoryData.id },
+        include: [
+          db.DormProfileImage,
+          db.DormDocument,
+          db.Amenity,
+          db.Room,
+          db.DormImage,
+          db.Reservation,
+          db.DormRating,
+        ],
       });
+
+      return res.send({ dormitory });
     }
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -217,50 +180,38 @@ exports.dormitorySwitch = async (req, res) => {
   const { dormId, isAccepting } = req.body;
 
   const userData = req.user;
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
+  const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const t = await db.sequelize.transaction();
   try {
     //Check the role of the userData
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     //Check if the dormitory does exist in the database
     if (!dormitoryData) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     //Check if the dormitory is owned by the user
     if (dormitoryData.userId !== userData.id) {
-      return res.status(401).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Dormitory not found" });
     }
 
     if (dormitoryData.isVerified === false) {
-      return res.status(401).send({
-        msg: "Dormitory not verified",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Dormitory not verified" });
     }
 
     await db.Dormitory.update(
-      {
-        isAccepting,
-      },
-      {
-        where: { id: dormitoryData.id },
-      },
-      {
-        transaction: t,
-      }
+      { isAccepting },
+      { where: { id: dormitoryData.id } },
+      { transaction: t }
     );
     await t.commit();
 
@@ -270,9 +221,7 @@ exports.dormitorySwitch = async (req, res) => {
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -287,52 +236,31 @@ exports.displayAllDormitories = async (req, res) => {
   try {
     if (adminRole === true) {
       const dormitories = await db.Dormitory.findAll({
-        include: [
-          db.User,
-          db.DormProfileImage,
-          db.DormRating
-        ],
+        include: [db.User, db.DormProfileImage, db.DormRating],
       });
 
-      return res.send({
-        adminView: dormitories,
-      });
+      return res.send({ adminView: dormitories });
     }
 
     if (tenantRole === true) {
       const dormitories = await db.Dormitory.findAll({
         where: { isAccepting: true, isVerified: true },
-        include: [
-          db.User,
-          db.DormProfileImage,
-          db.DormRating
-        ],
+        include: [db.User, db.DormProfileImage, db.DormRating],
       });
 
-      return res.send({
-        tenantView: dormitories,
-      });
+      return res.send({ tenantView: dormitories });
     }
 
     if (ownerRole === true) {
       const userDormitories = await db.Dormitory.findAll({
         where: { userId: userData.id },
-        include: [
-          db.User, 
-          db.DormProfileImage, 
-          db.Reservation,
-          db.DormRating],
+        include: [db.User, db.DormProfileImage, db.Reservation, db.DormRating],
       });
 
-      return res.send({
-        ownerView: userDormitories,
-      });
+      return res.send({ ownerView: userDormitories });
     }
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
-      msg: "Something went wrong",
-      err,
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };

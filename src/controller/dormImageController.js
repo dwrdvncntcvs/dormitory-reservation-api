@@ -14,14 +14,14 @@ exports.addDormImage = async (req, res) => {
   try {
     //Check user's role
     if (validRole === false) {
+      await t.rollback();
       return res.status(401).send({ message: "Invalid User" });
     }
 
     //Check if the dormitory was owned by the owner user
     if (userData.id !== dormitoryData.userId) {
-      return res
-        .status(401)
-        .send({ message: "Dormitory not found" });
+      await t.rollback();
+      return res.status(401).send({ message: "Dormitory not found" });
     }
 
     await db.DormImage.create(
@@ -33,21 +33,15 @@ exports.addDormImage = async (req, res) => {
         size: req.file.size,
         dormitoryId: dormId,
       },
-      {
-        transaction: t,
-      }
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Image Successfully Added",
-    });
+    return res.send({ msg: "Image Successfully Added" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -63,54 +57,41 @@ exports.deleteDormImage = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     if (!dormitoryData) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (!dormImageData) {
-      return res.status(404).send({
-        msg: "Dormitory Image not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory Image not found" });
     }
 
     if (dormitoryData.userId !== userData.id) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (dormitoryData.id !== dormImageData.dormitoryId) {
-      return res.status(404).send({
-        msg: "Dormitory Image not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory Image not found" });
     }
 
     await db.DormImage.destroy(
-      {
-        where: { id: dormImageData.id },
-      },
-      {
-        transaction: t,
-      }
+      { where: { id: dormImageData.id } },
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Image Successfully Deleted",
-    });
+    return res.send({ msg: "Image Successfully Deleted" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).json({
-      msg: "Something went wrong",
-    });
+    return res.status(500).json({ msg: "Something went wrong" });
   }
 };
 
@@ -127,19 +108,17 @@ exports.addDormitoryProfileImage = async (req, res) => {
   try {
     //Check the role of the user
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     //Check if the dormitory exist
     if (!dormitory) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
-    const dormitoryImage = await db.DormProfileImage.create({
+    await db.DormProfileImage.create({
       filename: req.file.filename,
       filepath: req.file.path,
       mimetype: req.file.mimetype,
@@ -147,16 +126,11 @@ exports.addDormitoryProfileImage = async (req, res) => {
       dormitoryId: dormitory.id,
     });
 
-    return res.send({
-      msg: "Dorm Profile Image Successfully Added",
-      dormitoryImage,
-    });
+    return res.send({ msg: "Dorm Profile Image Successfully Added" });
   } catch (error) {
     console.log(error);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -173,26 +147,23 @@ exports.addDormitoryDocuments = async (req, res) => {
   try {
     // Check user's role
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "Invalid User",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     //Check if dormitory does exist
     if (!userDormData) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     //Check if the dormitory exists owned by the right owner
     if (userDormData.userId !== userData.id) {
-      return res.status(404).send({
-        msg: "Dormitory not found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
-    const dormDocument = await db.DormDocument.create(
+    await db.DormDocument.create(
       {
         documentName,
         documentType,
@@ -202,21 +173,14 @@ exports.addDormitoryDocuments = async (req, res) => {
         mimetype: req.file.mimetype,
         size: req.file.size,
       },
-      {
-        transaction: t,
-      }
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Dormitory Documents Successfully Added",
-      dormDocument,
-    });
+    return res.send({ msg: "Dormitory Documents Successfully Added" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };

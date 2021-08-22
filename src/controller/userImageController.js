@@ -10,7 +10,7 @@ exports.addProfilePic = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    const profileImage = await db.ProfileImage.create(
+    await db.ProfileImage.create(
       {
         filename: req.file.filename,
         filepath: req.file.path,
@@ -18,22 +18,15 @@ exports.addProfilePic = async (req, res) => {
         size: req.file.size,
         userId: userData.id,
       },
-      {
-        transaction: t,
-      }
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Profile Image Uploaded",
-      profileImage,
-    });
+    return res.send({ msg: "Profile Image Uploaded" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -44,24 +37,16 @@ exports.deleteProfileImage = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     await db.ProfileImage.destroy(
-      {
-        where: { userId: userData.id },
-      },
-      {
-        transaction: t,
-      }
+      { where: { userId: userData.id } },
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Successfully Deleted",
-    });
+    return res.send({ msg: "Successfully Deleted" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -81,15 +66,12 @@ exports.addUserDocuments = async (req, res) => {
       size: req.file.size,
       userId: userData.id,
     });
+    await t.commit();
 
-    return res.send({
-      documents,
-    });
+    return res.send({ documents });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
