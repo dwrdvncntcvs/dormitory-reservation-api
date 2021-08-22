@@ -18,6 +18,11 @@ exports.addDormImage = async (req, res) => {
       return res.status(401).send({ message: "Invalid User" });
     }
 
+    if (name === "") {
+      await t.rollback();
+      return res.status(404).send({ msg: "Invalid Input" })
+    }
+
     //Check if the dormitory was owned by the owner user
     if (userData.id !== dormitoryData.userId) {
       await t.rollback();
@@ -149,6 +154,11 @@ exports.addDormitoryDocuments = async (req, res) => {
     if (validRole === false) {
       await t.rollback();
       return res.status(401).send({ msg: "Invalid User" });
+    }
+
+    if (documentName === "" || documentType === "") {
+      await t.rollback();
+      return res.status(404).send({msg: "Invalid Input"})
     }
 
     //Check if dormitory does exist

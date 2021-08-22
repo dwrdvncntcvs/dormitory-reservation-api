@@ -12,6 +12,11 @@ exports.addAmenities = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
+    if (amenity === "") {
+      await t.rollback();
+      return res.status(404).send({ msg: "Invalid Input" })
+    }
+
     if (validRole === false){
       await t.rollback();
       return res.status(401).send({ msg: "Invalid User" });

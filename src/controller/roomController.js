@@ -19,6 +19,17 @@ exports.createNewRoom = async (req, res) => {
       return res.status(401).send({ msg: "Invalid User" });
     }
 
+    if (
+      roomName === "" ||
+      roomCapacity === "" ||
+      roomCost === "" ||
+      electricBill === "" ||
+      waterBill === ""
+    ) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Invalid Inputs" });
+    }
+
     //Check if the dorm exists
     if (!dormitoryData) {
       await t.rollback();
@@ -73,6 +84,11 @@ exports.updateRoomPayment = async (req, res) => {
     if (validRole == false) {
       await t.rollback();
       return res.status(401).send({ msg: "Invalid User" });
+    }
+
+    if (roomCost === "" || electricBill === "" || waterBill === "") {
+      await t.rollback();
+      return res.status(404).send({ msg: "Invalid Input" });
     }
 
     // Checks if the dormitory does exist in the database

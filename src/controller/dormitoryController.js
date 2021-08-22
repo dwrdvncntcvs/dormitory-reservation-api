@@ -24,9 +24,9 @@ exports.createNewDormitory = async (req, res) => {
 
     //Check the field if not empty
     if (
-      name === "" &&
-      address === "" &&
-      contactNumber === "" &&
+      name === "" ||
+      address === "" ||
+      contactNumber === "" ||
       allowedGender === ""
     ) {
       await t.rollback();

@@ -22,14 +22,14 @@ exports.signUp = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (
-      name === "" &&
-      username === "" &&
-      email === "" &&
-      plainPassword === "" &&
-      plainConfirmPassword === "" &&
-      contactNumber === "" &&
-      address === "" &&
-      gender === "" &&
+      name === "" ||
+      username === "" ||
+      email === "" ||
+      plainPassword === "" ||
+      plainConfirmPassword === "" ||
+      contactNumber === "" ||
+      address === "" ||
+      gender === "" ||
       role === ""
     ) {
       await t.rollback();
@@ -65,7 +65,7 @@ exports.signIn = async (req, res) => {
   const { username, plainPassword, role } = req.body;
 
   try {
-    if (username === "" && plainPassword === "" && role === "")
+    if (username === "" || plainPassword === "" || role === "")
       return res.status(401).send({ msg: "Invalid Inputs" });
 
     const user = await db.User.findOne({
@@ -241,7 +241,7 @@ exports.changeUserPassword = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     //Checking if fields are null or not.
-    if (plainPassword === "" && plainConfirmPassword === "") {
+    if (plainPassword === "" || plainConfirmPassword === "") {
       await t.rollback();
       return res.status(401).send({ msg: "Invalid Passwords" });
     }
