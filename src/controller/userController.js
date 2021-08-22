@@ -140,6 +140,11 @@ exports.editProfileName = async (req, res) => {
   const t = await db.sequelize.transaction();
   const userData = req.user;
   try {
+    if (name === "") {
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Inputs" });
+    }
+
     await db.User.update(
       { name },
       { where: { id: userData.id } },
@@ -162,6 +167,11 @@ exports.editProfileUsername = async (req, res) => {
   const t = await db.sequelize.transaction();
   const userData = req.user;
   try {
+    if (username === "") {
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Inputs" });
+    }
+
     const user = await db.User.count({ where: { username } });
 
     if (user !== 0) return res.status(401).send({ msg: "Invalid User" }); // To be changed soon
@@ -188,6 +198,11 @@ exports.editProfileAddress = async (req, res) => {
   const userData = req.user;
   const t = await db.sequelize.transaction();
   try {
+    if (address === "") {
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Inputs" });
+    }
+
     await db.User.update(
       { address },
       { where: { id: userData.id } },
