@@ -29,4 +29,11 @@ module.exports = {
 
     return dormImageData;
   },
+  findDormRatingData: (dormRatingId) => {
+    const dormRatingData = db.DormRating.findOne({
+      where: { id: dormRatingId },
+    });
+
+    return dormRatingData;
+  },
 };

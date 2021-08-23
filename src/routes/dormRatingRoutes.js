@@ -10,4 +10,6 @@ const route = express.Router();
 
 route.post("/add-rating", requireAuth, dormRatingController.addRating);
 
+route.delete("/remove-rating", requireAuth, dormRatingController.removeRating);
+
 module.exports = route;
