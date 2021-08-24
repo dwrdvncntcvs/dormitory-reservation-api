@@ -117,6 +117,7 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.DormImage,
           db.Reservation,
           db.DormRating,
+          db.DormLocation
         ],
       });
 
@@ -140,6 +141,7 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.DormImage,
           db.Reservation,
           db.DormRating,
+          db.DormLocation
         ],
       });
 
@@ -164,6 +166,7 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.DormImage,
           db.Reservation,
           db.DormRating,
+          db.DormLocation
         ],
       });
 
@@ -236,7 +239,7 @@ exports.displayAllDormitories = async (req, res) => {
   try {
     if (adminRole === true) {
       const dormitories = await db.Dormitory.findAll({
-        include: [db.User, db.DormProfileImage, db.DormRating],
+        include: [db.User, db.DormProfileImage, db.DormRating, db.DormLocation],
       });
 
       return res.send({ adminView: dormitories });
@@ -245,7 +248,7 @@ exports.displayAllDormitories = async (req, res) => {
     if (tenantRole === true) {
       const dormitories = await db.Dormitory.findAll({
         where: { isAccepting: true, isVerified: true },
-        include: [db.User, db.DormProfileImage, db.DormRating],
+        include: [db.User, db.DormProfileImage, db.DormRating, db.DormLocation],
       });
 
       return res.send({ tenantView: dormitories });
@@ -254,7 +257,13 @@ exports.displayAllDormitories = async (req, res) => {
     if (ownerRole === true) {
       const userDormitories = await db.Dormitory.findAll({
         where: { userId: userData.id },
-        include: [db.User, db.DormProfileImage, db.Reservation, db.DormRating],
+        include: [
+          db.User,
+          db.DormProfileImage,
+          db.Reservation,
+          db.DormRating,
+          db.DormLocation,
+        ],
       });
 
       return res.send({ ownerView: userDormitories });
