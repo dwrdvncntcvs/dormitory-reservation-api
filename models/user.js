@@ -16,6 +16,8 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Dormitory, { foreignKey: "userId" });
 
       this.hasMany(models.Reservation, { foreignKey: "userId" });
+
+      this.hasMany(models.DormRating, { foreignKey: "userId" });
     }
   }
   User.init(

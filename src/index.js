@@ -1,5 +1,6 @@
 const express = require("express");
 const db = require("../models");
+const cors = require("cors");
 
 //Routes
 const authRoutes = require("./routes/authRoutes");
@@ -7,15 +8,27 @@ const dormitoryRoutes = require("./routes/dormitoryRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const dormImageRoutes = require("./routes/dormImageRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
+const amenityRoutes = require("./routes/amenityRoutes");
+const dormRatingRoutes = require("./routes/dormRatingRoutes");
+const dormLocationRoutes = require("./routes/dormLocationRoutes")
 
 //Initializing express in variable app.
 const app = express();
 const PORT = process.env.PORT || 3000;
-const divider = "=========================================================================";
+const divider =
+  "=========================================================================";
 
 const dormitory = [
-  " ######   #####  ######  ##   ## ####### #######  #####  ######  ##   ## ", " ##   ## ##   ## ##   ## ### ###    #       #    ##   ## ##   ## ##   ## ", " ##   ## ##   ## ##   ## # ### #    #       #    ##   ## ##   ## ##   ## ", " ##   ## ##   ## ######  #  #  #    #       #    ##   ## ######   #####   ", " ##   ## ##   ## ##   ## #  #  #    #       #    ##   ## ##   ##    #    ", " ######   #####  ##   ## #     # #######    #     #####  ##   ##    #    ",
+  " ######   #####  ######  ##   ## ####### #######  #####  ######  ##   ## ",
+  " ##   ## ##   ## ##   ## ### ###    #       #    ##   ## ##   ## ##   ## ",
+  " ##   ## ##   ## ##   ## # ### #    #       #    ##   ## ##   ## ##   ## ",
+  " ##   ## ##   ## ######  #  #  #    #       #    ##   ## ######   #####   ",
+  " ##   ## ##   ## ##   ## #  #  #    #       #    ##   ## ##   ##    #    ",
+  " ######   #####  ##   ## #     # #######    #     #####  ##   ##    #    ",
 ];
+
+//Use Cross-Origin Resource Sharing
+app.use(cors());
 
 //To allow JSON text formats
 app.use(express.json());
@@ -26,6 +39,9 @@ app.use(dormitoryRoutes);
 app.use(roomRoutes);
 app.use(dormImageRoutes);
 app.use(reservationRoutes);
+app.use(amenityRoutes);
+app.use(dormRatingRoutes);
+app.use(dormLocationRoutes);
 
 //To render the images using their paths.
 app.use("/image/profileImage", express.static("image/profileImage"));

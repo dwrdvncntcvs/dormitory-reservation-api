@@ -22,17 +22,18 @@ exports.signUp = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     if (
-      name === null &&
-      username === null &&
-      email === null &&
-      plainPassword === null &&
-      plainConfirmPassword === null &&
-      contactNumber === null &&
-      address === null &&
-      gender === null &&
-      role === null
+      name === "" ||
+      username === "" ||
+      email === "" ||
+      plainPassword === "" ||
+      plainConfirmPassword === "" ||
+      contactNumber === "" ||
+      address === "" ||
+      gender === "" ||
+      role === ""
     ) {
-      return res.status(401).send({ msg: "Can't submit empty field" });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Inputs" });
     }
 
     const salt = await bcrypt.genSalt(10, "a");
@@ -41,38 +42,21 @@ exports.signUp = async (req, res) => {
     const verifyPassword = await bcrypt.compare(plainConfirmPassword, password);
 
     if (!verifyPassword) {
-      return res.status(401).send({
-        msg: "Passwords are not the same.",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Passwords not matched" });
     }
 
     await db.User.create(
-      {
-        name,
-        username,
-        email,
-        password,
-        contactNumber,
-        address,
-        gender,
-        role,
-      },
-      {
-        transaction: t,
-      }
+      { name, username, email, password, contactNumber, address, gender, role },
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Successfully Created!",
-    });
+    return res.send({ msg: "Successfully Created!" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-      err,
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -81,20 +65,16 @@ exports.signIn = async (req, res) => {
   const { username, plainPassword, role } = req.body;
 
   try {
-    if (username === null && plainPassword === null && role === null) {
-      return res.status(401).send({
-        msg: "Can't submit empty fields",
-      });
-    }
+    if (username === "" || plainPassword === "" || role === "")
+      return res.status(401).send({ msg: "Invalid Inputs" });
 
     const user = await db.User.findOne({
       where: { username, role },
     });
 
     if (!user) {
-      return res.status(401).send({
-        msg: "Invalid Username and Password",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Username and Password" });
     }
 
     const validatedPassword = await bcrypt.compare(
@@ -103,9 +83,8 @@ exports.signIn = async (req, res) => {
     );
 
     if (!validatedPassword) {
-      return res.status(401).send({
-        msg: "Invalid Username and Password",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Username and Password" });
     }
 
     const token = jwt.sign(
@@ -113,57 +92,43 @@ exports.signIn = async (req, res) => {
       config.secretKey
     );
 
-    return res.send({
-      token,
-    });
+    return res.send({ token });
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
-      msg: "Something went wrong",
-      err,
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
 //This needs the user to be authenticated before the user view his/her profile details
 //This is not only for showing user information but also their dormitories and some images
 exports.userProfile = async (req, res) => {
+  const userData = req.user;
   try {
-    const userData = req.user;
-
     if (userData.role === "owner") {
       const user = await db.User.findOne({
         where: { id: userData.id },
         include: [db.Document, db.ProfileImage, db.Dormitory],
       });
 
-      return res.send({
-        user,
-      });
+      return res.send({ user });
     } else if (userData.role === "tenant") {
-      // To be fixed soon hehe :)
       const user = await db.User.findOne({
         where: { id: userData.id },
+        include: [db.Document, db.ProfileImage],
       });
 
-      return res.send({
-        user,
-      });
+      return res.send({ user });
     } else if (userData.role === "admin") {
       const user = await db.User.findOne({
         where: { id: userData.id },
         include: [db.ProfileImage, db.Document],
       });
 
-      return res.send({
-        user,
-      });
+      return res.send({ user });
     }
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -175,28 +140,23 @@ exports.editProfileName = async (req, res) => {
   const t = await db.sequelize.transaction();
   const userData = req.user;
   try {
+    if (name === "") {
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Inputs" });
+    }
+
     await db.User.update(
-      {
-        name,
-      },
-      {
-        where: { id: userData.id },
-      },
-      {
-        transaction: t,
-      }
+      { name },
+      { where: { id: userData.id } },
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Name successfully updated",
-    });
+    return res.send({ msg: "Name successfully updated" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -207,38 +167,27 @@ exports.editProfileUsername = async (req, res) => {
   const t = await db.sequelize.transaction();
   const userData = req.user;
   try {
-    const user = await db.User.count({
-      where: { username },
-    });
-
-    if (user !== 0) {
-      return res.status(401).send({ msg: "Error 1" }); // To be changed soon
+    if (username === "") {
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Inputs" });
     }
 
+    const user = await db.User.count({ where: { username } });
+
+    if (user !== 0) return res.status(401).send({ msg: "Invalid User" }); // To be changed soon
+
     await db.User.update(
-      {
-        //To be edited
-        username,
-      },
-      {
-        //Finding what to edit
-        where: { id: userData.id },
-      },
-      {
-        transaction: t,
-      }
+      { username },
+      { where: { id: userData.id } },
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Username successfully updated",
-    });
+    return res.send({ msg: "Username successfully updated" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -249,28 +198,23 @@ exports.editProfileAddress = async (req, res) => {
   const userData = req.user;
   const t = await db.sequelize.transaction();
   try {
+    if (address === "") {
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Inputs" });
+    }
+
     await db.User.update(
-      {
-        address,
-      },
-      {
-        where: { id: userData.id },
-      },
-      {
-        transaction: t,
-      }
+      { address },
+      { where: { id: userData.id } },
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Address updated successfully",
-    });
+    return res.send({ msg: "Address updated successfully" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -279,24 +223,14 @@ exports.checkUserEmail = async (req, res) => {
   const email = req.params.email;
 
   try {
-    const user = await db.User.findOne({
-      where: { email },
-    });
+    const user = await db.User.findOne({ where: { email } });
 
-    if (!user) {
-      return res.status(401).send({
-        msg: "Invalid Email Address", // To be changed soon.
-      });
-    }
+    if (!user) return res.status(401).send({ msg: "Invalid Email Address" });
 
-    return res.send({
-      id: user.id,
-    });
+    return res.send({ id: user.id });
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -307,10 +241,9 @@ exports.changeUserPassword = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     //Checking if fields are null or not.
-    if (plainPassword === null && plainConfirmPassword === null) {
-      return res.status(401).send({
-        msg: "Error 1", // To be change soon.
-      });
+    if (plainPassword === "" || plainConfirmPassword === "") {
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid Passwords" });
     }
 
     //For salting and hashing password
@@ -321,35 +254,19 @@ exports.changeUserPassword = async (req, res) => {
       plainConfirmPassword,
       password
     );
-    console.log("Password to be saved: ", password);
 
     if (!verifiedPassword) {
-      return res.status(401).send({
-        msg: "Error 2", // To be change soon.
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Password not matched" });
     }
 
-    await db.User.update(
-      {
-        password,
-      },
-      {
-        where: { id },
-      },
-      {
-        transaction: t,
-      }
-    );
+    await db.User.update({ password }, { where: { id } }, { transaction: t });
     await t.commit();
 
-    return res.send({
-      msg: "Password Successfully Changed",
-    });
+    return res.send({ msg: "Password Successfully Changed" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };

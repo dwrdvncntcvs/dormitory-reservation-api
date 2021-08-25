@@ -79,13 +79,6 @@ route.get("/find-user/:email", userController.checkUserEmail);
 //To get or display users information
 route.get("/get-all-users", requireAuth, adminUserController.displayAllUsers);
 
-//To get or display all dormitory information
-route.get(
-  "/get-all-dormitories",
-  requireAuth,
-  adminUserController.displayAllDormitories
-);
-
 //PUT METHOD
 //To edit the name of the user
 route.put("/edit-user-name", requireAuth, userController.editProfileName);
@@ -108,14 +101,22 @@ route.put("/change-user-password", userController.changeUserPassword);
 route.put("/verify-user", requireAuth, adminUserController.verifyUser);
 
 //To verify the dormitory created by the owner user
-route.put("/verify-dormitory", requireAuth, adminUserController.verifyDormitory);
+route.put(
+  "/verify-dormitory",
+  requireAuth,
+  adminUserController.verifyDormitory
+);
 
 //DELETE METHOD
 //Delete functionality that an admin user can only access.
 //This endpoint is not yet complete until this comment is deleted.
 
 //To delete a user
-route.delete("/delete-user-profile", requireAuth, adminUserController.deleteUser);
+route.delete(
+  "/delete-user-profile",
+  requireAuth,
+  adminUserController.deleteUser
+);
 
 //To delete the profile image of the user
 route.delete(

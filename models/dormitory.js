@@ -28,6 +28,12 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.DormImage, { foreignKey: "dormitoryId" });
 
       this.hasMany(models.Reservation, { foreignKey: "dormitoryId" });
+
+      this.hasMany(models.Amenity, { foreignKey: "dormitoryId" });
+      
+      this.hasMany(models.DormRating, { foreignKey: "dormitoryId" });
+
+      this.hasOne(models.DormLocation, { foreignKey: "dormitoryId" });
     }
   }
   Dormitory.init(
@@ -70,7 +76,7 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notEmpty: true,
           notNull: true,
-        }
+        },
       },
       userId: {
         type: DataTypes.UUID,

@@ -1,5 +1,6 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
+const { findDormitoryData, findDormImageData } = require("../database/find");
 
 //To add dorm images
 exports.addDormImage = async (req, res) => {
@@ -7,22 +8,25 @@ exports.addDormImage = async (req, res) => {
 
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
-  const validDormitory = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
+  const dormitoryData = await findDormitoryData(dormId);
 
   const t = await db.sequelize.transaction();
   try {
     //Check user's role
     if (validRole === false) {
-      return res.status(401).send({ message: "You are not an owner." });
+      await t.rollback();
+      return res.status(401).send({ message: "Invalid User" });
+    }
+
+    if (name === "") {
+      await t.rollback();
+      return res.status(404).send({ msg: "Invalid Input" })
     }
 
     //Check if the dormitory was owned by the owner user
-    if (userData.id !== validDormitory.userId) {
-      return res
-        .status(401)
-        .send({ message: "You cannot add images to this dormitory." });
+    if (userData.id !== dormitoryData.userId) {
+      await t.rollback();
+      return res.status(401).send({ message: "Dormitory not found" });
     }
 
     await db.DormImage.create(
@@ -34,21 +38,15 @@ exports.addDormImage = async (req, res) => {
         size: req.file.size,
         dormitoryId: dormId,
       },
-      {
-        transaction: t,
-      }
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Image Successfully Added",
-    });
+    return res.send({ msg: "Image Successfully Added" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -57,65 +55,48 @@ exports.deleteDormImage = async (req, res) => {
   const { imageId, dormId } = req.body;
 
   const userData = req.user;
-  const dormitoryData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
-  const dormImageData = await db.DormImage.findOne({
-    where: { id: imageId },
-  });
+  const dormitoryData = await findDormitoryData(dormId);
+  const dormImageData = await findDormImageData(imageId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const t = await db.sequelize.transaction();
   try {
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "You are not a owner user",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     if (!dormitoryData) {
-      return res.status(404).send({
-        msg: "Dormitory does not exist",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (!dormImageData) {
-      return res.status(404).send({
-        msg: "Dormitory Image does not exist",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory Image not found" });
     }
 
     if (dormitoryData.userId !== userData.id) {
-      return res.status(404).send({
-        msg: "This dormitory is not yours",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     if (dormitoryData.id !== dormImageData.dormitoryId) {
-      return res.status(404).send({
-        msg: "This image doesn't belong to this dormitory",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory Image not found" });
     }
 
     await db.DormImage.destroy(
-      {
-        where: { id: dormImageData.id },
-      },
-      {
-        transaction: t,
-      }
+      { where: { id: dormImageData.id } },
+      { transaction: t }
     );
     await t.commit();
 
-    return res.send({
-      msg: "Image Successfully Deleted",
-    });
+    return res.send({ msg: "Image Successfully Deleted" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).json({
-      msg: "Something went wrong",
-    });
+    return res.status(500).json({ msg: "Something went wrong" });
   }
 };
 
@@ -126,27 +107,23 @@ exports.addDormitoryProfileImage = async (req, res) => {
 
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
-  const dormitory = await db.Dormitory.findOne({
-    where: { id },
-  });
+  const dormitory = await findDormitoryData(id);
 
   const t = await db.sequelize.transaction();
   try {
     //Check the role of the user
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "You are not a dormitory owner",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
     }
 
     //Check if the dormitory exist
     if (!dormitory) {
-      return res.status(404).send({
-        msg: "Dormitory Not Found",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
-    const dormitoryImage = await db.DormProfileImage.create({
+    await db.DormProfileImage.create({
       filename: req.file.filename,
       filepath: req.file.path,
       mimetype: req.file.mimetype,
@@ -154,16 +131,11 @@ exports.addDormitoryProfileImage = async (req, res) => {
       dormitoryId: dormitory.id,
     });
 
-    return res.send({
-      msg: "Dorm Profile Image Successfully Added",
-      dormitoryImage,
-    });
+    return res.send({ msg: "Dorm Profile Image Successfully Added" });
   } catch (error) {
     console.log(error);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
@@ -173,56 +145,52 @@ exports.addDormitoryDocuments = async (req, res) => {
   const { documentName, documentType, dormId } = req.body;
 
   const userData = req.user;
-  const userDormData = await db.Dormitory.findOne({
-    where: { id: dormId },
-  });
+  const userDormData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const t = await db.sequelize.transaction();
   try {
     // Check user's role
     if (validRole === false) {
-      return res.status(401).send({
-        msg: "You are not an owner",
-      });
+      await t.rollback();
+      return res.status(401).send({ msg: "Invalid User" });
+    }
+
+    if (documentName === "" || documentType === "") {
+      await t.rollback();
+      return res.status(404).send({msg: "Invalid Input"})
     }
 
     //Check if dormitory does exist
     if (!userDormData) {
-      return res.status(404).send({
-        msg: "Dorm Doesn't exist",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
     //Check if the dormitory exists owned by the right owner
     if (userDormData.userId !== userData.id) {
-      return res.status(404).send({
-        msg: "This dormitory is not yours",
-      });
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
     }
 
-    const dormDocument = await db.DormDocument.create({
-      documentName,
-      documentType,
-      dormitoryId: userDormData.id,
-      filename: req.file.filename,
-      filepath: req.file.path,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-    }, {
-      transaction: t,
-    });
+    await db.DormDocument.create(
+      {
+        documentName,
+        documentType,
+        dormitoryId: userDormData.id,
+        filename: req.file.filename,
+        filepath: req.file.path,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+      },
+      { transaction: t }
+    );
     await t.commit();
 
-    return res.send({
-      msg: "Dormitory Documents Successfully Added",
-      dormDocument,
-    });
+    return res.send({ msg: "Dormitory Documents Successfully Added" });
   } catch (err) {
     console.log(err);
     await t.rollback();
-    return res.status(500).send({
-      msg: "Something went wrong",
-    });
+    return res.status(500).send({ msg: "Something went wrong" });
   }
 };

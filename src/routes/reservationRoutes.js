@@ -9,7 +9,6 @@ const reservationController = require("../controller/reservationController");
 const route = express.Router();
 
 //Request Methods
-
 //To create new reservation
 route.post(
   "/create-new-reservation",
@@ -19,15 +18,33 @@ route.post(
 
 //To view all new reservations by the tenant users
 route.get(
-  "/view-all-new-reservations/dorm-:dormId-room-:roomId",
+  "/view-all-reservations/dorm-:dormId",
   requireAuth,
-  reservationController.viewAllRoomReservations
+  reservationController.viewAllReservations
 );
 
 route.put(
   "/accept-new-reservation",
   requireAuth,
   reservationController.acceptReservations
+);
+
+route.put(
+  "/cancel-reservation",
+  requireAuth,
+  reservationController.cancelReservation
+);
+
+route.put(
+  "/add-tenant-reservation",
+  requireAuth,
+  reservationController.addUser
+);
+
+route.delete(
+  "/remove-tenant-user",
+  requireAuth,
+  reservationController.removeUser
 );
 
 module.exports = route;
