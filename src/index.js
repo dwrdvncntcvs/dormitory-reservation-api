@@ -1,5 +1,6 @@
 const express = require("express");
 const db = require("../models");
+const cors = require("cors");
 
 //Routes
 const authRoutes = require("./routes/authRoutes");
@@ -25,6 +26,9 @@ const dormitory = [
   " ##   ## ##   ## ##   ## #  #  #    #       #    ##   ## ##   ##    #    ",
   " ######   #####  ##   ## #     # #######    #     #####  ##   ##    #    ",
 ];
+
+//Use Cross-Origin Resource Sharing
+app.use(cors());
 
 //To allow JSON text formats
 app.use(express.json());
