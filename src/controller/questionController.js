@@ -14,7 +14,7 @@ exports.addQuestion = async (req, res) => {
       return res.status(404).send({ msg: "Dormitory not found" });
     }
 
-    const question = await db.Question.create(
+    await db.Question.create(
       {
         question,
         questioner: userData.name,

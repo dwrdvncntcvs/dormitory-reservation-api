@@ -30,10 +30,12 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Reservation, { foreignKey: "dormitoryId" });
 
       this.hasMany(models.Amenity, { foreignKey: "dormitoryId" });
-      
+
       this.hasMany(models.DormRating, { foreignKey: "dormitoryId" });
 
       this.hasOne(models.DormLocation, { foreignKey: "dormitoryId" });
+
+      this.hasMany(models.Question, { foreignKey: "dormitoryId" });
     }
   }
   Dormitory.init(
