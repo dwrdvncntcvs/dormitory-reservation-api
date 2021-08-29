@@ -123,6 +123,7 @@ exports.viewDormitoryDetail = async (req, res) => {
 
       const questions = await db.Question.findAll({
         where: { id: dormitoryData.id },
+        include: [db.Comment]
       });
 
       return res.send({ dormitory, questions });
@@ -150,6 +151,7 @@ exports.viewDormitoryDetail = async (req, res) => {
       });
       const questions = await db.Question.findAll({
         where: { id: dormitoryData.id },
+        include: [db.Comment]
       });
 
       return res.send({ dormitory, questions });
@@ -178,6 +180,7 @@ exports.viewDormitoryDetail = async (req, res) => {
       });
       const questions = await db.Question.findAll({
         where: { id: dormitoryData.id },
+        include: [db.Comment]
       });
 
       return res.send({ dormitory, questions });
