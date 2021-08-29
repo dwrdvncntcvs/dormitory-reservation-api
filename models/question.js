@@ -22,6 +22,8 @@ module.exports = (sequelize, DataTypes) => {
         hooks: true,
         targetKey: "id",
       });
+
+      this.hasMany(models.Comment, { foreignKey: "questionId" });
     }
   }
   Question.init(

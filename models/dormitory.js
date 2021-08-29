@@ -36,6 +36,8 @@ module.exports = (sequelize, DataTypes) => {
       this.hasOne(models.DormLocation, { foreignKey: "dormitoryId" });
 
       this.hasMany(models.Question, { foreignKey: "dormitoryId" });
+
+      this.hasMany(models.Comment, { foreignKey: "dormitoryId"})
     }
   }
   Dormitory.init(
