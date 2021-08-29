@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    questionId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     userId: {
       type: DataTypes.UUID,
       allowNull: false,

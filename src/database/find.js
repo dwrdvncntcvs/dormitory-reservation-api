@@ -36,4 +36,11 @@ module.exports = {
 
     return dormRatingData;
   },
+  findDormitoryQuestion: (questionId) => {
+    const questionData = db.Question.findOne({
+      where: { id: questionId },
+    });
+
+    return questionData;
+  },
 };
