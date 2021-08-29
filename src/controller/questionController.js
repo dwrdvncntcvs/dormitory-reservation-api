@@ -4,8 +4,8 @@ const { findDormitoryData } = require("../database/find");
 exports.addQuestion = async (req, res) => {
   const { question, dormitoryId } = req.body;
 
-  const userData = req.userData;
-  const dormitoryData = findDormitoryData(dormitoryId);
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormitoryId);
 
   const t = await db.sequelize.transaction();
   try {
