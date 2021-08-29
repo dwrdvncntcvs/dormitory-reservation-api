@@ -121,7 +121,11 @@ exports.viewDormitoryDetail = async (req, res) => {
         ],
       });
 
-      return res.send({ dormitory });
+      const questions = await db.Question.findAll({
+        where: { id: dormitoryData.id },
+      });
+
+      return res.send({ dormitory, questions });
     } else if (ownerRole === true) {
       //Check if the dormitory does exist
       if (!dormitoryData)
@@ -144,8 +148,11 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.DormLocation
         ],
       });
+      const questions = await db.Question.findAll({
+        where: { id: dormitoryData.id },
+      });
 
-      return res.send({ dormitory });
+      return res.send({ dormitory, questions });
     } else if (tenantRole === true) {
       if (!dormitoryData)
         return res.status(404).send({ msg: "Dormitory not found" });
@@ -169,8 +176,11 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.DormLocation
         ],
       });
+      const questions = await db.Question.findAll({
+        where: { id: dormitoryData.id },
+      });
 
-      return res.send({ dormitory });
+      return res.send({ dormitory, questions });
     }
   } catch (err) {
     console.log(err);
