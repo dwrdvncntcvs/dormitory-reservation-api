@@ -88,10 +88,58 @@ exports.editQuestion = async (req, res) => {
     );
     await t.commit();
 
-    return res.send({msg: "Question Edited"})
+    return res.send({ msg: "Question Edited" });
   } catch (err) {
     await t.rollback();
     console.log(err);
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.removeQuestion = async (req, res) => {
+  const { questionId, dormitoryId } = req.body;
+
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const questionData = await findDormitoryQuestion(questionId);
+
+  const t = await db.sequelize.transaction();
+  try {
+    if (!dormitoryData) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
+    }
+
+    if (!questionData) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Question not found" });
+    }
+
+    if (questionData.dormitoryId !== dormitoryData.id) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Question not found" });
+    }
+
+    if (questionData.userId !== userData.id) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Question not found" });
+    }
+
+    await db.Question.destroy(
+      {
+        where: {
+          id: questionData.id,
+          dormitoryId: dormitoryData.id,
+          userId: userData.id,
+        },
+      },
+      { transaction: t }
+    );
+    await t.commit();
+    return res.send({ msg: "Question Deleted" });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };

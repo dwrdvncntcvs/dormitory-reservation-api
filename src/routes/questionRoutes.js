@@ -9,4 +9,6 @@ route.post("/create-question", requireAuth, questionController.addQuestion);
 
 route.put("/edit-question", requireAuth, questionController.editQuestion);
 
+route.delete("/remove-question", requireAuth, questionController.removeQuestion);
+
 module.exports = route;
