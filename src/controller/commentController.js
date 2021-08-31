@@ -100,13 +100,73 @@ exports.editComment = async (req, res) => {
           userId: userData.id,
           questionId: questionData.id,
           dormitoryId: dormitoryData.id,
-        }
+        },
       },
       { transaction: t }
     );
     await t.commit();
 
     return res.send({ msg: "Comment Edited" });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.removeComment = async (req, res) => {
+  const { commentId, questionId, dormitoryId } = req.body;
+
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const questionData = await findDormitoryQuestion(questionId);
+  const commentData = await findDormitoryComment(commentId);
+
+  const t = await db.sequelize.transaction();
+  try {
+    if (!dormitoryData) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Dormitory not found" });
+    }
+
+    if (!questionData) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Question not found" });
+    }
+
+    if (!commentData) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Comment not found" });
+    }
+
+    if (commentData.dormitoryId !== dormitoryData.id) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Comment not found" });
+    }
+
+    if (commentData.questionId !== questionData.id) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Comment not found" });
+    }
+
+    if (commentData.userId !== userData.id) {
+      await t.rollback();
+      return res.status(404).send({ msg: "Comment not found" });
+    }
+
+    await db.Comment.destroy(
+      {
+        where: {
+          id: commentData.id,
+          questionId: questionData.id,
+          dormitoryId: dormitoryData.id,
+          userId: userData.id,
+        },
+      },
+      { transaction: t }
+    );
+
+    return res.send({ msg: "Comment Deleted" });
   } catch (err) {
     console.log(err);
     await t.rollback();
