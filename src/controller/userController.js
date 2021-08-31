@@ -73,7 +73,6 @@ exports.signIn = async (req, res) => {
     });
 
     if (!user) {
-      await t.rollback();
       return res.status(401).send({ msg: "Invalid Username and Password" });
     }
 
@@ -83,7 +82,6 @@ exports.signIn = async (req, res) => {
     );
 
     if (!validatedPassword) {
-      await t.rollback();
       return res.status(401).send({ msg: "Invalid Username and Password" });
     }
 
