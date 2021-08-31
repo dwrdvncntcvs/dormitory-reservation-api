@@ -31,6 +31,7 @@ exports.addComment = async (req, res) => {
     await db.Comment.create({
         comment,
         commenter: userData.name,
+        role: userData.role,
         questionId: questionData.id,
         dormitoryId: dormitoryData.id,
         userId: userData.id,
