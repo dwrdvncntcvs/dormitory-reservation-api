@@ -95,10 +95,12 @@ exports.editComment = async (req, res) => {
     await db.Comment.update(
       { comment },
       {
-        id: commentData.id,
-        userId: userData.id,
-        questionId: questionData.id,
-        dormitoryId: dormitoryData.id,
+        where: {
+          id: commentData.id,
+          userId: userData.id,
+          questionId: questionData.id,
+          dormitoryId: dormitoryData.id,
+        }
       },
       { transaction: t }
     );
