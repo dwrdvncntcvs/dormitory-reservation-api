@@ -43,4 +43,9 @@ module.exports = {
 
     return questionData;
   },
+  findDormitoryComment: (commentId) => {
+    const commentData = db.Comment.findOne({ where: { id: commentId } });
+
+    return commentData;
+  },
 };
