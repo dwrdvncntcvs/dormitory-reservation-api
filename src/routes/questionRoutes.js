@@ -7,4 +7,6 @@ const route = express.Router();
 
 route.post("/create-question", requireAuth, questionController.addQuestion);
 
+route.put("/edit-question", requireAuth, questionController.editQuestion);
+
 module.exports = route;
