@@ -107,7 +107,7 @@ route.put(
   adminUserController.verifyDormitory
 );
 
-route.put("/verify-account/:id", userController.verifyEmail);
+route.get("/verify-account/:id", userController.verifyEmail);
 
 //DELETE METHOD
 //Delete functionality that an admin user can only access.
