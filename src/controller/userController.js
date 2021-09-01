@@ -72,18 +72,21 @@ exports.signIn = async (req, res) => {
       where: { username, role },
     });
 
-    if (!user) {
+    if (!user)
       return res.status(401).send({ msg: "Invalid Username and Password" });
-    }
+
+    if (user.isEmailVerified !== true)
+      return res
+        .status(401)
+        .send({ msg: "Please Check your email to verify your account" });
 
     const validatedPassword = await bcrypt.compare(
       plainPassword,
       user.password
     );
 
-    if (!validatedPassword) {
+    if (!validatedPassword)
       return res.status(401).send({ msg: "Invalid Username and Password" });
-    }
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role },
