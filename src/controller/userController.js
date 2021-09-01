@@ -100,6 +100,26 @@ exports.signIn = async (req, res) => {
   }
 };
 
+exports.verifyEmail = async (req, res) => {
+  const id = req.params.id;
+
+  const t = await db.sequelize.transaction();
+  try {
+    await db.User.update(
+      { isEmailVerified: true },
+      { where: { id } },
+      { transaction: t }
+    );
+    await t.commit();
+
+    return res.send({ msg: "Email Verified" });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
 //This needs the user to be authenticated before the user view his/her profile details
 //This is not only for showing user information but also their dormitories and some images
 exports.userProfile = async (req, res) => {
