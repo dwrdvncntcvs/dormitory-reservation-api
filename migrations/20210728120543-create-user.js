@@ -42,6 +42,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      isEmailVerified: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
       isVerified: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,

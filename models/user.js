@@ -100,6 +100,11 @@ module.exports = (sequelize, DataTypes) => {
           notNull: true,
         },
       },
+      isEmailVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
       isVerified: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
