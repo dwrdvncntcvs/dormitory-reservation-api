@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 const validator = require("../validator/validator");
 const fs = require("fs");
+const mailer = require("../mailer/mailer");
 
 //CREATE NEW INFORMATION
 exports.signUp = async (req, res) => {
@@ -46,11 +47,12 @@ exports.signUp = async (req, res) => {
       return res.status(401).send({ msg: "Passwords not matched" });
     }
 
-    await db.User.create(
+    const user = await db.User.create(
       { name, username, email, password, contactNumber, address, gender, role },
       { transaction: t }
     );
     await t.commit();
+    mailer.verifyEmail(user, req.headers.host);
 
     return res.send({ msg: "Successfully Created!" });
   } catch (err) {
@@ -102,9 +104,15 @@ exports.signIn = async (req, res) => {
 
 exports.verifyEmail = async (req, res) => {
   const id = req.params.id;
+  const userData = await db.User.findOne({ where: { id } });
 
   const t = await db.sequelize.transaction();
   try {
+    if (!userData) {
+      await t.rollback();
+      return res.status(404).send({ msg: "User not found" });
+    }
+
     await db.User.update(
       { isEmailVerified: true },
       { where: { id } },
