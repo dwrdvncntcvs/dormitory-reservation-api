@@ -3,6 +3,11 @@ const {
   findDormitoryData,
   findDormitoryQuestion,
 } = require("../database/find");
+const {
+  addQuestionValidator,
+  editQuestionValidator,
+  removeQuestionValidator,
+} = require("../validator/questionValidator");
 
 exports.addQuestion = async (req, res) => {
   const { question, dormitoryId } = req.body;
@@ -12,10 +17,7 @@ exports.addQuestion = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
+    addQuestionValidator(question, dormitoryData, t, res);
 
     await db.Question.create(
       {
@@ -48,30 +50,14 @@ exports.editQuestion = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (question === "") {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid Input" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!questionData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
-
-    if (questionData.dormitoryId !== dormitoryData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
-
-    if (questionData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
+    await editQuestionValidator(
+      question,
+      userData,
+      questionData,
+      dormitoryData,
+      t,
+      res
+    );
 
     await db.Question.update(
       {
@@ -105,25 +91,13 @@ exports.removeQuestion = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!questionData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
-
-    if (questionData.dormitoryId !== dormitoryData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
-
-    if (questionData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
+    await removeQuestionValidator(
+      userData,
+      questionData,
+      dormitoryData,
+      t,
+      res
+    );
 
     await db.Question.destroy(
       {
