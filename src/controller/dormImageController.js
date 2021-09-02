@@ -1,8 +1,13 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const { findDormitoryData, findDormImageData } = require("../database/find");
+const {
+  is_roleValid,
+  dormImageValidator,
+  dormProfileImageValidator,
+  dormDocumentValidator,
+} = require("../validator/dormImageValidator");
 
-//To add dorm images
 exports.addDormImage = async (req, res) => {
   const { name, dormId } = req.body;
 
@@ -12,22 +17,9 @@ exports.addDormImage = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    //Check user's role
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ message: "Invalid User" });
-    }
+    await is_roleValid(validRole, t, res);
 
-    if (name === "") {
-      await t.rollback();
-      return res.status(404).send({ msg: "Invalid Input" })
-    }
-
-    //Check if the dormitory was owned by the owner user
-    if (userData.id !== dormitoryData.userId) {
-      await t.rollback();
-      return res.status(401).send({ message: "Dormitory not found" });
-    }
+    await dormImageValidator(name, userData, dormitoryData, null, t, res);
 
     await db.DormImage.create(
       {
@@ -50,7 +42,6 @@ exports.addDormImage = async (req, res) => {
   }
 };
 
-//To delete dorm images
 exports.deleteDormImage = async (req, res) => {
   const { imageId, dormId } = req.body;
 
@@ -61,30 +52,16 @@ exports.deleteDormImage = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
+    await is_roleValid(validRole, t, res);
 
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!dormImageData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory Image not found" });
-    }
-
-    if (dormitoryData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (dormitoryData.id !== dormImageData.dormitoryId) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory Image not found" });
-    }
+    await dormImageValidator(
+      null,
+      userData,
+      dormitoryData,
+      dormImageData,
+      t,
+      res
+    );
 
     await db.DormImage.destroy(
       { where: { id: dormImageData.id } },
@@ -100,35 +77,25 @@ exports.deleteDormImage = async (req, res) => {
   }
 };
 
-//For Owner Users
-//To add profile image of a dormitory.
 exports.addDormitoryProfileImage = async (req, res) => {
   const { id } = req.body;
 
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
-  const dormitory = await findDormitoryData(id);
+  const dormitoryData = await findDormitoryData(id);
 
   const t = await db.sequelize.transaction();
   try {
-    //Check the role of the user
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
+    await is_roleValid(validRole, t, res);
 
-    //Check if the dormitory exist
-    if (!dormitory) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
+    await dormProfileImageValidator(userData, dormitoryData, t, res);
 
     await db.DormProfileImage.create({
       filename: req.file.filename,
       filepath: req.file.path,
       mimetype: req.file.mimetype,
       size: req.file.size,
-      dormitoryId: dormitory.id,
+      dormitoryId: dormitoryData.id,
     });
 
     return res.send({ msg: "Dorm Profile Image Successfully Added" });
@@ -139,8 +106,6 @@ exports.addDormitoryProfileImage = async (req, res) => {
   }
 };
 
-//For Owner Users
-//To create or add dormitory documents to be verified by admins
 exports.addDormitoryDocuments = async (req, res) => {
   const { documentName, documentType, dormId } = req.body;
 
@@ -150,28 +115,16 @@ exports.addDormitoryDocuments = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    // Check user's role
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
+    await is_roleValid(validRole, t, res);
 
-    if (documentName === "" || documentType === "") {
-      await t.rollback();
-      return res.status(404).send({msg: "Invalid Input"})
-    }
-
-    //Check if dormitory does exist
-    if (!userDormData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    //Check if the dormitory exists owned by the right owner
-    if (userDormData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
+    await dormDocumentValidator(
+      documentName,
+      documentType,
+      userData,
+      userDormData,
+      t,
+      res
+    );
 
     await db.DormDocument.create(
       {
