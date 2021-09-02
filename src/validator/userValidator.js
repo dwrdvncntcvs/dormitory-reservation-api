@@ -55,3 +55,10 @@ exports.editAccountValidator = (toBeEdit, res, t) => {
     return res.status(401).send({ msg: "Invalid Inputs" });
   }
 };
+
+exports.is_roleValid = (validRole, res, t = null) => {
+  if (t !== null) {
+    if (validRole === false) return res.status(401).send({ msg: "Invalid User" });
+  }
+  if (validRole === false) return res.status(401).send({ msg: "Invalid User" });
+};
