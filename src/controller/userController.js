@@ -5,6 +5,12 @@ const config = require("../config/config");
 const validator = require("../validator/validator");
 const fs = require("fs");
 const mailer = require("../mailer/mailer");
+const {
+  signUpValidator,
+  passwordValidator,
+  signInValidator,
+  editAccountValidator,
+} = require("../validator/userValidator");
 
 //CREATE NEW INFORMATION
 exports.signUp = async (req, res) => {
@@ -22,30 +28,14 @@ exports.signUp = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (
-      name === "" ||
-      username === "" ||
-      email === "" ||
-      plainPassword === "" ||
-      plainConfirmPassword === "" ||
-      contactNumber === "" ||
-      address === "" ||
-      gender === "" ||
-      role === ""
-    ) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid Inputs" });
-    }
+    await signUpValidator(req.body, t, res);
 
     const salt = await bcrypt.genSalt(10, "a");
     const password = await bcrypt.hash(plainPassword, salt);
 
     const verifyPassword = await bcrypt.compare(plainConfirmPassword, password);
 
-    if (!verifyPassword) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Passwords not matched" });
-    }
+    passwordValidator(verifyPassword, res);
 
     const user = await db.User.create(
       { name, username, email, password, contactNumber, address, gender, role },
@@ -66,21 +56,12 @@ exports.signUp = async (req, res) => {
 exports.signIn = async (req, res) => {
   const { username, plainPassword, role } = req.body;
 
+  const user = await db.User.findOne({
+    where: { username, role },
+  });
+
   try {
-    if (username === "" || plainPassword === "" || role === "")
-      return res.status(401).send({ msg: "Invalid Inputs" });
-
-    const user = await db.User.findOne({
-      where: { username, role },
-    });
-
-    if (!user)
-      return res.status(401).send({ msg: "Invalid Username and Password" });
-
-    if (user.isEmailVerified !== true)
-      return res
-        .status(401)
-        .send({ msg: "Please Check your email to verify your account" });
+    signInValidator(req.body, user, res);
 
     const validatedPassword = await bcrypt.compare(
       plainPassword,
@@ -169,10 +150,7 @@ exports.editProfileName = async (req, res) => {
   const t = await db.sequelize.transaction();
   const userData = req.user;
   try {
-    if (name === "") {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid Inputs" });
-    }
+    await editAccountValidator(name, res, t);
 
     await db.User.update(
       { name },
@@ -196,14 +174,7 @@ exports.editProfileUsername = async (req, res) => {
   const t = await db.sequelize.transaction();
   const userData = req.user;
   try {
-    if (username === "") {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid Inputs" });
-    }
-
-    const user = await db.User.count({ where: { username } });
-
-    if (user !== 0) return res.status(401).send({ msg: "Invalid User" }); // To be changed soon
+    await editAccountValidator(username, res, t);
 
     await db.User.update(
       { username },
@@ -227,10 +198,7 @@ exports.editProfileAddress = async (req, res) => {
   const userData = req.user;
   const t = await db.sequelize.transaction();
   try {
-    if (address === "") {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid Inputs" });
-    }
+    await editAccountValidator(address, res, t);
 
     await db.User.update(
       { address },
@@ -284,10 +252,7 @@ exports.changeUserPassword = async (req, res) => {
       password
     );
 
-    if (!verifiedPassword) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Password not matched" });
-    }
+    await passwordValidator(verifiedPassword, t, res);
 
     await db.User.update({ password }, { where: { id } }, { transaction: t });
     await t.commit();
