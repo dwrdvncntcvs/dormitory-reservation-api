@@ -4,6 +4,7 @@ const {
   findDormitoryQuestion,
   findDormitoryComment,
 } = require("../database/find");
+const { commentValidator } = require("../validator/commentValidator");
 
 exports.addComment = async (req, res) => {
   const { comment, questionId, dormitoryId } = req.body;
@@ -14,20 +15,15 @@ exports.addComment = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dorm not found" });
-    }
-
-    if (!questionData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
-
-    if (questionData.dormitoryId !== dormitoryData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
+    await commentValidator(
+      comment,
+      userData,
+      dormitoryData,
+      questionData,
+      null,
+      res,
+      t
+    );
 
     await db.Comment.create({
       comment,
@@ -55,42 +51,17 @@ exports.editComment = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormitoryId);
 
   const t = await db.sequelize.transaction();
-
+P
   try {
-    if (comment === "") {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid Input" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!questionData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
-
-    if (!commentData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Comment not found" });
-    }
-
-    if (commentData.dormitoryId !== dormitoryData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Comment not found" });
-    }
-
-    if (commentData.questionId !== questionData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Comment not found" });
-    }
-
-    if (commentData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Comment not found" });
-    }
+    await commentValidator(
+      comment,
+      userData,
+      dormitoryData,
+      questionData,
+      commentData,
+      res,
+      t
+    );
 
     await db.Comment.update(
       { comment },
@@ -124,35 +95,15 @@ exports.removeComment = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!questionData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
-
-    if (!commentData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Comment not found" });
-    }
-
-    if (commentData.dormitoryId !== dormitoryData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Comment not found" });
-    }
-
-    if (commentData.questionId !== questionData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Comment not found" });
-    }
-
-    if (commentData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Comment not found" });
-    }
+    await commentValidator(
+      null,
+      userData,
+      dormitoryData,
+      questionData,
+      commentData,
+      res,
+      t
+    );
 
     await db.Comment.destroy(
       {
