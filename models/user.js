@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Reservation, { foreignKey: "userId" });
 
       this.hasMany(models.DormRating, { foreignKey: "userId" });
+
+      this.hasMany(models.Question, { foreignKey: "userId" });
+
+      this.hasMany(models.Comment, { foreignKey: "userId" });
     }
   }
   User.init(
@@ -95,6 +99,11 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
           notNull: true,
         },
+      },
+      isEmailVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
       },
       isVerified: {
         type: DataTypes.BOOLEAN,

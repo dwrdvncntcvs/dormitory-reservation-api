@@ -1,6 +1,10 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const { findDormitoryData, findRoomData } = require("../database/find");
+const {
+  createNewRoomValidator,
+  updateRoomPaymentValidator,
+} = require("../validator/roomValidator");
 
 // To create new room in a dormitory
 exports.createNewRoom = async (req, res) => {
@@ -13,40 +17,14 @@ exports.createNewRoom = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
   const t = await db.sequelize.transaction();
   try {
-    //Check Role
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    if (
-      roomName === "" ||
-      roomCapacity === "" ||
-      roomCost === "" ||
-      electricBill === "" ||
-      waterBill === ""
-    ) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Invalid Inputs" });
-    }
-
-    //Check if the dorm exists
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory not found" });
-    }
-
-    //Check if right user
-    if (userData.id !== dormitoryData.userId) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory not found" });
-    }
-
-    //Check if dorm is verified
-    if (dormitoryData.isVerified === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory is not verified" });
-    }
+    await createNewRoomValidator(
+      req.body,
+      userData,
+      dormitoryData,
+      validRole,
+      t,
+      res
+    );
 
     const roomDetail = await db.Room.create(
       {
@@ -80,41 +58,15 @@ exports.updateRoomPayment = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
   const t = await db.sequelize.transaction();
   try {
-    //Checks if the role of the signed in user is owner
-    if (validRole == false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    if (roomCost === "" || electricBill === "" || waterBill === "") {
-      await t.rollback();
-      return res.status(404).send({ msg: "Invalid Input" });
-    }
-
-    // Checks if the dormitory does exist in the database
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory not found" });
-    }
-
-    //Checks if the room does exist in the database
-    if (!roomData) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Room not found" });
-    }
-
-    // Checks if the dormitory is owned by the signed in user
-    if (dormitoryData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory not found" });
-    }
-
-    //Checks if the room belongs to the dormitory
-    if (dormitoryData.id !== roomData.dormitoryId) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Room not found" });
-    }
-
+    await updateRoomPaymentValidator(
+      req.body,
+      userData,
+      roomData,
+      dormitoryData,
+      validRole,
+      t,
+      res
+    );
     //To update the payment bills of the specific room
     await db.Room.update(
       { roomCost, electricBill, waterBill },

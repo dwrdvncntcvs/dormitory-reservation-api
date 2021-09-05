@@ -1,6 +1,7 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const { findDormitoryData } = require("../database/find");
+const { addAmenityValidator } = require("../validator/amenityValidator");
 
 //To add or create new amenity for the dormitory
 exports.addAmenities = async (req, res) => {
@@ -12,25 +13,14 @@ exports.addAmenities = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (amenity === "") {
-      await t.rollback();
-      return res.status(404).send({ msg: "Invalid Input" })
-    }
-
-    if (validRole === false){
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-      
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (dormitoryData.userId !== userData.id){
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory not found" });
-    }
+    await addAmenityValidator(
+      amenity,
+      validRole,
+      dormitoryData,
+      userData,
+      res,
+      t
+    );
 
     await db.Amenity.create(
       { name: amenity, dormitoryId: dormId },

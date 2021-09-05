@@ -1,6 +1,7 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const { findDormitoryData } = require("../database/find");
+const { dormLocationValidator } = require("../validator/dormLocationValidator");
 
 exports.addDormitoryLocation = async (req, res) => {
   const { dormId, longitude, latitude } = req.body;
@@ -9,29 +10,18 @@ exports.addDormitoryLocation = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
-  const point = { type: "Point", coordinates: [ latitude, longitude ] };
+  const point = { type: "Point", coordinates: [latitude, longitude] };
 
   const t = await db.sequelize.transaction();
   try {
-    if (longitude === "" || latitude === "") {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid Inputs" });
-    }
-
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (dormitoryData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
+    await dormLocationValidator(
+      req.body,
+      userData,
+      dormitoryData,
+      validRole,
+      t,
+      res
+    );
 
     await db.DormLocation.create(
       {

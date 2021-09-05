@@ -1,6 +1,7 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const fs = require("fs");
+const { is_roleValid } = require("../validator/userValidator");
 
 //For ADMIN only.
 //This function will let the admins to manually or perssonaly validate
@@ -10,8 +11,7 @@ exports.displayAllUsers = async (req, res) => {
 
   const validRole = validator.isValidRole(userData.role, "admin");
   try {
-    if (validRole === false)
-      return res.status(401).send({ msg: "Invalid User" });
+    is_roleValid(validRole, res);
 
     const adminUsers = await db.User.findAll({
       where: { role: "admin" },
@@ -43,10 +43,7 @@ exports.verifyUser = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "admin");
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
+    await is_roleValid(validRole, res, t);
 
     await db.User.update({ isVerified }, { where: { id } }, { transaction: t });
     await t.commit();
@@ -69,10 +66,7 @@ exports.deleteUser = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "admin");
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "You are not an admin!" });
-    }
+    await is_roleValid(validRole, res, t);
 
     const user = await db.User.findOne({ where: { id: id } });
 
@@ -95,10 +89,7 @@ exports.verifyDormitory = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "admin");
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
+    await is_roleValid(validRole, res, t);
 
     await db.Dormitory.update(
       { isVerified },

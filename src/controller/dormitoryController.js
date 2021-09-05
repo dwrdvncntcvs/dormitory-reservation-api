@@ -1,6 +1,11 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const { findDormitoryData } = require("../database/find");
+const {
+  createNewDormitoryValidator,
+  deleteDormitoryValidator,
+  dormitorySwitchValidator,
+} = require("../validator/dormitoryValidator");
 
 //To create and input new information of a dormitory in the system.
 exports.createNewDormitory = async (req, res) => {
@@ -10,28 +15,7 @@ exports.createNewDormitory = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
   const t = await db.sequelize.transaction();
   try {
-    //Check the user role
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    //Check if the user is verified
-    if (userData.isVerified !== true) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Account not verified" });
-    }
-
-    //Check the field if not empty
-    if (
-      name === "" ||
-      address === "" ||
-      contactNumber === "" ||
-      allowedGender === ""
-    ) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid Value" });
-    }
+    await createNewDormitoryValidator(req.body, userData, validRole, t, res);
 
     await db.Dormitory.create(
       {
@@ -62,21 +46,7 @@ exports.deleteDormitory = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    //Check the role of the user
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "You are not an owner" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (dormitoryData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory not found" });
-    }
+    await deleteDormitoryValidator(userData, dormitoryData, validRole, t, res);
 
     await db.Dormitory.destroy(
       { where: { id: dormitoryData.id } },
@@ -117,11 +87,16 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.DormImage,
           db.Reservation,
           db.DormRating,
-          db.DormLocation
+          db.DormLocation,
         ],
       });
 
-      return res.send({ dormitory });
+      const questions = await db.Question.findAll({
+        where: { dormitoryId: dormitoryData.id },
+        include: [db.Comment],
+      });
+
+      return res.send({ dormitory, questions });
     } else if (ownerRole === true) {
       //Check if the dormitory does exist
       if (!dormitoryData)
@@ -141,11 +116,15 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.DormImage,
           db.Reservation,
           db.DormRating,
-          db.DormLocation
+          db.DormLocation,
         ],
       });
+      const questions = await db.Question.findAll({
+        where: { dormitoryId: dormitoryData.id },
+        include: [db.Comment],
+      });
 
-      return res.send({ dormitory });
+      return res.send({ dormitory, questions });
     } else if (tenantRole === true) {
       if (!dormitoryData)
         return res.status(404).send({ msg: "Dormitory not found" });
@@ -166,11 +145,15 @@ exports.viewDormitoryDetail = async (req, res) => {
           db.DormImage,
           db.Reservation,
           db.DormRating,
-          db.DormLocation
+          db.DormLocation,
         ],
       });
+      const questions = await db.Question.findAll({
+        where: { dormitoryId: dormitoryData.id },
+        include: [db.Comment],
+      });
 
-      return res.send({ dormitory });
+      return res.send({ dormitory, questions });
     }
   } catch (err) {
     console.log(err);
@@ -188,28 +171,7 @@ exports.dormitorySwitch = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    //Check the role of the userData
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    //Check if the dormitory does exist in the database
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    //Check if the dormitory is owned by the user
-    if (dormitoryData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory not found" });
-    }
-
-    if (dormitoryData.isVerified === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory not verified" });
-    }
+    await dormitorySwitchValidator(userData, dormitoryData, validRole, t, res);
 
     await db.Dormitory.update(
       { isAccepting },

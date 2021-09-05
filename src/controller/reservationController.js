@@ -8,6 +8,15 @@ const {
   findReservationData,
 } = require("../database/find");
 
+const {
+  createNewReservationValidator,
+  cancelReservationValidator,
+  viewAllReservationsValidator,
+  removeUserValidator,
+  addUserValidator,
+  acceptReservationsValidator,
+} = require("../validator/reservationValidator");
+
 //For Tenant Users
 //To create new reservation for tenants
 exports.createNewReservation = async (req, res) => {
@@ -20,51 +29,14 @@ exports.createNewReservation = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    if (userData.isVerified === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Account not verified" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (dormitoryData.isVerified === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Dormitory is not available" });
-    }
-
-    if (dormitoryData.isAccepting !== true) {
-      await t.rollback();
-      return res
-        .status(401)
-        .send({ msg: "Dormitory is not accepting right now" });
-    }
-
-    if (dormitoryData.allowedGender !== "both") {
-      if (dormitoryData.allowedGender !== userData.gender) {
-        await t.rollback();
-        return res.status(401).send({
-          msg: `Dormitory only accepting ${dormitoryData.allowedGender} tenants`,
-        });
-      }
-    }
-
-    if (!roomData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Room not found" });
-    }
-
-    if (roomData.dormitoryId !== dormitoryData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Room not found" });
-    }
+    await createNewReservationValidator(
+      userData,
+      dormitoryData,
+      roomData,
+      validRole,
+      t,
+      res
+    );
 
     await db.Reservation.create(
       {
@@ -100,40 +72,15 @@ exports.cancelReservation = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!roomData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Room not found" });
-    }
-
-    if (!reservationData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Reservation not found" });
-    }
-
-    if (reservationData.roomId !== roomData.id) {
-      await t.rollback();
-      return res.status(401).send({ msg: "You can't cancel reservation" });
-    }
-
-    if (reservationData.dormitoryId !== dormitoryData.id) {
-      await t.rollback();
-      return res.status(401).send({ msg: "You can't cancel reservation" });
-    }
-
-    if (reservationData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(401).send({ msg: "You can't cancel reservation" });
-    }
+    await cancelReservationValidator(
+      userData,
+      dormitoryData,
+      roomData,
+      reservationData,
+      validRole,
+      t,
+      res
+    );
 
     await db.Reservation.update(
       { isCancelled: true, isAccepted: false },
@@ -167,14 +114,7 @@ exports.viewAllReservations = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
 
   try {
-    if (validRole === false)
-      return res.status(401).send({ msg: "Invalid User" });
-
-    if (!dormitoryData)
-      return res.status(404).send({ msg: "Dormitory not found" });
-
-    if (userData.id !== dormitoryData.userId)
-      return res.status(404).send({ msg: "Dormitory not found" });
+    viewAllReservationsValidator(userData, dormitoryData, validRole, res);
 
     const reservations = await db.Reservation.findAll({
       where: {
@@ -203,38 +143,14 @@ exports.removeUser = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!roomData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Room not found" });
-    }
-
-    if (!reservationData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Reservation not found" });
-    }
-
-    if (dormitoryData.id !== roomData.dormitoryId) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Room not found" });
-    }
-
-    if (
-      reservationData.roomId !== roomData.id &&
-      reservationData.dormitoryId !== dormitoryData.id
-    ) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Reservation not found" });
-    }
+    await removeUserValidator(
+      dormitoryData,
+      roomData,
+      reservationData,
+      validRole,
+      t,
+      res
+    );
 
     await db.Reservation.destroy(
       {
@@ -274,55 +190,15 @@ exports.addUser = async (req, res) => {
   const t = await db.sequelize.transaction();
 
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ message: "Invalid User" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!roomData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Room not found" });
-    }
-
-    if (!reservationData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Reservation not found" });
-    }
-
-    if (userData.id !== dormitoryData.userId) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (dormitoryData.id !== roomData.dormitoryId) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Room not found" });
-    }
-
-    if (roomData.id !== reservationData.roomId) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Reservation not found" });
-    }
-
-    if (roomData.activeTenant >= roomData.capacity) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Room is full" });
-    }
-
-    if (reservationData.isAccepted === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "You are not yet accepted" });
-    }
-
-    if (reservationData.isAdded === true) {
-      await t.rollback();
-      return res.send({ msg: "User Already added" });
-    }
+    await addUserValidator(
+      userData,
+      dormitoryData,
+      roomData,
+      reservationData,
+      validRole,
+      t,
+      res
+    );
 
     const updatedRoom = await db.Room.update(
       { activeTenant: roomData.activeTenant + 1 },
@@ -358,40 +234,15 @@ exports.acceptReservations = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ message: "Invalid User" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ message: "Dormitory not found." });
-    }
-
-    if (!roomData) {
-      await t.rollback();
-      return res.status(404).send({ message: "Room not found." });
-    }
-
-    if (!reservationData) {
-      await t.rollback();
-      return res.status(404).send({ message: "Reservation not found." });
-    }
-
-    if (dormitoryData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(404).send({ message: "Dormitory not found" });
-    }
-
-    if (dormitoryData.id !== roomData.dormitoryId) {
-      await t.rollback();
-      return res.status(404).send({ message: "Room not found" });
-    }
-
-    if (reservationData.roomId !== roomData.id) {
-      await t.rollback();
-      return res.status(404).send({ message: "Reservation not found" });
-    }
+    await acceptReservationsValidator(
+      userData,
+      dormitoryData,
+      roomData,
+      reservationData,
+      validRole,
+      t,
+      res
+    );
 
     const updatedReservation = await db.Reservation.update(
       { isAccepted },

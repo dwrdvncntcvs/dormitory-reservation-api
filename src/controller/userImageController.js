@@ -1,6 +1,7 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const fs = require("fs");
+const { userValidator } = require("../validator/userValidator")
 
 //ADD PROFILE IMAGE
 //Need to change on how to get the ID of the user later.
@@ -10,6 +11,8 @@ exports.addProfilePic = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
+    await userValidator(userData, res, t);
+
     await db.ProfileImage.create(
       {
         filename: req.file.filename,
@@ -36,6 +39,8 @@ exports.deleteProfileImage = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
+    await userValidator(userData, res, t);
+
     await db.ProfileImage.destroy(
       { where: { userId: userData.id } },
       { transaction: t }
@@ -57,6 +62,8 @@ exports.addUserDocuments = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
+    await userValidator(userData, res, t);
+
     const documents = await db.Document.create({
       documentName,
       documentType,

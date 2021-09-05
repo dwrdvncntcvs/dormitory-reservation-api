@@ -1,6 +1,10 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const { findDormitoryData, findDormRatingData } = require("../database/find");
+const {
+  addRatingValidator,
+  removeRatingValidator,
+} = require("../validator/dormRatingValidator");
 
 exports.addRating = async (req, res) => {
   const { rating, dormId } = req.body;
@@ -14,20 +18,14 @@ exports.addRating = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!isActive) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Reservation not active" });
-    }
+    await addRatingValidator(
+      req.body,
+      dormitoryData,
+      validRole,
+      isActive,
+      t,
+      res
+    );
 
     await db.DormRating.create(
       {
@@ -57,30 +55,14 @@ exports.removeRating = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    if (validRole === false) {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid User" });
-    }
-
-    if (!dormitoryData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Dormitory not found" });
-    }
-
-    if (!ratingData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Rating not found" });
-    }
-
-    if (ratingData.dormitoryId !== dormitoryData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Rating not found" });
-    }
-
-    if (ratingData.userId !== userData.id) {
-      await t.rollback();
-      return res.status(404).send({ msg: "Rating not found" });
-    }
+    await removeRatingValidator(
+      userData,
+      dormitoryData,
+      ratingData,
+      validRole,
+      t,
+      res
+    );
 
     await db.DormRating.destroy(
       { where: { id: ratingId } },
@@ -88,7 +70,7 @@ exports.removeRating = async (req, res) => {
     );
     await t.commit();
 
-    return res.send({msg: "Rating removed"})
+    return res.send({ msg: "Rating removed" });
   } catch (err) {
     console.log(err);
     await t.rollback();
