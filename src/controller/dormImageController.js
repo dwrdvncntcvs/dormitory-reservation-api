@@ -1,12 +1,13 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const { findDormitoryData, findDormImageData } = require("../database/find");
+const { findDormitoryData,findDormImageData } = require("../database/find");
 const {
   is_roleValid,
   dormImageValidator,
   dormProfileImageValidator,
   dormDocumentValidator,
 } = require("../validator/dormImageValidator");
+const fs = require("fs");
 
 exports.addDormImage = async (req, res) => {
   const { name, dormId } = req.body;
@@ -43,7 +44,8 @@ exports.addDormImage = async (req, res) => {
 };
 
 exports.deleteDormImage = async (req, res) => {
-  const { imageId, dormId } = req.body;
+  const dormId = req.params.dormId;
+  const imageId = req.params.imageId;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
@@ -62,6 +64,10 @@ exports.deleteDormImage = async (req, res) => {
       t,
       res
     );
+
+    await fs.unlink(`image/dormImage/${dormImageData.filename}`, (err) => {
+      if (err) console.log(err);
+    })
 
     await db.DormImage.destroy(
       { where: { id: dormImageData.id } },

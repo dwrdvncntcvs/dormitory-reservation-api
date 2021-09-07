@@ -31,7 +31,7 @@ exports.dormImageValidator = (
     }
   }
 
-  if (name === null && type === null) {
+  if (name === null) {
     if (!dormitoryData) {
       t.rollback();
       return res.status(404).send({ msg: "Dormitory not found" });
