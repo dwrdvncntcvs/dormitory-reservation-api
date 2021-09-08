@@ -26,11 +26,50 @@ describe('amenityValidator', () => {
     expect(actual.message).toBe("Invalid User");
   });
 
-  it('should return ValidationResult when dormitoryData is null', () => {});
+  it('should return ValidationResult when dormitoryData is null', () => {
+    const amenity = 'blah';
+    const validRole = true;
+    const dormitoryData = null;
+    const userData = {};
 
-  it('should return ValidationResult when userData is null', () => {});
+    const actual = validateAmenity(amenity, validRole, dormitoryData, userData);
 
-  it('should return ValidationResult when userId of dormitory and user does not match', () => {});
+    expect(actual.statusCode).toBe(404);
+    expect(actual.message).toBe("Dormitory not found");
+  });
 
-  it('should return null when data is valid', () => {});
+  it('should return ValidationResult when userData is null', () => {
+    const amenity = 'blah';
+    const validRole = true;
+    const dormitoryData = {};
+    const userData = null;
+
+    const actual = validateAmenity(amenity, validRole, dormitoryData, userData);
+
+    expect(actual.statusCode).toBe(404);
+    expect(actual.message).toBe("User not found");
+  });
+
+  it('should return ValidationResult when userId of dormitory and user does not match', () => {
+    const amenity = 'blah';
+    const validRole = true;
+    const dormitoryData = { userId: 1 };
+    const userData = { id: 2 };
+
+    const actual = validateAmenity(amenity, validRole, dormitoryData, userData);
+
+    expect(actual.statusCode).toBe(403);
+    expect(actual.message).toBe("User has no permission to add amenity to dormitory.");
+  });
+
+  it('should return null when data is valid', () => {
+    const amenity = 'blah';
+    const validRole = true;
+    const dormitoryData = { userId: 1 };
+    const userData = { id: 1 };
+
+    const actual = validateAmenity(amenity, validRole, dormitoryData, userData);
+
+    expect(actual).toBe(null);
+  });
 });
