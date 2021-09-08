@@ -13,7 +13,7 @@ const dormImageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "image/dormImage");
   },
-  fieldname: (req, file, cb) => {
+  filename: (req, file, cb) => {
     cb(
       null,
       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
@@ -37,7 +37,7 @@ route.post(
 
 //To delte dormitory images
 route.delete(
-  "/delete-dormitory-image",
+  "/delete-dormitory-image/dorm-:dormId/image-:imageId",
   requireAuth,
   dormImageController.deleteDormImage
 );

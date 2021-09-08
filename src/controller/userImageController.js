@@ -35,14 +35,23 @@ exports.addProfilePic = async (req, res) => {
 
 //DELETE PROFILE IMAGE
 exports.deleteProfileImage = async (req, res) => {
+  const id = req.params.id;
   const userData = req.user;
+
+  const image = await db.ProfileImage.findOne({where: {id}});
+
+  if (image.userId !== userData.id) return res.status(401).send({ msg: "Invalid User"})
 
   const t = await db.sequelize.transaction();
   try {
     await userValidator(userData, res, t);
 
+    await fs.unlink(`image/profileImage/${image.filename}`, async (err) => {
+      if (err) console.log(err);
+    });
+
     await db.ProfileImage.destroy(
-      { where: { userId: userData.id } },
+      { where: { id: image.id } },
       { transaction: t }
     );
     await t.commit();

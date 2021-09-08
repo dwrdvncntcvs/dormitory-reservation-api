@@ -122,7 +122,7 @@ route.delete(
 
 //To delete the profile image of the user
 route.delete(
-  "/delete-profile-image",
+  "/delete-profile-image/:id",
   requireAuth,
   userImageController.deleteProfileImage
 );
