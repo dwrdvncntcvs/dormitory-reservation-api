@@ -1,7 +1,7 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const { findDormitoryData } = require("../database/find");
-const { addAmenityValidator, validateAmenity } = require("../validator/amenityValidator");
+const { validateAmenity } = require("../validator/amenityValidator");
 
 //To add or create new amenity for the dormitory
 exports.addAmenities = async (req, res) => {
