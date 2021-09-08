@@ -1,98 +1,54 @@
-exports.commentValidator = (
-  comment = null,
-  userData,
-  dormitoryData,
-  questionData,
-  commentData = null,
-  res,
-  t
-) => {
-  if (commentData === null) {
-    if (comment === "") {
-      t.rollback();
-      return res.status(401).send({ msg: "Invalid Input" });
-    }
+const { ValidationResult } = require('./validationResult.js');
 
-    if (!dormitoryData) {
-      t.rollback();
-      return res.status(404).send({ msg: "Dorm not found" });
-    }
-
-    if (!questionData) {
-      t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
-
-    if (questionData.dormitoryId !== dormitoryData.id) {
-      t.rollback();
-      return res.status(404).send({ msg: "Question not found" });
-    }
-  }
-
-  if (comment === null) {    
-      if (!dormitoryData) {
-        t.rollback();
-        return res.status(404).send({ msg: "Dormitory not found" });
-      }
-    
-      if (!questionData) {
-        t.rollback();
-        return res.status(404).send({ msg: "Question not found" });
-      }
-    
-      if (!commentData) {
-        t.rollback();
-        return res.status(404).send({ msg: "Comment not found" });
-      }
-    
-      if (commentData.dormitoryId !== dormitoryData.id) {
-        t.rollback();
-        return res.status(404).send({ msg: "Comment not found" });
-      }
-    
-      if (commentData.questionId !== questionData.id) {
-        t.rollback();
-        return res.status(404).send({ msg: "Comment not found" });
-      }
-    
-      if (commentData.userId !== userData.id) {
-        t.rollback();
-        return res.status(404).send({ msg: "Comment not found" });
-      }
-  }
-
+exports.validateNewComment = (comment, userData, dormitoryData, questionData) => {
   if (comment === "") {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid Input" });
+    return new ValidationResult(401, "Invalid Input" );
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dorm not found" );
   }
 
   if (!questionData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Question not found" });
+    return new ValidationResult(404, "Question not found" );
+  }
+
+  if (!userData) {
+    return new ValidationResult(404, "User not found" );
+  }
+
+  if (questionData.dormitoryId !== dormitoryData.id) {
+    return new ValidationResult(404, "Question not found" );
+  }
+
+  return null;
+}
+
+exports.validateExistingComment = (userData, dormitoryData, questionData, commentData) => {
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found" );
+  }
+
+  if (!questionData) {
+    return new ValidationResult(404, "Question not found" );
   }
 
   if (!commentData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Comment not found" });
+    return new ValidationResult(404, "Comment not found" );
   }
 
   if (commentData.dormitoryId !== dormitoryData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Comment not found" });
+    return new ValidationResult(404, "Comment not found" );
   }
 
   if (commentData.questionId !== questionData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Comment not found" });
+    return new ValidationResult(404, "Comment not found" );
   }
 
   if (commentData.userId !== userData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Comment not found" });
+    return new ValidationResult(404, "Comment not found" );
   }
-};
+
+  return null;
+}
+
