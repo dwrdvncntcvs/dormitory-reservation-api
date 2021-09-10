@@ -13,10 +13,19 @@ exports.createNewDormitory = async (req, res) => {
 
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = createNewDormitoryValidator(
+    req.body,
+    userData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await createNewDormitoryValidator(req.body, userData, validRole, t, res);
-
     await db.Dormitory.create(
       {
         name,
@@ -44,10 +53,18 @@ exports.deleteDormitory = async (req, res) => {
   const dormitoryData = await db.Dormitory.findOne({ where: { id } });
   const validRole = validator.isValidRole(userData.role, "owner");
 
+  const validationResult = deleteDormitoryValidator(
+    userData,
+    dormitoryData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await deleteDormitoryValidator(userData, dormitoryData, validRole, t, res);
-
     await db.Dormitory.destroy(
       { where: { id: dormitoryData.id } },
       { transaction: t }
@@ -169,10 +186,18 @@ exports.dormitorySwitch = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
+  const validationResult = dormitorySwitchValidator(
+    userData,
+    dormitoryData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await dormitorySwitchValidator(userData, dormitoryData, validRole, t, res);
-
     await db.Dormitory.update(
       { isAccepting },
       { where: { id: dormitoryData.id } },
