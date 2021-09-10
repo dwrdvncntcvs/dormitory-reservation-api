@@ -1,11 +1,11 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const { findDormitoryData,findDormImageData } = require("../database/find");
+const { findDormitoryData, findDormImageData } = require("../database/find");
 const {
-  is_roleValid,
-  dormImageValidator,
-  dormProfileImageValidator,
-  dormDocumentValidator,
+  addDormImagevalidator,
+  deleteDormImageValidator,
+  addDormitoryProfileImageValidator,
+  addDormitoryDocuments,
 } = require("../validator/dormImageValidator");
 const fs = require("fs");
 
@@ -16,12 +16,20 @@ exports.addDormImage = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(dormId);
 
+  //New Validator
+  const validationResult = addDormImagevalidator(
+    dormitoryData,
+    name,
+    userData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, t, res);
-
-    await dormImageValidator(name, userData, dormitoryData, null, t, res);
-
     await db.DormImage.create(
       {
         name,
@@ -52,22 +60,22 @@ exports.deleteDormImage = async (req, res) => {
   const dormImageData = await findDormImageData(imageId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
+  const validationResult = deleteDormImageValidator(
+    dormitoryData,
+    dormImageData,
+    userData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, t, res);
-
-    await dormImageValidator(
-      null,
-      userData,
-      dormitoryData,
-      dormImageData,
-      t,
-      res
-    );
-
     await fs.unlink(`image/dormImage/${dormImageData.filename}`, (err) => {
       if (err) console.log(err);
-    })
+    });
 
     await db.DormImage.destroy(
       { where: { id: dormImageData.id } },
@@ -90,12 +98,18 @@ exports.addDormitoryProfileImage = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(id);
 
+  const validationResult = addDormitoryProfileImageValidator(
+    validRole,
+    dormitoryData,
+    userData
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, t, res);
-
-    await dormProfileImageValidator(userData, dormitoryData, t, res);
-
     await db.DormProfileImage.create({
       filename: req.file.filename,
       filepath: req.file.path,
@@ -116,27 +130,28 @@ exports.addDormitoryDocuments = async (req, res) => {
   const { documentName, documentType, dormId } = req.body;
 
   const userData = req.user;
-  const userDormData = await findDormitoryData(dormId);
+  const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = addDormitoryDocuments(
+    documentName,
+    documentType,
+    userData,
+    dormitoryData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
 
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, t, res);
-
-    await dormDocumentValidator(
-      documentName,
-      documentType,
-      userData,
-      userDormData,
-      t,
-      res
-    );
-
     await db.DormDocument.create(
       {
         documentName,
         documentType,
-        dormitoryId: userDormData.id,
+        dormitoryId: dormitoryData.id,
         filename: req.file.filename,
         filepath: req.file.path,
         mimetype: req.file.mimetype,
