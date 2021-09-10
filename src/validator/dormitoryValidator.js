@@ -58,4 +58,5 @@ exports.dormitorySwitchValidator = (userData, dormitoryData, validRole) => {
   if (dormitoryData.isVerified === false) {
     return new ValidationResult(404, "Dormitory not found");
   }
+  return null;
 };
