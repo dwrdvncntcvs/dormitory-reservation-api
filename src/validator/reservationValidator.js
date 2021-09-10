@@ -1,56 +1,49 @@
+const { ValidationResult } = require("./validationResult");
+
 exports.createNewReservationValidator = (
   userData,
   dormitoryData,
   roomData,
-  validRole,
-  t,
-  res
+  validRole
 ) => {
   if (validRole === false) {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid User" });
+    return new ValidationResult(401, "Invalid User");
   }
 
   if (userData.isVerified === false) {
-    t.rollback();
-    return res.status(401).send({ msg: "Account not verified" });
+    return new ValidationResult(401, "Account not verified");
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (dormitoryData.isVerified === false) {
-    t.rollback();
-    return res.status(401).send({ msg: "Dormitory is not available" });
+    return new ValidationResult(401, "Dormitory is not available");
   }
 
   if (dormitoryData.isAccepting !== true) {
-    t.rollback();
-    return res
-      .status(401)
-      .send({ msg: "Dormitory is not accepting right now" });
+    return new ValidationResult(401, "Dormitory is not accepting right now");
   }
 
   if (dormitoryData.allowedGender !== "both") {
     if (dormitoryData.allowedGender !== userData.gender) {
-      t.rollback();
-      return res.status(401).send({
-        msg: `Dormitory only accepting ${dormitoryData.allowedGender} tenants`,
-      });
+      return new ValidationResult(
+        401,
+        `Dormitory only accepting ${dormitoryData.allowedGender} tenants`
+      );
     }
   }
 
   if (!roomData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Room not found" });
+    return new ValidationResult(404, "Room not found");
   }
 
   if (roomData.dormitoryId !== dormitoryData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Room not found" });
+    return new ValidationResult(404, "Room not found");
   }
+
+  return null;
 };
 
 exports.cancelReservationValidator = (
@@ -58,101 +51,89 @@ exports.cancelReservationValidator = (
   dormitoryData,
   roomData,
   reservationData,
-  validRole,
-  t,
-  res
+  validRole
 ) => {
   if (validRole === false) {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid User" });
+    return new ValidationResult(401, "Invalid User");
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (!roomData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Room not found" });
+    return new ValidationResult(404, "Room not found");
   }
 
   if (!reservationData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Reservation not found" });
+    return new ValidationResult(404, "Reservation not found");
   }
 
   if (reservationData.roomId !== roomData.id) {
-    t.rollback();
-    return res.status(401).send({ msg: "You can't cancel reservation 1" });
+    return new ValidationResult(404, "You can't cancel the reservation");
   }
 
   if (reservationData.dormitoryId !== dormitoryData.id) {
-    t.rollback();
-    return res.status(401).send({ msg: "You can't cancel reservation 2" });
+    return new ValidationResult(404, "You can't cancel the reservation");
   }
 
   if (reservationData.userId !== userData.id) {
-    t.rollback();
-    return res.status(401).send({ msg: "You can't cancel reservation 3" });
+    return new ValidationResult(404, "You can't cancel the reservation");
   }
+
+  return null;
 };
 
-exports.viewAllReservationsValidator = (
-  userData,
-  dormitoryData,
-  validRole,
-  res
-) => {
-  if (validRole === false) return res.status(401).send({ msg: "Invalid User" });
+exports.viewAllReservationsValidator = (userData, dormitoryData, validRole) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
 
-  if (!dormitoryData)
-    return res.status(404).send({ msg: "Dormitory not found" });
+  if (!dormitoryData) {
+    return new ValidationResult((404, "Dormitory not found"));
+  }
 
-  if (userData.id !== dormitoryData.userId)
-    return res.status(404).send({ msg: "Dormitory not found" });
+  if (userData.id !== dormitoryData.userId) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  return null;
 };
 
 exports.removeUserValidator = (
   dormitoryData,
   roomData,
   reservationData,
-  validRole,
-  t,
-  res
+  validRole
 ) => {
   if (validRole === false) {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid User" });
+    return new ValidationResult(401, "Invalid User");
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (!roomData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Room not found" });
+    return new ValidationResult(404, "Room not found");
   }
 
   if (!reservationData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Reservation not found" });
+    return new ValidationResult(404, "Reservation not found");
   }
 
   if (dormitoryData.id !== roomData.dormitoryId) {
-    t.rollback();
-    return res.status(404).send({ msg: "Room not found" });
+    return new ValidationResult(404, "Room not found");
   }
 
   if (
     reservationData.roomId !== roomData.id &&
     reservationData.dormitoryId !== dormitoryData.id
   ) {
-    t.rollback();
-    return res.status(404).send({ msg: "Reservation not found" });
+    return new ValidationResult((404, "Reservation not found"));
   }
+
+  return null;
 };
 
 exports.addUserValidator = (
@@ -161,58 +142,48 @@ exports.addUserValidator = (
   roomData,
   reservationData,
   validRole,
-  t,
-  res
 ) => {
   if (validRole === false) {
-    t.rollback();
-    return res.status(401).send({ message: "Invalid User" });
+    return new ValidationResult(401, "Invalid User");
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found")
   }
 
   if (!roomData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Room not found" });
+    return new ValidationResult(404, "Room not found")
   }
 
   if (!reservationData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Reservation not found" });
+    return new ValidationResult(404, "Reservation not found")
   }
 
   if (userData.id !== dormitoryData.userId) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found")
   }
 
   if (dormitoryData.id !== roomData.dormitoryId) {
-    t.rollback();
-    return res.status(404).send({ msg: "Room not found" });
+    return new ValidationResult(404, "Room not found")
   }
 
   if (roomData.id !== reservationData.roomId) {
-    t.rollback();
-    return res.status(404).send({ msg: "Reservation not found" });
+    return new ValidationResult(404, "Reservation not found")
   }
 
   if (roomData.activeTenant >= roomData.capacity) {
-    t.rollback();
-    return res.status(401).send({ msg: "Room is full" });
+    return new ValidationResult(401, "Room is full")
   }
 
   if (reservationData.isAccepted === false) {
-    t.rollback();
-    return res.status(401).send({ msg: "You are not yet accepted" });
+    return new ValidationResult(401, "Your are not yet accepted")
   }
 
   if (reservationData.isAdded === true) {
-    t.rollback();
-    return res.send({ msg: "User Already added" });
+    return new ValidationResult(403, "User already added")
   }
+
+  return null;
 };
 
 exports.acceptReservationsValidator = (
@@ -221,41 +192,34 @@ exports.acceptReservationsValidator = (
   roomData,
   reservationData,
   validRole,
-  t,
-  res
 ) => {
   if (validRole === false) {
-    t.rollback();
-    return res.status(401).send({ message: "Invalid User" });
+    return new ValidationResult(401, "Invalid User");
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ message: "Dormitory not found." });
+    return new ValidationResult(404, "Dormitory not found")
   }
 
   if (!roomData) {
-    t.rollback();
-    return res.status(404).send({ message: "Room not found." });
+    return new ValidationResult(404, "Room not found")
   }
 
   if (!reservationData) {
-    t.rollback();
-    return res.status(404).send({ message: "Reservation not found." });
+    return new ValidationResult(404, "Reservation not found")
   }
 
   if (dormitoryData.userId !== userData.id) {
-    t.rollback();
-    return res.status(404).send({ message: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found")
   }
 
   if (dormitoryData.id !== roomData.dormitoryId) {
-    t.rollback();
-    return res.status(404).send({ message: "Room not found" });
+    return new ValidationResult(404, "Room not found")
   }
 
   if (reservationData.roomId !== roomData.id) {
-    t.rollback();
-    return res.status(404).send({ message: "Reservation not found" });
+    return new ValidationResult(404, "Reservation not found")
   }
+
+  return null;
 };
