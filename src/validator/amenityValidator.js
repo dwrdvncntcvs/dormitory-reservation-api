@@ -1,7 +1,7 @@
 const { ValidationResult } = require('./validationResult.js');
 
 exports.validateAmenity = (amenity, validRole, dormitoryData, userData) => {
-  if (amenity === "") {
+  if (amenity === null || amenity === "") {
     return new ValidationResult(400, "Invalid Input");
   }
   if (validRole === false) {
