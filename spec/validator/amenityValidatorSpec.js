@@ -2,6 +2,18 @@ const { validateAmenity } = require("../../src/validator/amenityValidator");
 
 describe('amenityValidator', () => {
 
+  it('should return ValidationResult when amenity is null', () => {
+    const amenity = null;
+    const validRole = true;
+    const dormitoryData = {};
+    const userData = {};
+
+    const actual = validateAmenity(amenity, validRole, dormitoryData, userData);
+
+    expect(actual.statusCode).toBe(400);
+    expect(actual.message).toBe("Invalid Input");
+  });
+
   it('should return ValidationResult when amenity is empty', () => {
     const amenity = '';
     const validRole = true;
