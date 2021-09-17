@@ -1,18 +1,16 @@
-exports.signUpValidator = (
-  {
-    name,
-    username,
-    email,
-    plainPassword,
-    plainConfirmPassword,
-    contactNumber,
-    address,
-    gender,
-    role,
-  },
-  transaction,
-  res
-) => {
+const { ValidationResult } = require("./validationResult");
+
+exports.signUpValidator = ({
+  name,
+  username,
+  email,
+  plainPassword,
+  plainConfirmPassword,
+  contactNumber,
+  address,
+  gender,
+  role,
+}) => {
   if (
     name === "" ||
     username === "" ||
@@ -24,36 +22,45 @@ exports.signUpValidator = (
     gender === "" ||
     role === ""
   ) {
-    transaction.rollback();
-    return res.status(401).send({ msg: "Invalid Inputs" });
+    return new ValidationResult(401, "Invalid Imputs");
   }
+
+  return null;
 };
 
-exports.passwordValidator = (password, t, res) => {
-  if (!password) {
-    t.rollback();
-    return res.status(401).send({ msg: "Passwords not matched" });
+exports.passwordValidator = (password) => {
+  if (password === false) {
+    return new ValidationResult(401, "Passwords not matched");
   }
+
+  return null;
 };
 
-exports.signInValidator = ({ username, plainPassword, role }, user, res) => {
-  if (username === "" || plainPassword === "" || role === "")
-    return res.status(401).send({ msg: "Invalid Inputs" });
+exports.signInValidator = ({ username, plainPassword, role }, user) => {
+  if (username === "" || plainPassword === "" || role === "") {
+    return new ValidationResult(401, "Invalid Inputs");
+  }
 
-  if (!user)
-    return res.status(401).send({ msg: "Invalid Username and Password" });
+  if (!user) {
+    return new ValidationResult(401, "Invalid Username and Password");
+  }
 
-  if (user.isEmailVerified !== true)
-    return res
-      .status(401)
-      .send({ msg: "Please Check your email to verify your account" });
+  if (user.isEmailVerified !== true) {
+    return new ValidationResult(
+      401,
+      "Please Check your email to verify your account"
+    );
+  }
+
+  return null;
 };
 
-exports.editAccountValidator = (toBeEdit, res, t) => {
+exports.editAccountValidator = (toBeEdit) => {
   if (toBeEdit === "") {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid Inputs" });
+    return new ValidationResult(401, "Invalid Input")
   }
+
+  return null;
 };
 
 exports.is_roleValid = (validRole, res, t = null) => {
