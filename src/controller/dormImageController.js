@@ -15,19 +15,25 @@ exports.addDormImage = async (req, res) => {
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(dormId);
+  const filePath = `image/dormImage/${req.file.filename}`
 
   //New Validator
   const validationResult = addDormImagevalidator(
     dormitoryData,
     name,
     userData,
-    validRole
+    validRole,
+    filePath
   );
-  if (validationResult !== null)
+  if (validationResult !== null) {
+    filePath, (err) => {
+      console.log(err);
+    }
     return res
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
-
+  }
+    
   const t = await db.sequelize.transaction();
   try {
     await db.DormImage.create(
@@ -97,11 +103,13 @@ exports.addDormitoryProfileImage = async (req, res) => {
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(id);
+  const filePath = `image/dormitoryProfileImage/${req.file.filename}`
 
   const validationResult = addDormitoryProfileImageValidator(
     validRole,
     dormitoryData,
-    userData
+    userData,
+    filePath
   );
   if (validationResult !== null)
     return res

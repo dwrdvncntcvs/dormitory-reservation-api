@@ -1,6 +1,13 @@
 const { ValidationResult } = require("./validationResult");
+const fs = require("fs");
 
-exports.addDormImagevalidator = (dormitoryData, name, userData, validRole) => {
+exports.addDormImagevalidator = (
+  dormitoryData,
+  name,
+  userData,
+  validRole,
+  filePath
+) => {
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");
   }
@@ -16,6 +23,10 @@ exports.addDormImagevalidator = (dormitoryData, name, userData, validRole) => {
   //Check if the dormitory was owned by the owner user
   if (userData.id !== dormitoryData.userId) {
     return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (dormitoryData.isVerified === false) {
+    return new ValidationResult(401, "Dormitory is not verified");
   }
 
   return null;
@@ -53,7 +64,8 @@ exports.deleteDormImageValidator = (
 exports.addDormitoryProfileImageValidator = (
   validRole,
   dormitoryData,
-  userData
+  userData,
+  filePath
 ) => {
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");
@@ -65,6 +77,13 @@ exports.addDormitoryProfileImageValidator = (
 
   if (dormitoryData.userId !== userData.id) {
     return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (dormitoryData.isVerified === false) {
+    fs.unlinkSync(filePath, (err) => {
+      console.log(err);
+    });
+    return new ValidationResult(401, "Dormitory is not verified");
   }
 
   return null;

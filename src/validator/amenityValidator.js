@@ -16,5 +16,9 @@ exports.validateAmenity = (amenity, validRole, dormitoryData, userData) => {
   if (dormitoryData.userId !== userData.id) {
     return new ValidationResult(403, "User has no permission to add amenity to dormitory." );
   }
+
+  if (dormitoryData.isVerified === false) {
+    return new ValidationResult(401, "Dormitory is not verified")
+  }
   return null;
 }

@@ -23,7 +23,14 @@ exports.addLandmarkValidator = (
   }
 
   if (dormitoryData.userId !== userData.id) {
-    return new ValidationResult(403, "User has no permission to add landmark to dormitory." );
+    return new ValidationResult(
+      403,
+      "User has no permission to add landmark to dormitory."
+    );
+  }
+
+  if (dormitoryData.isVerified === false) {
+    return new ValidationResult(401, "Dormitory is not verified");
   }
 
   return null;
