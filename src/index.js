@@ -2,6 +2,9 @@ const express = require("express");
 const db = require("../models");
 const cors = require("cors");
 
+//Jobs
+const verificationJob = require("./jobs/verificationJob");
+
 //Routes
 const authRoutes = require("./routes/authRoutes");
 const dormitoryRoutes = require("./routes/dormitoryRoutes");
@@ -35,6 +38,9 @@ app.use(cors());
 
 //To allow JSON text formats
 app.use(express.json());
+
+//Use jobs
+verificationJob.scheduler();
 
 //To Connect the routes
 app.use(authRoutes);
