@@ -244,13 +244,16 @@ exports.editProfileAddress = async (req, res) => {
 //Checks email address to change user's password.
 exports.checkUserEmail = async (req, res) => {
   const email = req.params.email;
+  const { hostAddress } = req.body;
 
   try {
     const user = await db.User.findOne({ where: { email } });
 
     if (!user) return res.status(401).send({ msg: "Invalid Email Address" });
 
-    return res.send({ id: user.id });
+    mailer.changePassword(user, hostAddress,);
+
+    return res.status(200).send({ msg: "Please open your email to fully change your password." });
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });

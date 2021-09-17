@@ -73,7 +73,7 @@ route.post("/sign-in", userController.signIn);
 //This needs the user to be authenticated before the user view his/her profile details
 route.get("/user-profile", requireAuth, userController.userProfile);
 
-route.get("/find-user/:email", userController.checkUserEmail);
+route.post("/find-user/:email", userController.checkUserEmail);
 
 //ADMIN ONLY
 //To get or display users information

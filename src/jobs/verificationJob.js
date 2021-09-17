@@ -15,7 +15,7 @@ exports.scheduler = () => {
       for (let acc of user) {
         const dateCreated = new Date(acc.createdAt);
         const dayCreated = parseInt(
-          new Intl.DateTimeFormat("en", { minute: "numeric" }).format(
+          new Intl.DateTimeFormat("en", { day: "numeric" }).format(
             dateCreated
           )
         );
