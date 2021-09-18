@@ -48,4 +48,9 @@ module.exports = {
 
     return commentData;
   },
+  findAmenity: (amenityId) => {
+    const amenityData = db.Amenity.findOne({ where: { id: amenityId } });
+
+    return amenityData;
+  },
 };
