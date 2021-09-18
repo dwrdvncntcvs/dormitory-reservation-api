@@ -1,11 +1,16 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const { findDormitoryData, findDormImageData } = require("../database/find");
+const {
+  findDormitoryData,
+  findDormImageData,
+  findDormProfileImageData,
+} = require("../database/find");
 const {
   addDormImagevalidator,
   deleteDormImageValidator,
   addDormitoryProfileImageValidator,
   addDormitoryDocuments,
+  removeDormitoryProfileImageValidator,
 } = require("../validator/dormImageValidator");
 const fs = require("fs");
 
@@ -15,7 +20,7 @@ exports.addDormImage = async (req, res) => {
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(dormId);
-  const filePath = `image/dormImage/${req.file.filename}`
+  const filePath = `image/dormImage/${req.file.filename}`;
 
   //New Validator
   const validationResult = addDormImagevalidator(
@@ -26,14 +31,15 @@ exports.addDormImage = async (req, res) => {
     filePath
   );
   if (validationResult !== null) {
-    filePath, (err) => {
-      console.log(err);
-    }
+    filePath,
+      (err) => {
+        console.log(err);
+      };
     return res
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
   }
-    
+
   const t = await db.sequelize.transaction();
   try {
     await db.DormImage.create(
@@ -103,7 +109,7 @@ exports.addDormitoryProfileImage = async (req, res) => {
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(id);
-  const filePath = `image/dormitoryProfileImage/${req.file.filename}`
+  const filePath = `image/dormitoryProfileImage/${req.file.filename}`;
 
   const validationResult = addDormitoryProfileImageValidator(
     validRole,
@@ -129,6 +135,52 @@ exports.addDormitoryProfileImage = async (req, res) => {
     return res.send({ msg: "Dorm Profile Image Successfully Added" });
   } catch (error) {
     console.log(error);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.removeDormitoryProfileImage = async (req, res) => {
+  const dormId = req.params.dormId;
+  const profileImageId = req.params.profileImageId;
+
+  const userData = req.user;
+  const validRole = validator.isValidRole(userData.role, "owner");
+  const dormitoryData = await findDormitoryData(dormId);
+  const dormProfileImageData = await findDormProfileImageData(profileImageId);
+
+  const validationResult = removeDormitoryProfileImageValidator(
+    userData,
+    validRole,
+    dormitoryData,
+    dormProfileImageData
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
+  const filePath = `image/dormitoryProfileImage/${dormProfileImageData.filename}`;
+
+  const t = await db.sequelize.transaction();
+  try {
+    await fs.unlink(filePath, (err) => {
+      console.log(err);
+    });
+
+    await db.DormProfileImage.destroy(
+      {
+        where: { id: dormProfileImageData.id },
+      },
+      { transaction: t }
+    );
+    await t.commit();
+
+    return res
+      .status(200)
+      .send({ msg: "Dormitory Profile Image deleted successfully" });
+  } catch (err) {
+    console.log(err);
     await t.rollback();
     return res.status(500).send({ msg: "Something went wrong" });
   }

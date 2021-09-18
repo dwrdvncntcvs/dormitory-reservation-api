@@ -97,5 +97,11 @@ route.delete(
   dormitoryController.deleteDormitory
 );
 
+route.delete(
+  "/delete-dormitory-profile-image/dorm-:dormId/image-:profileImageId",
+  requireAuth,
+  dormImageController.removeDormitoryProfileImage
+);
+
 //Export Here
 module.exports = route;

@@ -53,4 +53,11 @@ module.exports = {
 
     return amenityData;
   },
+  findDormProfileImageData: (dormProfileImageId) => {
+    const dormProfileImageData = db.DormProfileImage.findOne({
+      where: { id: dormProfileImageId },
+    });
+
+    return dormProfileImageData;
+  },
 };

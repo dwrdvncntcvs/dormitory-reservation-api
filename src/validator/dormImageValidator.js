@@ -89,6 +89,35 @@ exports.addDormitoryProfileImageValidator = (
   return null;
 };
 
+exports.removeDormitoryProfileImageValidator = (
+  userData,
+  validRole,
+  dormitoryData,
+  dormProfileImageData
+) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (!dormProfileImageData) {
+    return new ValidationResult(404, "Dormitory Image not found");
+  }
+
+  if (dormitoryData.userId !== userData.id) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (dormitoryData.id !== dormProfileImageData.dormitoryId) {
+    return new ValidationResult(404, "Dormitory Image not found");
+  }
+
+  return null;
+};
+
 exports.addDormitoryDocuments = (
   name,
   type,
