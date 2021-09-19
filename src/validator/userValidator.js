@@ -71,19 +71,6 @@ exports.is_roleValid = (validRole) => {
   return null;
 };
 
-exports.userValidator = (user, res, t = null) => {
-  if (t !== null) {
-    if (!user) {
-      t.rollback();
-      res.send({ msg: "Invalid User" });
-    }
-  }
-
-  if (!user) {
-    res.send({ msg: "Invalid User" });
-  }
-};
-
 exports.verifyDormitory = (validRole, dormitoryData) => {
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");
@@ -91,6 +78,10 @@ exports.verifyDormitory = (validRole, dormitoryData) => {
 
   if (!dormitoryData) {
     return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (dormitoryData.isVerified === true) {
+    return new ValidationResult(400, "Dormitory's already verified");
   }
 
   return null;
@@ -103,6 +94,10 @@ exports.userValidator = (validRole, userData) => {
 
   if (!userData) {
     return new ValidationResult(404, "User not found");
+  }
+
+  if (userData.isVerified === true) {
+    return new ValidationResult(400, "User's already verified");
   }
 
   return null;
