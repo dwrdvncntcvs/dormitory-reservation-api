@@ -1,8 +1,11 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const fs = require("fs");
-const { is_roleValid, verifyDormitory } = require("../validator/userValidator");
-const { findDormitoryData } = require("../database/find");
+const {
+  is_roleValid,
+  verifyDormitory,
+  userValidator,
+} = require("../validator/userValidator");
+const { findDormitoryData, findUserData } = require("../database/find");
 
 //For ADMIN only.
 //This function will let the admins to manually or perssonaly validate
@@ -11,7 +14,7 @@ exports.displayAllUsers = async (req, res) => {
   const userData = req.user;
 
   const validRole = validator.isValidRole(userData.role, "admin");
-  
+
   const validationResult = is_roleValid(validRole);
   if (validationResult !== null) {
     return res
@@ -45,10 +48,11 @@ exports.displayAllUsers = async (req, res) => {
 //TO VERIFY THE USERS
 exports.verifyUser = async (req, res) => {
   const { id, isVerified } = req.body;
-  const userData = req.user;
+  const user = req.user;
 
-  const validRole = validator.isValidRole(userData.role, "admin");
-  const validationResult = is_roleValid(validRole);
+  const userData = await findUserData(id);
+  const validRole = validator.isValidRole(user.role, "admin");
+  const validationResult = userValidator(validRole, userData);
   if (validationResult !== null) {
     return res
       .status(validationResult.statusCode)
@@ -73,10 +77,11 @@ exports.verifyUser = async (req, res) => {
 //This function is not yet complete until this comment is deleted.
 exports.deleteUser = async (req, res) => {
   const { id } = req.body;
-  const userData = req.user;
+  const user = req.user;
 
-  const validRole = validator.isValidRole(userData.role, "admin");
-  const validationResult = is_roleValid(validRole);
+  const userData = await findUserData(id);
+  const validRole = validator.isValidRole(user.role, "admin");
+  const validationResult = userValidator(validRole, userData);
   if (validationResult !== null) {
     return res
       .status(validationResult.statusCode)
@@ -106,7 +111,7 @@ exports.verifyDormitory = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "admin");
 
- const validationResult = verifyDormitory(validRole, dormitoryData);
+  const validationResult = verifyDormitory(validRole, dormitoryData);
   if (validationResult !== null) {
     return res
       .status(validationResult.statusCode)

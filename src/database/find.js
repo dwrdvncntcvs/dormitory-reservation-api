@@ -60,4 +60,9 @@ module.exports = {
 
     return dormProfileImageData;
   },
+  findUserData: (userId) => {
+    const userData = db.User.findOne({ where: { id: userId } });
+
+    return userData;
+  },
 };
