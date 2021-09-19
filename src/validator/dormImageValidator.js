@@ -65,7 +65,6 @@ exports.addDormitoryProfileImageValidator = (
   validRole,
   dormitoryData,
   userData,
-  filePath
 ) => {
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");
@@ -80,9 +79,6 @@ exports.addDormitoryProfileImageValidator = (
   }
 
   if (dormitoryData.isVerified === false) {
-    fs.unlinkSync(filePath, (err) => {
-      console.log(err);
-    });
     return new ValidationResult(401, "Dormitory is not verified");
   }
 

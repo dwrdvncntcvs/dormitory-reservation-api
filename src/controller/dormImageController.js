@@ -31,10 +31,9 @@ exports.addDormImage = async (req, res) => {
     filePath
   );
   if (validationResult !== null) {
-    filePath,
-      (err) => {
-        console.log(err);
-      };
+    await fs.unlink(filePath, (err) => {
+      console.log(err);
+    });
     return res
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
@@ -114,13 +113,16 @@ exports.addDormitoryProfileImage = async (req, res) => {
   const validationResult = addDormitoryProfileImageValidator(
     validRole,
     dormitoryData,
-    userData,
-    filePath
+    userData
   );
-  if (validationResult !== null)
+  if (validationResult !== null) {
+    await fs.unlink(filePath, (err) => {
+      console.log(err);
+    });
     return res
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
+  }
 
   const t = await db.sequelize.transaction();
   try {
