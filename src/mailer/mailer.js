@@ -72,3 +72,7 @@ exports.changePassword = ({ id, name, email, role }, host) => {
     console.log(message, " Successfully sent!");
   });
 };
+
+exports.dormitoryVerifiedNotice = () => {
+  
+}

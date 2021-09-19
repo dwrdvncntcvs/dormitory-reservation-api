@@ -1,7 +1,8 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 const fs = require("fs");
-const { is_roleValid } = require("../validator/userValidator");
+const { is_roleValid, verifyDormitory } = require("../validator/userValidator");
+const { findDormitoryData } = require("../database/find");
 
 //For ADMIN only.
 //This function will let the admins to manually or perssonaly validate
@@ -10,9 +11,15 @@ exports.displayAllUsers = async (req, res) => {
   const userData = req.user;
 
   const validRole = validator.isValidRole(userData.role, "admin");
-  try {
-    is_roleValid(validRole, res);
+  
+  const validationResult = is_roleValid(validRole);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
 
+  try {
     const adminUsers = await db.User.findAll({
       where: { role: "admin" },
       include: [db.ProfileImage, db.Document],
@@ -41,10 +48,15 @@ exports.verifyUser = async (req, res) => {
   const userData = req.user;
 
   const validRole = validator.isValidRole(userData.role, "admin");
+  const validationResult = is_roleValid(validRole);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, res, t);
-
     await db.User.update({ isVerified }, { where: { id } }, { transaction: t });
     await t.commit();
 
@@ -64,10 +76,15 @@ exports.deleteUser = async (req, res) => {
   const userData = req.user;
 
   const validRole = validator.isValidRole(userData.role, "admin");
+  const validationResult = is_roleValid(validRole);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, res, t);
-
     const user = await db.User.findOne({ where: { id: id } });
 
     await db.User.destroy({ where: { id: user.id } }, { transaction: t });
@@ -86,11 +103,18 @@ exports.verifyDormitory = async (req, res) => {
   const { dormId, isVerified } = req.body;
 
   const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "admin");
+
+ const validationResult = verifyDormitory(validRole, dormitoryData);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, res, t);
-
     await db.Dormitory.update(
       { isVerified },
       { where: { id: dormId } },

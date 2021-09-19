@@ -57,18 +57,18 @@ exports.signInValidator = ({ username, plainPassword, role }, user) => {
 
 exports.editAccountValidator = (toBeEdit) => {
   if (toBeEdit === "") {
-    return new ValidationResult(401, "Invalid Input")
+    return new ValidationResult(401, "Invalid Input");
   }
 
   return null;
 };
 
-exports.is_roleValid = (validRole, res, t = null) => {
-  if (t !== null) {
-    if (validRole === false)
-      return res.status(401).send({ msg: "Invalid User" });
+exports.is_roleValid = (validRole) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
   }
-  if (validRole === false) return res.status(401).send({ msg: "Invalid User" });
+
+  return null;
 };
 
 exports.userValidator = (user, res, t = null) => {
@@ -82,4 +82,16 @@ exports.userValidator = (user, res, t = null) => {
   if (!user) {
     res.send({ msg: "Invalid User" });
   }
+};
+
+exports.verifyDormitory = (validRole, dormitoryData) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  return null;
 };
