@@ -6,6 +6,7 @@ const {
   userValidator,
 } = require("../validator/userValidator");
 const { findDormitoryData, findUserData } = require("../database/find");
+const { dormitoryVerifiedNotice, userVerifiedNotice } = require("../mailer/mailer");
 
 //For ADMIN only.
 //This function will let the admins to manually or perssonaly validate
@@ -63,6 +64,8 @@ exports.verifyUser = async (req, res) => {
   try {
     await db.User.update({ isVerified }, { where: { id } }, { transaction: t });
     await t.commit();
+
+    userVerifiedNotice(userData);
 
     return res.send({ msg: "Account Successfully Verified" });
   } catch (error) {
@@ -126,6 +129,8 @@ exports.verifyDormitory = async (req, res) => {
       { transaction: t }
     );
     await t.commit();
+
+    dormitoryVerifiedNotice(userData, dormitoryData);
 
     return res.send({ msg: "Your dormitory is now verified" });
   } catch (error) {

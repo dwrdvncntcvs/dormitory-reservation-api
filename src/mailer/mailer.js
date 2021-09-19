@@ -73,6 +73,51 @@ exports.changePassword = ({ id, name, email, role }, host) => {
   });
 };
 
-exports.dormitoryVerifiedNotice = () => {
-  
-}
+exports.dormitoryVerifiedNotice = (userData, dormitoryData) => {
+  const messageInfo = {
+    to: userData.email,
+    from: user_email,
+    subject: `WELCOME TO DORMRES!`,
+    text: `
+        Greetings! ${userData.name}
+
+        We're happy to announce that your dormitory ${dormitoryData.name} has been verified!!!
+        You can now add additional information to your dormitory!!!
+        
+        Please be reminded that before you post your dormitory in public, Please complete all the information of your dormitory.
+
+        Thank you!
+    `,
+  };
+
+  transport.sendMail(messageInfo, (err, message) => {
+    if (err) {
+      console.log(err);
+    }
+
+    console.log(message, " Successfully sent!");
+  });
+};
+
+exports.userVerifiedNotice = (userData) => {
+  const messageInfo = {
+    to: userData.email,
+    from: user_email,
+    subject: `WELCOME TO DORMRES!`,
+    text: `
+        Greetings! ${userData.name}
+
+        We're happy to announce that your account with the role of ${userData.role} has been verified!
+
+        Thank you!
+    `,
+  };
+
+  transport.sendMail(messageInfo, (err, message) => {
+    if (err) {
+      console.log(err);
+    }
+
+    console.log(message, " Successfully sent!");
+  });
+};
