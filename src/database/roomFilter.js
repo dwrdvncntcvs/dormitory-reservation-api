@@ -1,3 +1,5 @@
+const { Op } = require("sequelize");
+
 exports.getValue = (filter1, filter2) => {
     if (filter1 !== '?' && filter2 !== '?') {
       const value = { "$Rooms.roomCost$": { [Op.between]: [filter1, filter2] } };
