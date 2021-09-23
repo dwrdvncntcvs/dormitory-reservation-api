@@ -39,7 +39,16 @@ exports.deleteDormitoryValidator = (userData, dormitoryData, validRole) => {
   return null;
 };
 
-exports.dormitorySwitchValidator = (userData, dormitoryData, validRole) => {
+exports.dormitorySwitchValidator = (
+  userData,
+  dormitoryData,
+  validRole,
+  dormitoryAmenitySegment,
+  dormitoryDocumentSegment,
+  dormitoryLocationSegment,
+  dormitoryLandmarkSegment,
+  dormitoryRoomSegment
+) => {
   //Check the role of the userData
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");
@@ -50,6 +59,42 @@ exports.dormitorySwitchValidator = (userData, dormitoryData, validRole) => {
     return new ValidationResult(404, "Dormitory not found");
   }
 
+  if (
+    dormitoryAmenitySegment.length === 0 &&
+    dormitoryRoomSegment.length === 0 &&
+    dormitoryDocumentSegment.length === 0 &&
+    dormitoryLocationSegment.length === 0 &&
+    dormitoryLandmarkSegment.length === 0
+  ) {
+    return new ValidationResult(404, "Please complete all of your dormitory information");
+  }
+
+  if (dormitoryAmenitySegment.length === 0) {
+    return new ValidationResult(404, "Please add amenity for your dormitory");
+  }
+
+  if (dormitoryDocumentSegment.length === 0) {
+    return new ValidationResult(
+      404,
+      "Please add a dormtory document for your dormitory"
+    );
+  }
+
+  if (dormitoryLocationSegment.length === 0) {
+    return new ValidationResult(404, "Please add your dormitory location");
+  }
+
+  if (dormitoryLandmarkSegment.length === 0) {
+    return new ValidationResult(
+      404,
+      "Please add a landmark near to your dormitory"
+    );
+  }
+
+  if (dormitoryRoomSegment.length === 0) {
+    return new ValidationResult(404, "Please add a room for your dormitory");
+  }
+
   //Check if the dormitory is owned by the user
   if (dormitoryData.userId !== userData.id) {
     return new ValidationResult(404, "Dormitory not found");
@@ -58,5 +103,6 @@ exports.dormitorySwitchValidator = (userData, dormitoryData, validRole) => {
   if (dormitoryData.isVerified === false) {
     return new ValidationResult(404, "Dormitory not found");
   }
+
   return null;
 };

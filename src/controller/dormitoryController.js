@@ -138,18 +138,18 @@ exports.dormitorySwitch = async (req, res) => {
   const dormitoryLandmarkSegment = await findDormitoryLandmarkSegment(dormId);
   const dormitoryLocationSegment = await findDormitoryLocationSegment(dormId);
   const dormitoryRoomSegment = await findDormitoryRoomSegment(dormId);
-  console.log("Dormitory Amenity: ", dormitoryAmenitySegment);
-  console.log("Dormitory Document: ", dormitoryDocumentSegment);
-  console.log("Dormitory Location: ", dormitoryLocationSegment);
-  console.log("Dormitory Landmark: ", dormitoryLandmarkSegment);
-  console.log("Dormitory Room: ", dormitoryRoomSegment);
 
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const validationResult = dormitorySwitchValidator(
     userData,
     dormitoryData,
-    validRole
+    validRole,
+    dormitoryAmenitySegment,
+    dormitoryDocumentSegment,
+    dormitoryLocationSegment,
+    dormitoryLandmarkSegment,
+    dormitoryRoomSegment
   );
   if (validationResult !== null)
     return res
