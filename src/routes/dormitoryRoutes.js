@@ -66,19 +66,22 @@ route.post(
   dormImageController.addDormitoryDocuments
 );
 
+route.get(
+  "/view-owner-dormitories",
+  requireAuth,
+  dormitoryController.displayOwnerDormitories
+);
+
 //To get specific dormitory information created by the user.
 route.get(
   "/view-dormitory-detail/:dormId",
-  requireAuth,
   dormitoryController.viewDormitoryDetail
 );
 
+route.get("/search-dormitory", dormitoryController.searchDormitory);
+
 //To get or display all dormitory information
-route.get(
-  "/get-all-dormitories",
-  requireAuth,
-  dormitoryController.displayAllDormitories
-);
+route.get("/get-all-dormitories", dormitoryController.displayAllDormitories);
 
 //To edit the status of the availability of the dormitory
 route.put(
@@ -92,6 +95,12 @@ route.delete(
   "/delete-dormitory",
   requireAuth,
   dormitoryController.deleteDormitory
+);
+
+route.delete(
+  "/delete-dormitory-profile-image/dorm-:dormId/image-:profileImageId",
+  requireAuth,
+  dormImageController.removeDormitoryProfileImage
 );
 
 //Export Here

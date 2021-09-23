@@ -1,7 +1,12 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const fs = require("fs");
-const { is_roleValid } = require("../validator/userValidator");
+const {
+  is_roleValid,
+  verifyDormitory,
+  userValidator,
+} = require("../validator/userValidator");
+const { findDormitoryData, findUserData } = require("../database/find");
+const { dormitoryVerifiedNotice, userVerifiedNotice } = require("../mailer/mailer");
 
 //For ADMIN only.
 //This function will let the admins to manually or perssonaly validate
@@ -10,9 +15,15 @@ exports.displayAllUsers = async (req, res) => {
   const userData = req.user;
 
   const validRole = validator.isValidRole(userData.role, "admin");
-  try {
-    is_roleValid(validRole, res);
 
+  const validationResult = is_roleValid(validRole);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
     const adminUsers = await db.User.findAll({
       where: { role: "admin" },
       include: [db.ProfileImage, db.Document],
@@ -38,15 +49,23 @@ exports.displayAllUsers = async (req, res) => {
 //TO VERIFY THE USERS
 exports.verifyUser = async (req, res) => {
   const { id, isVerified } = req.body;
-  const userData = req.user;
+  const user = req.user;
 
-  const validRole = validator.isValidRole(userData.role, "admin");
+  const userData = await findUserData(id);
+  const validRole = validator.isValidRole(user.role, "admin");
+  const validationResult = userValidator(validRole, userData);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, res, t);
-
     await db.User.update({ isVerified }, { where: { id } }, { transaction: t });
     await t.commit();
+
+    userVerifiedNotice(userData);
 
     return res.send({ msg: "Account Successfully Verified" });
   } catch (error) {
@@ -61,13 +80,19 @@ exports.verifyUser = async (req, res) => {
 //This function is not yet complete until this comment is deleted.
 exports.deleteUser = async (req, res) => {
   const { id } = req.body;
-  const userData = req.user;
+  const user = req.user;
 
-  const validRole = validator.isValidRole(userData.role, "admin");
+  const userData = await findUserData(id);
+  const validRole = validator.isValidRole(user.role, "admin");
+  const validationResult = userValidator(validRole, userData);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, res, t);
-
     const user = await db.User.findOne({ where: { id: id } });
 
     await db.User.destroy({ where: { id: user.id } }, { transaction: t });
@@ -86,17 +111,26 @@ exports.verifyDormitory = async (req, res) => {
   const { dormId, isVerified } = req.body;
 
   const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "admin");
+
+  const validationResult = verifyDormitory(validRole, dormitoryData);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, res, t);
-
     await db.Dormitory.update(
       { isVerified },
       { where: { id: dormId } },
       { transaction: t }
     );
     await t.commit();
+
+    dormitoryVerifiedNotice(userData, dormitoryData);
 
     return res.send({ msg: "Your dormitory is now verified" });
   } catch (error) {

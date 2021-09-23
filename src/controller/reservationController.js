@@ -27,17 +27,19 @@ exports.createNewReservation = async (req, res) => {
   const roomData = await findRoomData(roomId);
   const validRole = validator.isValidRole(userData.role, "tenant");
 
+  const validationResult = createNewReservationValidator(
+    userData,
+    dormitoryData,
+    roomData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await createNewReservationValidator(
-      userData,
-      dormitoryData,
-      roomData,
-      validRole,
-      t,
-      res
-    );
-
     await db.Reservation.create(
       {
         dormitoryId: dormId,
@@ -70,18 +72,20 @@ exports.cancelReservation = async (req, res) => {
   const reservationData = await findReservationData(reservationId);
   const validRole = validator.isValidRole(userData.role, "tenant");
 
+  const validationResult = cancelReservationValidator(
+    userData,
+    dormitoryData,
+    roomData,
+    reservationData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await cancelReservationValidator(
-      userData,
-      dormitoryData,
-      roomData,
-      reservationData,
-      validRole,
-      t,
-      res
-    );
-
     await db.Reservation.update(
       { isCancelled: true, isAccepted: false },
       { where: { id: reservationData.id } },
@@ -113,9 +117,17 @@ exports.viewAllReservations = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
-  try {
-    viewAllReservationsValidator(userData, dormitoryData, validRole, res);
+  const validationResult = viewAllReservationsValidator(
+    userData,
+    dormitoryData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
 
+  try {
     const reservations = await db.Reservation.findAll({
       where: {
         dormitoryId: dormitoryData.id,
@@ -141,17 +153,19 @@ exports.removeUser = async (req, res) => {
   const reservationData = await findReservationData(reservationId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
+  const validationResult = removeUserValidator(
+    dormitoryData,
+    roomData,
+    reservationData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await removeUserValidator(
-      dormitoryData,
-      roomData,
-      reservationData,
-      validRole,
-      t,
-      res
-    );
-
     await db.Reservation.destroy(
       {
         where: {
@@ -187,19 +201,21 @@ exports.addUser = async (req, res) => {
   const reservationData = await findReservationData(reservationId);
 
   const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = addUserValidator(
+    userData,
+    dormitoryData,
+    roomData,
+    reservationData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
-
   try {
-    await addUserValidator(
-      userData,
-      dormitoryData,
-      roomData,
-      reservationData,
-      validRole,
-      t,
-      res
-    );
-
     const updatedRoom = await db.Room.update(
       { activeTenant: roomData.activeTenant + 1 },
       { where: { id: roomData.id } },
@@ -232,18 +248,21 @@ exports.acceptReservations = async (req, res) => {
   const reservationData = await findReservationData(reservationId);
 
   const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = acceptReservationsValidator(
+    userData,
+    dormitoryData,
+    roomData,
+    reservationData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await acceptReservationsValidator(
-      userData,
-      dormitoryData,
-      roomData,
-      reservationData,
-      validRole,
-      t,
-      res
-    );
-
     const updatedReservation = await db.Reservation.update(
       { isAccepted },
       { where: { id: reservationData.id } },

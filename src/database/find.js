@@ -48,4 +48,21 @@ module.exports = {
 
     return commentData;
   },
+  findAmenity: (amenityId) => {
+    const amenityData = db.Amenity.findOne({ where: { id: amenityId } });
+
+    return amenityData;
+  },
+  findDormProfileImageData: (dormProfileImageId) => {
+    const dormProfileImageData = db.DormProfileImage.findOne({
+      where: { id: dormProfileImageId },
+    });
+
+    return dormProfileImageData;
+  },
+  findUserData: (userId) => {
+    const userData = db.User.findOne({ where: { id: userId } });
+
+    return userData;
+  },
 };

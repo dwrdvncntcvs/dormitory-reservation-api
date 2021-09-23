@@ -26,17 +26,27 @@ exports.signUp = async (req, res) => {
     role,
   } = req.body;
 
+  const validationResult = signUpValidator(req.body);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  const salt = await bcrypt.genSalt(10, "a");
+  const password = await bcrypt.hash(plainPassword, salt);
+
+  const verifyPassword = await bcrypt.compare(plainConfirmPassword, password);
+
+  const validatePassword = passwordValidator(verifyPassword);
+  if (validatePassword !== null) {
+    return res
+      .status(validatePassword.statusCode)
+      .send({ msg: validatePassword.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    await signUpValidator(req.body, t, res);
-
-    const salt = await bcrypt.genSalt(10, "a");
-    const password = await bcrypt.hash(plainPassword, salt);
-
-    const verifyPassword = await bcrypt.compare(plainConfirmPassword, password);
-
-    passwordValidator(verifyPassword, res);
-
     const user = await db.User.create(
       { name, username, email, password, contactNumber, address, gender, role },
       { transaction: t }
@@ -60,17 +70,19 @@ exports.signIn = async (req, res) => {
     where: { username, role },
   });
 
+  const validationResult = signInValidator(req.body, user);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  const validatedPassword = await bcrypt.compare(plainPassword, user.password);
+
+  if (!validatedPassword)
+    return res.status(401).send({ msg: "Invalid Username and Password" });
+
   try {
-    signInValidator(req.body, user, res);
-
-    const validatedPassword = await bcrypt.compare(
-      plainPassword,
-      user.password
-    );
-
-    if (!validatedPassword)
-      return res.status(401).send({ msg: "Invalid Username and Password" });
-
     const token = jwt.sign(
       { id: user.id, email: user.email, role },
       config.secretKey
@@ -87,13 +99,12 @@ exports.verifyEmail = async (req, res) => {
   const id = req.params.id;
   const userData = await db.User.findOne({ where: { id } });
 
+  if (!userData) {
+    return res.status(404).send({ msg: "User not found" });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    if (!userData) {
-      await t.rollback();
-      return res.status(404).send({ msg: "User not found" });
-    }
-
     await db.User.update(
       { isEmailVerified: true },
       { where: { id } },
@@ -131,7 +142,7 @@ exports.userProfile = async (req, res) => {
     } else if (userData.role === "admin") {
       const user = await db.User.findOne({
         where: { id: userData.id },
-        include: [db.ProfileImage, db.Document],
+        include: [db.ProfileImage],
       });
 
       return res.send({ user });
@@ -147,11 +158,16 @@ exports.userProfile = async (req, res) => {
 exports.editProfileName = async (req, res) => {
   const { name } = req.body;
 
+  const validationResult = editAccountValidator(name);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   const userData = req.user;
   try {
-    await editAccountValidator(name, res, t);
-
     await db.User.update(
       { name },
       { where: { id: userData.id } },
@@ -171,11 +187,16 @@ exports.editProfileName = async (req, res) => {
 exports.editProfileUsername = async (req, res) => {
   const { username } = req.body;
 
+  const validationResult = editAccountValidator(username);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   const userData = req.user;
   try {
-    await editAccountValidator(username, res, t);
-
     await db.User.update(
       { username },
       { where: { id: userData.id } },
@@ -195,11 +216,16 @@ exports.editProfileUsername = async (req, res) => {
 exports.editProfileAddress = async (req, res) => {
   const { address } = req.body;
 
+  const validationResult = editAccountValidator(address);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
   const userData = req.user;
   const t = await db.sequelize.transaction();
   try {
-    await editAccountValidator(address, res, t);
-
     await db.User.update(
       { address },
       { where: { id: userData.id } },
@@ -218,13 +244,16 @@ exports.editProfileAddress = async (req, res) => {
 //Checks email address to change user's password.
 exports.checkUserEmail = async (req, res) => {
   const email = req.params.email;
+  const { hostAddress } = req.body;
 
   try {
     const user = await db.User.findOne({ where: { email } });
 
     if (!user) return res.status(401).send({ msg: "Invalid Email Address" });
 
-    return res.send({ id: user.id });
+    mailer.changePassword(user, hostAddress,);
+
+    return res.status(200).send({ msg: "Please open your email to fully change your password." });
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
@@ -235,25 +264,26 @@ exports.checkUserEmail = async (req, res) => {
 exports.changeUserPassword = async (req, res) => {
   const { id, plainPassword, plainConfirmPassword } = req.body;
 
+  //Checking if fields are null or not.
+  if (plainPassword === "" || plainConfirmPassword === "") {
+    return res.status(401).send({ msg: "Invalid Passwords" });
+  }
+
+  //For salting and hashing password
+  const salt = await bcrypt.genSalt(10, "a");
+  const password = await bcrypt.hash(plainPassword, salt);
+
+  const verifiedPassword = await bcrypt.compare(plainConfirmPassword, password);
+
+  const validatePassword = passwordValidator(verifiedPassword);
+  if (validatePassword !== null) {
+    return res
+      .status(validatePassword.statusCode)
+      .send({ msg: validatePassword.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    //Checking if fields are null or not.
-    if (plainPassword === "" || plainConfirmPassword === "") {
-      await t.rollback();
-      return res.status(401).send({ msg: "Invalid Passwords" });
-    }
-
-    //For salting and hashing password
-    const salt = await bcrypt.genSalt(10, "a");
-    const password = await bcrypt.hash(plainPassword, salt);
-
-    const verifiedPassword = await bcrypt.compare(
-      plainConfirmPassword,
-      password
-    );
-
-    await passwordValidator(verifiedPassword, t, res);
-
     await db.User.update({ password }, { where: { id } }, { transaction: t });
     await t.commit();
 

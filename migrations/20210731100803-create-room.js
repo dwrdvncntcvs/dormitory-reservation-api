@@ -21,13 +21,25 @@ module.exports = {
         defaultValue: 0,
       },
       roomCost: {
-        type: Sequelize.DECIMAL(16,2)
+        type: Sequelize.DECIMAL(16,2),
+        get() {
+          const value = this.getDataValue('roomCost');
+          return value === null ? null : parseFloat(value);
+        }
       },
       electricBill: {
-        type: Sequelize.DECIMAL(16,2)
+        type: Sequelize.DECIMAL(16,2),
+        get() {
+          const value = this.getDataValue('electricBill');
+          return value === null ? null : parseFloat(value);
+        }
       },
       waterBill: {
-        type: Sequelize.DECIMAL(16,2)
+        type: Sequelize.DECIMAL(16,2),
+        get() {
+          const value = this.getDataValue('waterBill');
+          return value === null ? null : parseFloat(value);
+        }
       },
       dormitoryId: {
         type: Sequelize.INTEGER,

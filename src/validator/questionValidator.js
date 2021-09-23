@@ -1,67 +1,66 @@
-exports.addQuestionValidator = (question, dormitoryData, t, res) => {
+const { ValidationResult } = require("./validationResult");
+
+exports.addQuestionValidator = (question, dormitoryData) => {
   if (question === "") {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid Input" });
+    return new ValidationResult(401, "Invalid Input");
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
+
+  return null;
 };
 
 exports.editQuestionValidator = (
   question,
   userData,
   questionData,
-  dormitoryData,
-  t,
-  res
+  dormitoryData
 ) => {
   if (question === "") {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid Input" });
+    return new ValidationResult(401, "Invalid Input");
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (!questionData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Question not found" });
+    return new ValidationResult(404, "Question not found");
   }
 
   if (questionData.dormitoryId !== dormitoryData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Question not found" });
+    return new ValidationResult(404, "Question not found");
   }
 
   if (questionData.userId !== userData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Question not found" });
+    return new ValidationResult(404, "Question not found");
   }
+
+  return null;
 };
 
-exports.removeQuestionValidator = (userData, questionData, dormitoryData, t, res) => {
+exports.removeQuestionValidator = (
+  userData,
+  questionData,
+  dormitoryData,
+) => {
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (!questionData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Question not found" });
+    return new ValidationResult(404, "Question not found");
   }
 
   if (questionData.dormitoryId !== dormitoryData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Question not found" });
+    return new ValidationResult(404, "Question not found")
   }
 
   if (questionData.userId !== userData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Question not found" });
+    return new ValidationResult(404, "Question not found")
   }
+
+  return null;
 };

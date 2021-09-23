@@ -1,62 +1,55 @@
+const { ValidationResult } = require("./validationResult");
+
 exports.addRatingValidator = (
   { rating },
   dormitoryData,
   validRole,
-  isActive,
-  t,
-  res
+  isActive
 ) => {
   if (rating === "") {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid Input" });
+    return new ValidationResult(401, "Invalid Input");
   }
 
   if (validRole === false) {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid User" });
+    return new ValidationResult((401, "Invalid User"));
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (!isActive) {
-    t.rollback();
-    return res.status(404).send({ msg: "Reservation not active" });
+    return new ValidationResult(404, "Reservation not active");
   }
+
+  return null;
 };
 
 exports.removeRatingValidator = (
   userData,
   dormitoryData,
   ratingData,
-  validRole,
-  t,
-  res
+  validRole
 ) => {
   if (validRole === false) {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid User" });
+    return new ValidationResult(401, "Invalid User");
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (!ratingData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Rating not found" });
+    return new ValidationResult(404, "Rating not found");
   }
 
   if (ratingData.dormitoryId !== dormitoryData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Rating not found" });
+    return new ValidationResult(404, "Rating not found");
   }
 
   if (ratingData.userId !== userData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Rating not found" });
+    return new ValidationResult(404, "Rating not found");
   }
+
+  return null;
 };

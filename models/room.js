@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         hooks: true,
       });
 
-      this.hasMany(models.Reservation, { foreignKey: "roomId"});
+      this.hasMany(models.Reservation, { foreignKey: "roomId" });
     }
   }
   Room.init(
@@ -43,14 +43,26 @@ module.exports = (sequelize, DataTypes) => {
       roomCost: {
         type: DataTypes.DECIMAL(16, 2),
         allowNull: false,
+        get() {
+          const value = this.getDataValue("roomCost");
+          return value === null ? null : parseFloat(value);
+        },
       },
       electricBill: {
         type: DataTypes.DECIMAL(16, 2),
         allowNull: true,
+        get() {
+          const value = this.getDataValue("electricBill");
+          return value === null ? null : parseFloat(value);
+        },
       },
       waterBill: {
         type: DataTypes.DECIMAL(16, 2),
         allowNull: true,
+        get() {
+          const value = this.getDataValue("waterBill");
+          return value === null ? null : parseFloat(value);
+        },
       },
     },
     {

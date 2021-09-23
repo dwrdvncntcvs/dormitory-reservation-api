@@ -1,18 +1,16 @@
-exports.signUpValidator = (
-  {
-    name,
-    username,
-    email,
-    plainPassword,
-    plainConfirmPassword,
-    contactNumber,
-    address,
-    gender,
-    role,
-  },
-  transaction,
-  res
-) => {
+const { ValidationResult } = require("./validationResult");
+
+exports.signUpValidator = ({
+  name,
+  username,
+  email,
+  plainPassword,
+  plainConfirmPassword,
+  contactNumber,
+  address,
+  gender,
+  role,
+}) => {
   if (
     name === "" ||
     username === "" ||
@@ -24,55 +22,83 @@ exports.signUpValidator = (
     gender === "" ||
     role === ""
   ) {
-    transaction.rollback();
-    return res.status(401).send({ msg: "Invalid Inputs" });
+    return new ValidationResult(401, "Invalid Imputs");
   }
+
+  return null;
 };
 
-exports.passwordValidator = (password, t, res) => {
-  if (!password) {
-    t.rollback();
-    return res.status(401).send({ msg: "Passwords not matched" });
+exports.passwordValidator = (password) => {
+  if (password === false) {
+    return new ValidationResult(401, "Passwords not matched");
   }
+
+  return null;
 };
 
-exports.signInValidator = ({ username, plainPassword, role }, user, res) => {
-  if (username === "" || plainPassword === "" || role === "")
-    return res.status(401).send({ msg: "Invalid Inputs" });
-
-  if (!user)
-    return res.status(401).send({ msg: "Invalid Username and Password" });
-
-  if (user.isEmailVerified !== true)
-    return res
-      .status(401)
-      .send({ msg: "Please Check your email to verify your account" });
-};
-
-exports.editAccountValidator = (toBeEdit, res, t) => {
-  if (toBeEdit === "") {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid Inputs" });
-  }
-};
-
-exports.is_roleValid = (validRole, res, t = null) => {
-  if (t !== null) {
-    if (validRole === false)
-      return res.status(401).send({ msg: "Invalid User" });
-  }
-  if (validRole === false) return res.status(401).send({ msg: "Invalid User" });
-};
-
-exports.userValidator = (user, res, t = null) => {
-  if (t !== null) {
-    if (!user) {
-      t.rollback();
-      res.send({ msg: "Invalid User" });
-    }
+exports.signInValidator = ({ username, plainPassword, role }, user) => {
+  if (username === "" || plainPassword === "" || role === "") {
+    return new ValidationResult(401, "Invalid Inputs");
   }
 
   if (!user) {
-    res.send({ msg: "Invalid User" });
+    return new ValidationResult(401, "Invalid Username and Password");
   }
+
+  if (user.isEmailVerified !== true) {
+    return new ValidationResult(
+      401,
+      "Please Check your email to verify your account"
+    );
+  }
+
+  return null;
+};
+
+exports.editAccountValidator = (toBeEdit) => {
+  if (toBeEdit === "") {
+    return new ValidationResult(401, "Invalid Input");
+  }
+
+  return null;
+};
+
+exports.is_roleValid = (validRole) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  return null;
+};
+
+exports.verifyDormitory = (validRole, dormitoryData) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (dormitoryData.isVerified === true) {
+    return new ValidationResult(400, "Dormitory's already verified");
+  }
+
+  return null;
+};
+
+exports.userValidator = (validRole, userData) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!userData) {
+    return new ValidationResult(404, "User not found");
+  }
+
+  if (userData.isVerified === true) {
+    return new ValidationResult(400, "User's already verified");
+  }
+
+  return null;
 };

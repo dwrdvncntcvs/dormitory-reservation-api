@@ -1,28 +1,30 @@
+const { ValidationResult } = require("./validationResult");
+
 exports.dormLocationValidator = (
   { longitude, latitude },
   userData,
   dormitoryData,
-  validRole,
-  t,
-  res
+  validRole
 ) => {
   if (longitude === "" || latitude === "") {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid Inputs" });
+    return new ValidationResult(401, "Invalid Inputs");
   }
 
   if (validRole === false) {
-    t.rollback();
-    return res.status(401).send({ msg: "Invalid User" });
+    return new ValidationResult(401, "Invalid User");
   }
 
   if (!dormitoryData) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (dormitoryData.userId !== userData.id) {
-    t.rollback();
-    return res.status(404).send({ msg: "Dormitory not found" });
+    return new ValidationResult(404, "Dormitory not found");
   }
+
+  if (dormitoryData.isVerified === false) {
+    return new ValidationResult(401, "Dormitory is not verified");
+  }
+
+  return null;
 };

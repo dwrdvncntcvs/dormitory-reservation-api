@@ -4,7 +4,7 @@ const {
   findDormitoryQuestion,
   findDormitoryComment,
 } = require("../database/find");
-const { commentValidator } = require("../validator/commentValidator");
+const { validateExistingComment, validateNewComment } = require("../validator/commentValidator");
 
 exports.addComment = async (req, res) => {
   const { comment, questionId, dormitoryId } = req.body;
@@ -13,18 +13,13 @@ exports.addComment = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormitoryId);
   const questionData = await findDormitoryQuestion(questionId);
 
+  const validationResult = validateNewComment(comment, userData, dormitoryData, questionData);
+  if (validationResult !== null) {
+    res.status(validationResult.statusCode).send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    await commentValidator(
-      comment,
-      userData,
-      dormitoryData,
-      questionData,
-      null,
-      res,
-      t
-    );
-
     await db.Comment.create({
       comment,
       commenter: userData.name,
@@ -50,19 +45,14 @@ exports.editComment = async (req, res) => {
   const commentData = await findDormitoryComment(commentId);
   const dormitoryData = await findDormitoryData(dormitoryId);
 
+  const validationResult = validateExistingComment(userData, dormitoryData, questionData, commentData);
+  if (!comment || validationResult != null) {
+    res.status(validationResult.statusCode).send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
 P
   try {
-    await commentValidator(
-      comment,
-      userData,
-      dormitoryData,
-      questionData,
-      commentData,
-      res,
-      t
-    );
-
     await db.Comment.update(
       { comment },
       {
@@ -93,18 +83,13 @@ exports.removeComment = async (req, res) => {
   const questionData = await findDormitoryQuestion(questionId);
   const commentData = await findDormitoryComment(commentId);
 
+  const validationResult = validateExistingComment(userData, dormitoryData, questionData, commentData);
+  if (validationResult != null) {
+    res.status(validationResult.statusCode).send({ msg: validationResult.message });
+  }
+
   const t = await db.sequelize.transaction();
   try {
-    await commentValidator(
-      null,
-      userData,
-      dormitoryData,
-      questionData,
-      commentData,
-      res,
-      t
-    );
-
     await db.Comment.destroy(
       {
         where: {

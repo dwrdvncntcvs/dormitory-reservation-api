@@ -15,10 +15,14 @@ exports.addQuestion = async (req, res) => {
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormitoryId);
 
+  const validationResult = addQuestionValidator(question, dormitoryData);
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    addQuestionValidator(question, dormitoryData, t, res);
-
     await db.Question.create(
       {
         question,
@@ -48,17 +52,19 @@ exports.editQuestion = async (req, res) => {
   const questionData = await findDormitoryQuestion(questionId);
   const dormitoryData = await findDormitoryData(dormitoryId);
 
+  const validationResult = editQuestionValidator(
+    question,
+    userData,
+    questionData,
+    dormitoryData
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msgs: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await editQuestionValidator(
-      question,
-      userData,
-      questionData,
-      dormitoryData,
-      t,
-      res
-    );
-
     await db.Question.update(
       {
         question,
@@ -89,16 +95,18 @@ exports.removeQuestion = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormitoryId);
   const questionData = await findDormitoryQuestion(questionId);
 
+  const validationResult = removeQuestionValidator(
+    userData,
+    questionData,
+    dormitoryData
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await removeQuestionValidator(
-      userData,
-      questionData,
-      dormitoryData,
-      t,
-      res
-    );
-
     await db.Question.destroy(
       {
         where: {

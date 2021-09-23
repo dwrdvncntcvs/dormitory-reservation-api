@@ -1,12 +1,18 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const { findDormitoryData, findDormImageData } = require("../database/find");
 const {
-  is_roleValid,
-  dormImageValidator,
-  dormProfileImageValidator,
-  dormDocumentValidator,
+  findDormitoryData,
+  findDormImageData,
+  findDormProfileImageData,
+} = require("../database/find");
+const {
+  addDormImagevalidator,
+  deleteDormImageValidator,
+  addDormitoryProfileImageValidator,
+  addDormitoryDocuments,
+  removeDormitoryProfileImageValidator,
 } = require("../validator/dormImageValidator");
+const fs = require("fs");
 
 exports.addDormImage = async (req, res) => {
   const { name, dormId } = req.body;
@@ -14,13 +20,27 @@ exports.addDormImage = async (req, res) => {
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(dormId);
+  const filePath = `image/dormImage/${req.file.filename}`;
+
+  //New Validator
+  const validationResult = addDormImagevalidator(
+    dormitoryData,
+    name,
+    userData,
+    validRole,
+    filePath
+  );
+  if (validationResult !== null) {
+    await fs.unlink(filePath, (err) => {
+      console.log(err);
+    });
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
 
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, t, res);
-
-    await dormImageValidator(name, userData, dormitoryData, null, t, res);
-
     await db.DormImage.create(
       {
         name,
@@ -43,25 +63,30 @@ exports.addDormImage = async (req, res) => {
 };
 
 exports.deleteDormImage = async (req, res) => {
-  const { imageId, dormId } = req.body;
+  const dormId = req.params.dormId;
+  const imageId = req.params.imageId;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
   const dormImageData = await findDormImageData(imageId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
+  const validationResult = deleteDormImageValidator(
+    dormitoryData,
+    dormImageData,
+    userData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, t, res);
-
-    await dormImageValidator(
-      null,
-      userData,
-      dormitoryData,
-      dormImageData,
-      t,
-      res
-    );
+    await fs.unlink(`image/dormImage/${dormImageData.filename}`, (err) => {
+      if (err) console.log(err);
+    });
 
     await db.DormImage.destroy(
       { where: { id: dormImageData.id } },
@@ -83,13 +108,24 @@ exports.addDormitoryProfileImage = async (req, res) => {
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(id);
+  const filePath = `image/dormitoryProfileImage/${req.file.filename}`;
+
+  const validationResult = addDormitoryProfileImageValidator(
+    validRole,
+    dormitoryData,
+    userData
+  );
+  if (validationResult !== null) {
+    await fs.unlink(filePath, (err) => {
+      console.log(err);
+    });
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
 
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, t, res);
-
-    await dormProfileImageValidator(userData, dormitoryData, t, res);
-
     await db.DormProfileImage.create({
       filename: req.file.filename,
       filepath: req.file.path,
@@ -106,31 +142,78 @@ exports.addDormitoryProfileImage = async (req, res) => {
   }
 };
 
+exports.removeDormitoryProfileImage = async (req, res) => {
+  const dormId = req.params.dormId;
+  const profileImageId = req.params.profileImageId;
+
+  const userData = req.user;
+  const validRole = validator.isValidRole(userData.role, "owner");
+  const dormitoryData = await findDormitoryData(dormId);
+  const dormProfileImageData = await findDormProfileImageData(profileImageId);
+
+  const validationResult = removeDormitoryProfileImageValidator(
+    userData,
+    validRole,
+    dormitoryData,
+    dormProfileImageData
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
+  const filePath = `image/dormitoryProfileImage/${dormProfileImageData.filename}`;
+
+  const t = await db.sequelize.transaction();
+  try {
+    await fs.unlink(filePath, (err) => {
+      console.log(err);
+    });
+
+    await db.DormProfileImage.destroy(
+      {
+        where: { id: dormProfileImageData.id },
+      },
+      { transaction: t }
+    );
+    await t.commit();
+
+    return res
+      .status(200)
+      .send({ msg: "Dormitory Profile Image deleted successfully" });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
 exports.addDormitoryDocuments = async (req, res) => {
   const { documentName, documentType, dormId } = req.body;
 
   const userData = req.user;
-  const userDormData = await findDormitoryData(dormId);
+  const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = addDormitoryDocuments(
+    documentName,
+    documentType,
+    userData,
+    dormitoryData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
 
   const t = await db.sequelize.transaction();
   try {
-    await is_roleValid(validRole, t, res);
-
-    await dormDocumentValidator(
-      documentName,
-      documentType,
-      userData,
-      userDormData,
-      t,
-      res
-    );
-
     await db.DormDocument.create(
       {
         documentName,
         documentType,
-        dormitoryId: userDormData.id,
+        dormitoryId: dormitoryData.id,
         filename: req.file.filename,
         filepath: req.file.path,
         mimetype: req.file.mimetype,

@@ -16,17 +16,19 @@ exports.addRating = async (req, res) => {
     where: { userId: userData.id, isActive: true },
   });
 
+  const validationResult = addRatingValidator(
+    req.body,
+    dormitoryData,
+    validRole,
+    isActive
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await addRatingValidator(
-      req.body,
-      dormitoryData,
-      validRole,
-      isActive,
-      t,
-      res
-    );
-
     await db.DormRating.create(
       {
         dormitoryId: dormitoryData.id,
@@ -53,17 +55,19 @@ exports.removeRating = async (req, res) => {
   const ratingData = await findDormRatingData(ratingId);
   const validRole = validator.isValidRole(userData.role, "tenant");
 
+  const validationResult = removeRatingValidator(
+    userData,
+    dormitoryData,
+    ratingData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await removeRatingValidator(
-      userData,
-      dormitoryData,
-      ratingData,
-      validRole,
-      t,
-      res
-    );
-
     await db.DormRating.destroy(
       { where: { id: ratingId } },
       { transaction: t }

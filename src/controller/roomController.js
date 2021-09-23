@@ -15,17 +15,20 @@ exports.createNewRoom = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormId);
 
   const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = createNewRoomValidator(
+    req.body,
+    userData,
+    dormitoryData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await createNewRoomValidator(
-      req.body,
-      userData,
-      dormitoryData,
-      validRole,
-      t,
-      res
-    );
-
     const roomDetail = await db.Room.create(
       {
         name: roomName,
@@ -56,17 +59,21 @@ exports.updateRoomPayment = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormId);
 
   const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = updateRoomPaymentValidator(
+    req.body,
+    userData,
+    roomData,
+    dormitoryData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await updateRoomPaymentValidator(
-      req.body,
-      userData,
-      roomData,
-      dormitoryData,
-      validRole,
-      t,
-      res
-    );
     //To update the payment bills of the specific room
     await db.Room.update(
       { roomCost, electricBill, waterBill },

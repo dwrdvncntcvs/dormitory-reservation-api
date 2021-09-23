@@ -12,17 +12,19 @@ exports.addDormitoryLocation = async (req, res) => {
 
   const point = { type: "Point", coordinates: [latitude, longitude] };
 
+  const validationResult = dormLocationValidator(
+    req.body,
+    userData,
+    dormitoryData,
+    validRole
+  );
+  if (validationResult !== null)
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+
   const t = await db.sequelize.transaction();
   try {
-    await dormLocationValidator(
-      req.body,
-      userData,
-      dormitoryData,
-      validRole,
-      t,
-      res
-    );
-
     await db.DormLocation.create(
       {
         dormitoryName: dormitoryData.name,

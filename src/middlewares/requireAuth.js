@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
 
     if (!authorization) {
         console.log("No Authorization Header");
-        return res.status(401).send({ msg: "Please sign in first." })
+        return res.status(401).send({ msg: "Please sign in first." });
     }
 
     //Replacing token . . .
