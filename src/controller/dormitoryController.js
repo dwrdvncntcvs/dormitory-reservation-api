@@ -6,8 +6,9 @@ const {
   deleteDormitoryValidator,
   dormitorySwitchValidator,
 } = require("../validator/dormitoryValidator");
-const { Landmark } = require("../../models");
+const { Landmark, Room } = require("../../models");
 const { Op } = require("sequelize");
+const { getValue } = require("../database/roomFilter");
 
 //To create and input new information of a dormitory in the system.
 exports.createNewDormitory = async (req, res) => {
@@ -157,18 +158,37 @@ exports.dormitorySwitch = async (req, res) => {
 
 //To View all dormitories depends on filter with their user information
 exports.displayAllDormitories = async (req, res) => {
-  try {
-    const dormitories = await db.Dormitory.findAll({
-      include: [
-        db.DormProfileImage,
-        db.User,
-        db.DormProfileImage,
-        db.DormRating,
-        db.DormLocation,
-      ],
-    });
+  const filter1 = req.query.filter1;
+  const filter2 = req.query.filter2;
 
-    return res.status(200).send({ dormitories });
+  try {
+    if (filter1 === "all") {
+      const dormitories = await db.Dormitory.findAll({
+        include: [
+          db.DormProfileImage,
+          db.User,
+          db.DormProfileImage,
+          db.DormRating,
+          db.DormLocation,
+        ],
+      });
+
+      return res.status(200).send({ dormitories });
+    } else if (filter1 !== "all") {
+      const dormitories = await db.Dormitory.findAll({
+        where: getValue(filter1, filter2),
+        include: [
+          { model: Room },
+          db.DormProfileImage,
+          db.User,
+          db.DormProfileImage,
+          db.DormRating,
+          db.DormLocation,
+        ],
+      });
+
+      return res.status(200).send({ dormitories });
+    }
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
