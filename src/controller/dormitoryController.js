@@ -1,6 +1,13 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const { findDormitoryData } = require("../database/find");
+const {
+  findDormitoryData,
+  findDormitoryAmenitySegment,
+  findDormitoryDocumentSegment,
+  findDormitoryLandmarkSegment,
+  findDormitoryLocationSegment,
+  findDormitoryRoomSegment,
+} = require("../database/find");
 const {
   createNewDormitoryValidator,
   deleteDormitoryValidator,
@@ -125,6 +132,18 @@ exports.dormitorySwitch = async (req, res) => {
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
+  //Dormitory Segments
+  const dormitoryAmenitySegment = await findDormitoryAmenitySegment(dormId);
+  const dormitoryDocumentSegment = await findDormitoryDocumentSegment(dormId);
+  const dormitoryLandmarkSegment = await findDormitoryLandmarkSegment(dormId);
+  const dormitoryLocationSegment = await findDormitoryLocationSegment(dormId);
+  const dormitoryRoomSegment = await findDormitoryRoomSegment(dormId);
+  console.log("Dormitory Amenity: ", dormitoryAmenitySegment);
+  console.log("Dormitory Document: ", dormitoryDocumentSegment);
+  console.log("Dormitory Location: ", dormitoryLocationSegment);
+  console.log("Dormitory Landmark: ", dormitoryLandmarkSegment);
+  console.log("Dormitory Room: ", dormitoryRoomSegment);
+
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const validationResult = dormitorySwitchValidator(

@@ -65,4 +65,41 @@ module.exports = {
 
     return userData;
   },
+
+  //Dormitory Segments
+  findDormitoryDocumentSegment: (dormId) => {
+    const dormitoryDocumentSegment = db.DormDocument.findAll({
+      where: { dormitoryId: dormId },
+    });
+
+    return dormitoryDocumentSegment;
+  },
+  findDormitoryLocationSegment: (dormId) => {
+    const dormitoryLocationSegment = db.DormLocation.findAll({
+      where: { dormitoryId: dormId },
+    });
+
+    return dormitoryLocationSegment;
+  },
+  findDormitoryLandmarkSegment: (dormId) => {
+    const dormitoryLocationSegment = db.Landmark.findAll({
+      where: { dormitoryId: dormId },
+    });
+
+    return dormitoryLocationSegment;
+  },
+  findDormitoryRoomSegment: (dormId) => {
+    const dormitoryRoomSegment = db.Room.findAll({
+      where: { dormitoryId: dormId },
+    });
+
+    return dormitoryRoomSegment;
+  },
+  findDormitoryAmenitySegment: (dormId) => {
+    const dormitoryAmenitySegment = db.Amenity.findAll({
+      where: { dormitoryId: dormId },
+    });
+
+    return dormitoryAmenitySegment;
+  },
 };
