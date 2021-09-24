@@ -22,10 +22,6 @@ module.exports = (sequelize, DataTypes) => {
   }
   DormDocument.init(
     {
-      documentName: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
       documentType: {
         type: DataTypes.STRING,
         allowNull: false,

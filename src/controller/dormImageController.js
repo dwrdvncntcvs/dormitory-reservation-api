@@ -211,7 +211,6 @@ exports.addDormitoryDocuments = async (req, res) => {
   try {
     await db.DormDocument.create(
       {
-        documentName,
         documentType,
         dormitoryId: dormitoryData.id,
         filename: req.file.filename,

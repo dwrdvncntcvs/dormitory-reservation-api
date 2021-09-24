@@ -36,7 +36,7 @@ exports.createNewDormitory = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    await db.Dormitory.create(
+    const dormitory = await db.Dormitory.create(
       {
         name,
         address,
@@ -48,7 +48,7 @@ exports.createNewDormitory = async (req, res) => {
     );
     await t.commit();
 
-    return res.send({ msg: "Dormitory Successfully Created." });
+    return res.send({ msg: "Dormitory Successfully Created.",  dormitory});
   } catch (error) {
     console.log(error);
     await t.rollback();
