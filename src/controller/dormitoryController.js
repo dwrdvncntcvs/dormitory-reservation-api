@@ -183,7 +183,12 @@ exports.displayAllDormitories = async (req, res) => {
   try {
     if (filter1 === "all") {
       const dormitories = await db.Dormitory.findAll({
-        where: { isVerified: true, isAccepting: true },
+        where: {
+          [Op.and]: [
+            { isVerified: { [Op.eq]: true } },
+            { isAccepting: { [Op.eq]: true } },
+          ],
+        },
         include: [
           db.DormProfileImage,
           db.User,
@@ -197,9 +202,11 @@ exports.displayAllDormitories = async (req, res) => {
     } else if (filter1 !== "all") {
       const dormitories = await db.Dormitory.findAll({
         where: {
-          isVerified: true,
-          isAccepting: true,
-          [Op.and]: getValue(filter1, filter2),
+          [Op.and]: [
+            { isVerified: { [Op.eq]: true } },
+            { isAccepting: { [Op.eq]: true } },
+            getValue(filter1, filter2),
+          ],
         },
         include: [
           { model: Room },
@@ -212,7 +219,7 @@ exports.displayAllDormitories = async (req, res) => {
       });
 
       return res.status(200).send({ dormitories });
-    }
+    } 
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
