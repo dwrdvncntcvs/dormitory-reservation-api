@@ -48,7 +48,7 @@ exports.createNewDormitory = async (req, res) => {
     );
     await t.commit();
 
-    return res.send({ msg: "Dormitory Successfully Created.",  dormitory});
+    return res.send({ msg: "Dormitory Successfully Created.", dormitory });
   } catch (error) {
     console.log(error);
     await t.rollback();
@@ -183,6 +183,7 @@ exports.displayAllDormitories = async (req, res) => {
   try {
     if (filter1 === "all") {
       const dormitories = await db.Dormitory.findAll({
+        where: { isVerified: true, isAccepting: true },
         include: [
           db.DormProfileImage,
           db.User,
@@ -195,7 +196,11 @@ exports.displayAllDormitories = async (req, res) => {
       return res.status(200).send({ dormitories });
     } else if (filter1 !== "all") {
       const dormitories = await db.Dormitory.findAll({
-        where: getValue(filter1, filter2),
+        where: {
+          isVerified: true,
+          isAccepting: true,
+          [Op.and]: getValue(filter1, filter2),
+        },
         include: [
           { model: Room },
           db.DormProfileImage,
@@ -247,6 +252,8 @@ exports.searchDormitory = async (req, res) => {
   try {
     const dormitoryResults = await db.Dormitory.findAll({
       where: {
+        isVerified: true,
+        isAccepting: true,
         [Op.or]: [
           { name: { [Op.iLike]: "%" + search + "%" } },
           { "$Landmarks.name$": { [Op.iLike]: "%" + search + "%" } },
