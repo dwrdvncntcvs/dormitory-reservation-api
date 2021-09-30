@@ -77,7 +77,7 @@ route.post("/find-user/:email", userController.checkUserEmail);
 
 //ADMIN ONLY
 //To get or display users information
-route.get("/get-all-users", requireAuth, adminUserController.displayAllUsers);
+route.get("/get-all-users/:role", requireAuth, adminUserController.displayAllUsers);
 
 //PUT METHOD
 //To edit the name of the user
