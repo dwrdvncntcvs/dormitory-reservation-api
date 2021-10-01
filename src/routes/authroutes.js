@@ -75,9 +75,18 @@ route.get("/user-profile", requireAuth, userController.userProfile);
 
 route.post("/find-user/:email", userController.checkUserEmail);
 
+route.get(
+  "/get-user-detail/user-:userId",
+  requireAuth,
+  adminUserController.userDetails
+);
 //ADMIN ONLY
 //To get or display users information
-route.get("/get-all-users/:role", requireAuth, adminUserController.displayAllUsers);
+route.get(
+  "/get-all-users/:role",
+  requireAuth,
+  adminUserController.displayAllUsers
+);
 
 //PUT METHOD
 //To edit the name of the user
@@ -115,7 +124,7 @@ route.get("/verify-account/:id", userController.verifyEmail);
 
 //To delete a user
 route.delete(
-  "/delete-user-profile",
+  "/delete-user-profile/:id",
   requireAuth,
   adminUserController.deleteUser
 );

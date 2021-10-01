@@ -41,6 +41,7 @@ const uploadDormDocument = multer({
 //Import Dormitory Controller || Functions
 const dormitoryController = require("../controller/dormitoryController");
 const dormImageController = require("../controller/dormImageController");
+const adminUserController = require("../controller/adminUserController");
 
 const route = express.Router();
 
@@ -82,6 +83,12 @@ route.get("/search-dormitory", dormitoryController.searchDormitory);
 
 //To get or display all dormitory information
 route.get("/get-all-dormitories", dormitoryController.displayAllDormitories);
+
+route.get(
+  "/get-all-dormitories/admin",
+  requireAuth,
+  adminUserController.displayAllDormitories
+);
 
 //To edit the status of the availability of the dormitory
 route.put(

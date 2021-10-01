@@ -95,6 +95,65 @@ exports.displayAllUsers = async (req, res) => {
   }
 };
 
+exports.userDetails = async (req, res) => {
+  const userId = req.params.userId;
+
+  const userData = req.user;
+  const validRole = validator.isValidRole(userData.role, "admin");
+
+  const validationResult = is_roleValid(validRole);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
+    const userDetail = await db.User.findOne({
+      where: { id: userId },
+      include: [db.ProfileImage, db.Document],
+    });
+
+    return res.send({ userDetail });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.displayAllDormitories = async (req, res) => {
+  const filter = req.query.filter;
+
+  const userData = req.user;
+  const validRole = validator.isValidRole(userData.role, "admin");
+
+  const validationResult = is_roleValid(validRole);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
+    const dormitories = await db.Dormitory.findAll({
+      where: { [Op.or]: [{ isVerified: { [Op.eq]: filter } }] },
+      include: [
+        db.DormProfileImage,
+        db.User,
+        db.DormProfileImage,
+        db.DormRating,
+        db.DormLocation,
+        db.DormDocument,
+        db.Room,
+      ],
+    });
+
+    return res.status(200).send({ dormitories });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
 //TO VERIFY THE USERS
 exports.verifyUser = async (req, res) => {
   const { id, isVerified } = req.body;
@@ -128,7 +187,7 @@ exports.verifyUser = async (req, res) => {
 //Delete functionality that an admin user can only access.
 //This function is not yet complete until this comment is deleted.
 exports.deleteUser = async (req, res) => {
-  const { id } = req.body;
+  const id = req.params.id;
   const user = req.user;
 
   const userData = await findUserData(id);
