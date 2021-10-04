@@ -4,6 +4,7 @@ const {
   is_roleValid,
   verifyDormitory,
   userValidator,
+  displayDormitoryDetail,
 } = require("../validator/userValidator");
 const { findDormitoryData, findUserData } = require("../database/find");
 const {
@@ -38,7 +39,7 @@ exports.displayAllUsers = async (req, res) => {
           role: "admin",
           [Op.or]: [userFilter.getValue(filter, "admin")],
         },
-        include: [db.ProfileImage, db.Document],
+        // include: [db.ProfileImage, db.Document],
       });
 
       const ownerUsers = await db.User.findAll({
@@ -46,7 +47,7 @@ exports.displayAllUsers = async (req, res) => {
           role: "owner",
           [Op.or]: [userFilter.getValue(filter, "owner")],
         },
-        include: [db.ProfileImage, db.Document, db.Dormitory],
+        // include: [db.ProfileImage, db.Document, db.Dormitory],
       });
 
       const tenantUsers = await db.User.findAll({
@@ -54,7 +55,7 @@ exports.displayAllUsers = async (req, res) => {
           role: "tenant",
           [Op.or]: [userFilter.getValue(filter, "tenant")],
         },
-        include: [db.ProfileImage, db.Document],
+        // include: [db.ProfileImage, db.Document],
       });
 
       return res.send({ adminUsers, ownerUsers, tenantUsers });
@@ -64,7 +65,7 @@ exports.displayAllUsers = async (req, res) => {
           role: role,
           [Op.or]: [userFilter.getValue(filter, role)],
         },
-        include: [db.ProfileImage, db.Document],
+        // include: [db.ProfileImage, db.Document],
       });
 
       return res.send({ adminUsers });
@@ -74,7 +75,7 @@ exports.displayAllUsers = async (req, res) => {
           role: role,
           [Op.or]: [userFilter.getValue(filter, role)],
         },
-        include: [db.ProfileImage, db.Document, db.Dormitory],
+        // include: [db.ProfileImage, db.Document, db.Dormitory],
       });
 
       return res.send({ ownerUsers });
@@ -84,7 +85,7 @@ exports.displayAllUsers = async (req, res) => {
           role: role,
           [Op.or]: [userFilter.getValue(filter, role)],
         },
-        include: [db.ProfileImage, db.Document],
+        // include: [db.ProfileImage, db.Document],
       });
 
       return res.send({ tenantUsers });
@@ -121,7 +122,7 @@ exports.userDetails = async (req, res) => {
 };
 
 exports.displayAllDormitories = async (req, res) => {
-  const filter = req.query.filter;
+  const filter = req.params.filter;
 
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "admin");
@@ -134,20 +135,54 @@ exports.displayAllDormitories = async (req, res) => {
   }
 
   try {
-    const dormitories = await db.Dormitory.findAll({
-      where: { [Op.or]: [{ isVerified: { [Op.eq]: filter } }] },
-      include: [
-        db.DormProfileImage,
-        db.User,
-        db.DormProfileImage,
-        db.DormRating,
-        db.DormLocation,
-        db.DormDocument,
-        db.Room,
-      ],
+    const bothDormitories = await db.Dormitory.findAll({
+      where: { isVerified: filter, allowedGender: "both" },
+      include: [db.User],
     });
 
-    return res.status(200).send({ dormitories });
+    const maleDormitories = await db.Dormitory.findAll({
+      where: { isVerified: filter, allowedGender: "male" },
+      include: [db.User],
+    });
+
+    const femaleDormitories = await db.Dormitory.findAll({
+      where: { isVerified: filter, allowedGender: "female" },
+      include: [db.User],
+    });
+
+    return res
+      .status(200)
+      .send({ bothDormitories, femaleDormitories, maleDormitories });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.displayDormitoryDetail = async (req, res) => {
+  const dormitoryId = req.params.dormitoryId;
+
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const validRole = validator.isValidRole(userData.role, "admin");
+
+  const validationResult = displayDormitoryDetail(validRole, dormitoryData);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
+    const dormitory = await db.Dormitory.findOne({
+      where: { id: dormitoryId },
+      include: [
+        db.DormProfileImage,
+        db.DormDocument,
+        db.User
+      ]
+    });
+    return res.send({ dormitory });
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });

@@ -85,9 +85,15 @@ route.get("/search-dormitory", dormitoryController.searchDormitory);
 route.get("/get-all-dormitories", dormitoryController.displayAllDormitories);
 
 route.get(
-  "/get-all-dormitories/admin",
+  "/get-all-dormitories/admin/dormitory-:filter",
   requireAuth,
   adminUserController.displayAllDormitories
+);
+
+route.get(
+  "/get-dormitory-detail/admin/dormitory-:dormitoryId",
+  requireAuth,
+  adminUserController.displayDormitoryDetail
 );
 
 //To edit the status of the availability of the dormitory

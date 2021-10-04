@@ -102,3 +102,15 @@ exports.userValidator = (validRole, userData) => {
 
   return null;
 };
+
+exports.displayDormitoryDetail = (validRole, dormitoryData) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  return null;
+};

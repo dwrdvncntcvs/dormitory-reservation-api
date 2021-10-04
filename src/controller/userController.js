@@ -54,7 +54,7 @@ exports.signUp = async (req, res) => {
     await t.commit();
     mailer.verifyEmail(user, req.headers.host);
 
-    return res.send({ msg: "Successfully Created!" });
+    return res.send({ msg: "Successfully Created!", userId: user.id });
   } catch (err) {
     console.log(err);
     await t.rollback();
