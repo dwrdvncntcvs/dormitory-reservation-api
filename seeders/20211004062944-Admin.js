@@ -1,5 +1,15 @@
 "use strict";
 const uuid = require("uuid");
+const bcrypt = require("bcrypt");
+
+const plainPassword = "myPassword";
+
+const hashPass = async (plainPassword) => {
+  const salt = await bcrypt.genSalt(10, "a");
+  const password = await bcrypt.hash(plainPassword, salt);
+
+  return password;
+};
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -18,7 +28,7 @@ module.exports = {
         name: "Edward Vincent Cuevas",
         username: "dwrdvncntcvs",
         email: "edwardvincentcuevas7@gmail.com",
-        password: "myPassword",
+        password: await hashPass(plainPassword),
         contactNumber: "094556792203",
         address: "San Isidro Cuenca Batangas",
         gender: "male",
@@ -33,7 +43,7 @@ module.exports = {
         name: "Reneil Moncawe",
         username: "reneil",
         email: "reneilmoncawe@gmail.com",
-        password: "myPassword",
+        password: await hashPass(plainPassword),
         contactNumber: "1231312312321",
         address: "Ibaan Batangas",
         gender: "male",
@@ -48,7 +58,7 @@ module.exports = {
         name: "Anna Paulene Joble",
         username: "anna",
         email: "annapaulene7@gmail.com",
-        password: "myPassword",
+        password: await hashPass(plainPassword),
         contactNumber: "24234234323234",
         address: "Ibaan Batangas",
         gender: "female",
