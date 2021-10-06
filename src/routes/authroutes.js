@@ -142,4 +142,9 @@ route.delete(
   adminUserController.denyDormitory
 );
 
+route.delete(
+  "/deny-user-verification/userId-:userId",
+  requireAuth,
+  adminUserController.denyUsers
+);
 module.exports = route;

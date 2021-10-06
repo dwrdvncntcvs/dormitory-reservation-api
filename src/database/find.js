@@ -101,4 +101,9 @@ module.exports = {
 
     return dormitoryAmenitySegment;
   },
+  findUserDocumentsData: (userId) => {
+    const userDocumentsData = db.Document.findAll({ where: { userId: userId } });
+
+    return userDocumentsData;
+  },
 };

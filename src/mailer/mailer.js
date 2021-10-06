@@ -149,3 +149,32 @@ exports.deniedDormitoryNotice = (dormitoryData, userData) => {
     console.log(message, " Successfully sent!");
   });
 };
+
+exports.deniedUserNotice = (userData) => {
+  const messageInfo = {
+    to: userData.email,
+    from: user_email,
+    subject: `WELCOME TO DORMRES!`,
+    text: `
+        Greetings! ${userData.name}
+
+        We are very sad to inform that our admin doesn't accept your documents as a validation for your account.
+
+        I know this is frustrating, but still you can still send new documents to verify that your are the actual account owner.
+        We want you to know that we are very happy to accept you as part of us but please meet our requirements first.
+
+        I hope you understand our policies.
+        We will be happy serving you.
+
+        Thank you
+    `,
+  };
+
+  transport.sendMail(messageInfo, (err, message) => {
+    if (err) {
+      console.log(err);
+    }
+
+    console.log(message, " Successfully sent!");
+  });
+};

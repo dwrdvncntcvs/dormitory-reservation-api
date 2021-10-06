@@ -6,16 +6,19 @@ const {
   userValidator,
   displayDormitoryDetail,
   denyDormitoryValidator,
+  denyUserValidator,
 } = require("../validator/userValidator");
 const {
   findDormitoryData,
   findUserData,
   findDormitoryDocumentSegment,
+  findUserDocumentsData,
 } = require("../database/find");
 const {
   dormitoryVerifiedNotice,
   userVerifiedNotice,
   deniedDormitoryNotice,
+  deniedUserNotice,
 } = require("../mailer/mailer");
 const { Op } = require("sequelize");
 const userFilter = require("../database/userFilter");
@@ -329,6 +332,50 @@ exports.denyDormitory = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.denyUsers = async (req, res) => {
+  const userId = req.params.userId;
+
+  const userData = req.user;
+  const userToBeMailed = await findUserData(userId);
+  const validRole = validator.isValidRole(userData.role, "admin");
+  const userDocumentsData = await findUserDocumentsData(userId);
+
+  const validationResult = denyUserValidator(
+    validRole,
+    userToBeMailed,
+    userDocumentsData
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  const t = await db.sequelize.transaction();
+  try {
+    for (let document of userDocumentsData) {
+      const fileLink = `image/documentImage/${document.filename}`;
+
+      await fs.unlink(fileLink, (err) => {
+        console.log(err);
+      });
+
+      await db.Document.destroy(
+        { where: { id: document.id } },
+        { transaction: t }
+      );
+      await t.commit();
+
+      deniedUserNotice(userToBeMailed);
+      return res.send({ msg: "Email Successfully Sent" });
+    }
+  } catch (e) {
+    console.log(error);
     await t.rollback();
     return res.status(500).send({ msg: "Something went wrong" });
   }

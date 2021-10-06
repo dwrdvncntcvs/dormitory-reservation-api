@@ -156,3 +156,30 @@ exports.denyDormitoryValidator = (
 
   return null;
 };
+
+exports.denyUserValidator = (validRole, userToBeMailed, userDocumentsData) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!userToBeMailed) {
+    return new ValidationResult(404, "User not found");
+  }
+
+  if (userDocumentsData.length === 0) {
+    return new ValidationResult(404, "User Documents not found");
+  }
+
+  for (let document of userDocumentsData) {
+    if (document.userId !== userToBeMailed.id) {
+      return new ValidationResult(
+        404,
+        "These documents are not belongs to this user"
+      );
+    }
+
+    return null;
+  }
+
+  return null;
+};
