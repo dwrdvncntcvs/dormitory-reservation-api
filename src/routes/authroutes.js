@@ -136,4 +136,10 @@ route.delete(
   userImageController.deleteProfileImage
 );
 
+route.delete(
+  "/deny-dormitory-verification/userId-:userId/dormitoryId-:dormitoryId",
+  requireAuth,
+  adminUserController.denyDormitory
+);
+
 module.exports = route;

@@ -114,3 +114,45 @@ exports.displayDormitoryDetail = (validRole, dormitoryData) => {
 
   return null;
 };
+
+exports.denyDormitoryValidator = (
+  validRole,
+  dormitoryData,
+  userToBeMailed,
+  dormitoryDocumentData
+) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!userToBeMailed) {
+    return new ValidationResult(404, "User not found");
+  }
+
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (userToBeMailed.id !== dormitoryData.userId) {
+    return new ValidationResult(
+      401,
+      "This dormitory doesn't belongs to this user"
+    );
+  }
+  if (!dormitoryDocumentData) {
+    return new ValidationResult(404, "Dormitory Document not found");
+  }
+
+  for (let dormitoryDocument of dormitoryDocumentData) {
+    if (dormitoryDocument.dormitoryId !== dormitoryData.id) {
+      return new ValidationResult(
+        401,
+        "These documents/ document doesn't belongs to this dormitory"
+      );
+    }
+
+    return null;
+  }
+
+  return null;
+};

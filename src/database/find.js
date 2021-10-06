@@ -65,7 +65,6 @@ module.exports = {
 
     return userData;
   },
-
   //Dormitory Segments
   findDormitoryDocumentSegment: (dormId) => {
     const dormitoryDocumentSegment = db.DormDocument.findAll({

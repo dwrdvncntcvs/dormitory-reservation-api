@@ -5,14 +5,21 @@ const {
   verifyDormitory,
   userValidator,
   displayDormitoryDetail,
+  denyDormitoryValidator,
 } = require("../validator/userValidator");
-const { findDormitoryData, findUserData } = require("../database/find");
+const {
+  findDormitoryData,
+  findUserData,
+  findDormitoryDocumentSegment,
+} = require("../database/find");
 const {
   dormitoryVerifiedNotice,
   userVerifiedNotice,
+  deniedDormitoryNotice,
 } = require("../mailer/mailer");
 const { Op } = require("sequelize");
 const userFilter = require("../database/userFilter");
+const fs = require("fs");
 
 //For ADMIN only.
 //This function will let the admins to manually or perssonaly validate
@@ -176,11 +183,7 @@ exports.displayDormitoryDetail = async (req, res) => {
   try {
     const dormitory = await db.Dormitory.findOne({
       where: { id: dormitoryId },
-      include: [
-        db.DormProfileImage,
-        db.DormDocument,
-        db.User
-      ]
+      include: [db.DormProfileImage, db.DormDocument, db.User],
     });
     return res.send({ dormitory });
   } catch (err) {
@@ -251,9 +254,10 @@ exports.deleteUser = async (req, res) => {
 
 //To verify a dormitory to add things such as rooms and payments
 exports.verifyDormitory = async (req, res) => {
-  const { dormId, isVerified } = req.body;
+  const { userId, dormId, isVerified } = req.body;
 
   const userData = req.user;
+  const userToBeMailed = await findUserData(userId);
   const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "admin");
 
@@ -273,12 +277,58 @@ exports.verifyDormitory = async (req, res) => {
     );
     await t.commit();
 
-    dormitoryVerifiedNotice(userData, dormitoryData);
+    dormitoryVerifiedNotice(userToBeMailed, dormitoryData);
 
     return res.send({ msg: "Your dormitory is now verified" });
   } catch (error) {
     await t.rollback();
     console.log(error);
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.denyDormitory = async (req, res) => {
+  const dormitoryId = req.params.dormitoryId;
+  const userId = req.params.userId;
+
+  const userData = req.user;
+  const userToBeMailed = await findUserData(userId);
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const validRole = validator.isValidRole(userData.role, "admin");
+  const dormitoryDocumentData = await findDormitoryDocumentSegment(dormitoryId);
+
+  const validationResult = denyDormitoryValidator(
+    validRole,
+    dormitoryData,
+    userToBeMailed,
+    dormitoryDocumentData
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  const t = await db.sequelize.transaction();
+  try {
+    for (let document of dormitoryDocumentData) {
+      const fileLink = `image/dormDocumentImage/${document.filename}`;
+
+      await fs.unlink(fileLink, (err) => {
+        console.log(err);
+      });
+
+      await db.DormDocument.destroy(
+        { where: { id: document.id } },
+        { transaction: t }
+      );
+
+      deniedDormitoryNotice(dormitoryData, userToBeMailed);
+      return res.send({ msg: "Email successfully send." });
+    }
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };

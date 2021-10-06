@@ -121,3 +121,31 @@ exports.userVerifiedNotice = (userData) => {
     console.log(message, " Successfully sent!");
   });
 };
+
+exports.deniedDormitoryNotice = (dormitoryData, userData) => {
+  const messageInfo = {
+    to: userData.email,
+    from: user_email,
+    subject: `WELCOME TO DORMRES!`,
+    text: `
+        Greetings! ${userData.name}
+
+        We are very sad to inform you that your dormitory ${dormitoryData.name} documents was not accepted by the admin.
+
+        But please don't worry! Your dormitory is still in our system but not yet verified. You are still allowed to to send new documents and we
+        will update your for the status of your verification.
+
+        We hope that you understand.
+
+        Thank you
+    `,
+  };
+
+  transport.sendMail(messageInfo, (err, message) => {
+    if (err) {
+      console.log(err);
+    }
+
+    console.log(message, " Successfully sent!");
+  });
+};
