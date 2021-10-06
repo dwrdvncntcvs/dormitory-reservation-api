@@ -322,6 +322,7 @@ exports.denyDormitory = async (req, res) => {
         { where: { id: document.id } },
         { transaction: t }
       );
+      await t.commit();
 
       deniedDormitoryNotice(dormitoryData, userToBeMailed);
       return res.send({ msg: "Email successfully send." });

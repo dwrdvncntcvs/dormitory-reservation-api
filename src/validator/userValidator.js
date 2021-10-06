@@ -139,7 +139,7 @@ exports.denyDormitoryValidator = (
       "This dormitory doesn't belongs to this user"
     );
   }
-  if (!dormitoryDocumentData) {
+  if (dormitoryDocumentData.length === 0) {
     return new ValidationResult(404, "Dormitory Document not found");
   }
 
