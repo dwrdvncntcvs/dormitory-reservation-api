@@ -3,7 +3,7 @@ const db = require("../../models");
 
 exports.scheduler = () => {
   cron.schedule(
-    "* 6 * * *",
+    "0 0 */6 * * *",
     async () => {
       const user = await db.User.findAll({ where: { isEmailVerified: false } });
       const currentDate = Date.now();
