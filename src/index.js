@@ -17,6 +17,7 @@ const dormLocationRoutes = require("./routes/dormLocationRoutes");
 const questionRoutes = require("./routes/questionRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const landmarkRoutes = require("./routes/landmarkRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 //Initializing express in variable app.
 const app = express();
@@ -54,6 +55,7 @@ app.use(dormLocationRoutes);
 app.use(questionRoutes);
 app.use(commentRoutes);
 app.use(landmarkRoutes);
+app.use(paymentRoutes);
 
 //To render the images using their paths.
 app.use("/image/profileImage", express.static("image/profileImage"));
