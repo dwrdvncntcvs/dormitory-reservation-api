@@ -20,13 +20,20 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      isPayed: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
       isVerified: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
+        allowNull: false,
       },
       isAccepting: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
+        allowNull: false,
       },
       allowedGender: {
         type: Sequelize.STRING,

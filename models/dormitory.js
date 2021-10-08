@@ -68,13 +68,20 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
+      isPayed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
       isVerified: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+        allowNull: false,
       },
       isAccepting: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+        allowNull: false,
       },
       allowedGender: {
         type: DataTypes.STRING,
