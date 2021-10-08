@@ -42,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
       isValid: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
       },
       filename: {
         type: DataTypes.STRING,

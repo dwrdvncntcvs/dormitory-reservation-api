@@ -32,6 +32,7 @@ module.exports = {
       isValid: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
       },
       filename: {
         type: Sequelize.STRING,

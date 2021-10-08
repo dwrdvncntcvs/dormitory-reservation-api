@@ -66,6 +66,7 @@ app.use(
 app.use("/image/dormDocumentImage", express.static("image/dormDocumentImage"));
 app.use("/image/documentImage", express.static("image/documentImage"));
 app.use("/image/dormImage", express.static("image/dormImage"));
+app.use("/image/paymentImage", express.static("image/paymentImage"));
 
 app.listen(PORT, () => {
   console.log(divider);
