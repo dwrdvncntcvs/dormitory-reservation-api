@@ -2,11 +2,12 @@ const { ValidationResult } = require("../validator/validationResult");
 
 exports.addLandmarkValidator = (
   landmark,
+  point,
   validRole,
   dormitoryData,
   userData
 ) => {
-  if (landmark === "") {
+  if (landmark === "" && point === "") {
     return new ValidationResult(403, "Invalid Input");
   }
 

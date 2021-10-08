@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      location: {
+        type: DataTypes.GEOMETRY('POINT'),
+        allowNull: false,
+      },
       dormitoryId: {
         type: DataTypes.INTEGER,
         allowNull: false,

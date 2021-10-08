@@ -4,14 +4,16 @@ const { findDormitoryData } = require("../database/find");
 const { addLandmarkValidator } = require("../validator/landmarkValidator");
 
 exports.addLandmark = async (req, res) => {
-  const { landmark, dormId } = req.body;
+  const { landmark, latitude, longitude, dormId } = req.body;
 
+  const point = { type: "Point", coordinates: [latitude, longitude] };
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const validationResult = addLandmarkValidator(
     landmark,
+    point,
     validRole,
     dormitoryData,
     userData
@@ -26,6 +28,7 @@ exports.addLandmark = async (req, res) => {
     await db.Landmark.create(
       {
         name: landmark,
+        location: point,
         dormitoryId: dormId,
       },
       { transaction: t }

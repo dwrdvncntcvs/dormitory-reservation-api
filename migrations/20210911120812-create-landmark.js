@@ -12,6 +12,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      location: {
+        type: Sequelize.GEOMETRY('POINT'),
+        allowNull: false,
+      },
       dormitoryId: {
         type: Sequelize.INTEGER,
         allowNull: false,
