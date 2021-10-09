@@ -1,7 +1,15 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const { findDormitoryData } = require("../database/find");
-const { createPaymentValidator } = require("../validator/paymentValidator");
+const {
+  findDormitoryData,
+  findPaymentData,
+  findUserData,
+} = require("../database/find");
+const {
+  createPaymentValidator,
+  paymentVerification,
+} = require("../validator/paymentValidator");
+const { paymentVerificationNotice } = require("../mailer/mailer");
 
 exports.createNewPayment = async (req, res) => {
   const { sender, recipientNumber, amount, referenceNumber, dormitoryId } =
@@ -47,6 +55,46 @@ exports.createNewPayment = async (req, res) => {
     return res.send({
       msg: "Payment Successfully Created. Please wait for the verification of the admin",
     });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.verifyDormitoryPayment = async (req, res) => {
+  const { userId, dormitoryId, paymentId } = req.body;
+
+  const userData = req.user;
+  const userToBeMailed = await findUserData(userId);
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const validRole = validator.isValidRole(userData.role, "admin");
+  const paymentData = await findPaymentData(paymentId);
+
+  const validationResult = paymentVerification(
+    validRole,
+    dormitoryData,
+    paymentData,
+    userToBeMailed
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  const t = await db.sequelize.transaction();
+  try {
+    await db.Payment.update(
+      { isValid: true },
+      { where: { id: paymentData.id, isValid: false } },
+      { transaction: t }
+    );
+    await t.commit();
+
+    paymentVerificationNotice(userToBeMailed);
+
+    return res.send({ msg: "Payment Accepted" });
   } catch (err) {
     console.log(err);
     await t.rollback();

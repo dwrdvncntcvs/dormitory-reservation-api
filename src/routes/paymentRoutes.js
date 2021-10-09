@@ -30,4 +30,10 @@ route.post(
   paymentController.createNewPayment
 );
 
+route.put(
+  "/verifiy-dormitory-payment",
+  requireAuth,
+  paymentController.verifyDormitoryPayment
+);
+
 module.exports = route;

@@ -178,3 +178,27 @@ exports.deniedUserNotice = (userData) => {
     console.log(message, " Successfully sent!");
   });
 };
+
+exports.paymentVerificationNotice = (userData) => {
+  const messageInfo = {
+    to: userData.email,
+    from: user_email,
+    subject: `WELCOME TO DORMRES!`,
+    text: `
+        Greetings! ${userData.name}
+
+        We are happy to tell you that your payment was verified by our admin!
+        Enjoy your one year of activation of your dormitory! We hope your business all the best!
+
+        Thank you fo trusting us!
+    `,
+  };
+
+  transport.sendMail(messageInfo, (err, message) => {
+    if (err) {
+      console.log(err);
+    }
+
+    console.log(message, " Successfully sent!");
+  });
+};
