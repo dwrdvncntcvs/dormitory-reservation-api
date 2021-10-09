@@ -5,7 +5,8 @@ const {
   findPaymentData,
   findUserData,
   findPaymentRefData,
-  findNotValidPayment,
+  countNotValidPayment,
+  findDormitoryPaymentData,
 } = require("../database/find");
 const {
   createPaymentValidator,
@@ -21,13 +22,16 @@ exports.createNewPayment = async (req, res) => {
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormitoryId);
   const validRole = validator.isValidRole(userData.role, "owner");
+  const dormitoryPaymentData = await findDormitoryPaymentData(dormitoryId);
   const paymentData = await findPaymentRefData(referenceNumber);
-  const notValidPayment = await findNotValidPayment();
+  const notValidPayment = await countNotValidPayment(dormitoryId);
   const isRefExist = validator.isRefNumberExist(paymentData);
+  console.log(notValidPayment);
 
   const file = `image/paymentImage/${req.file.filename}`;
 
   const validationResult = createPaymentValidator(
+    dormitoryPaymentData,
     notValidPayment,
     isRefExist,
     validRole,

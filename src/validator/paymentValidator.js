@@ -1,6 +1,7 @@
 const { ValidationResult } = require("../validator/validationResult");
 
 exports.createPaymentValidator = (
+  dormitoryPaymentData,
   notValidPayment,
   isExist,
   validRole,
@@ -31,6 +32,10 @@ exports.createPaymentValidator = (
 
   if (dormitoryData.userId !== userData.id) {
     return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (dormitoryPaymentData.dormitoryId !== dormitoryData.id) {
+    return new ValidationResult(404, "Payment not found");
   }
 
   if (isExist === true) {

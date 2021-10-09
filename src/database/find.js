@@ -121,10 +121,16 @@ module.exports = {
     });
     return paymentRefData;
   },
-  findNotValidPayment: () => {
+  countNotValidPayment: (dormitoryId) => {
     const notValidPayment = db.Payment.count({
-      where: { isValid: false },
+      where: { isValid: false, dormitoryId: dormitoryId },
     });
     return notValidPayment;
+  },
+  findDormitoryPaymentData: (dormitoryId) => {
+    const dormitoryPaymentData = db.Payment.findOne({
+      where: { dormitoryId: dormitoryId },
+    });
+    return dormitoryPaymentData;
   },
 };
