@@ -188,6 +188,7 @@ exports.displayAllDormitories = async (req, res) => {
           [Op.and]: [
             { isVerified: { [Op.eq]: true } },
             { isAccepting: { [Op.eq]: true } },
+            { isPayed: { [Op.eq]: true } },
           ],
         },
         include: [
@@ -262,6 +263,7 @@ exports.searchDormitory = async (req, res) => {
       where: {
         isVerified: true,
         isAccepting: true,
+        isPayed: true,
         [Op.or]: [
           { name: { [Op.iLike]: "%" + search + "%" } },
           { "$Landmarks.name$": { [Op.iLike]: "%" + search + "%" } },

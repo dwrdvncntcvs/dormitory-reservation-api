@@ -19,7 +19,7 @@ exports.createPaymentValidator = (
     return new ValidationResult(401, "Invalid User");
   }
 
-  if (userData.isVerified !== false) {
+  if (userData.isVerified !== true) {
     return new ValidationResult(401, "You are not verified");
   }
 

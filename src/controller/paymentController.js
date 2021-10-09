@@ -10,16 +10,16 @@ const {
   paymentVerification,
 } = require("../validator/paymentValidator");
 const { paymentVerificationNotice } = require("../mailer/mailer");
+const fs = require("fs");
 
 exports.createNewPayment = async (req, res) => {
   const { sender, recipientNumber, amount, referenceNumber, dormitoryId } =
     req.body;
 
-  console.log(req.file);
-
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormitoryId);
   const validRole = validator.isValidRole(userData.role, "owner");
+  const file = `image/paymentImage/${req.file.filename}`;
 
   const validationResult = createPaymentValidator(
     validRole,
@@ -28,6 +28,10 @@ exports.createNewPayment = async (req, res) => {
     req.body
   );
   if (validationResult !== null) {
+    await fs.unlink(file, (err) => {
+      console.log(err);
+    });
+    
     return res
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
