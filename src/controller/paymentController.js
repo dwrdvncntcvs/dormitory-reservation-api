@@ -11,8 +11,12 @@ const {
 const {
   createPaymentValidator,
   paymentVerification,
+  denyDormitoryPaymentValidator,
 } = require("../validator/paymentValidator");
-const { paymentVerificationNotice } = require("../mailer/mailer");
+const {
+  paymentVerificationNotice,
+  deniedPaymentNotice,
+} = require("../mailer/mailer");
 const fs = require("fs");
 
 exports.createNewPayment = async (req, res) => {
@@ -117,6 +121,51 @@ exports.verifyDormitoryPayment = async (req, res) => {
     paymentVerificationNotice(userToBeMailed);
 
     return res.send({ msg: "Payment Accepted" });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.denyDormitoryPayment = async (req, res) => {
+  const userId = req.params.userId;
+  const dormitoryId = req.params.dormitoryId;
+  const paymentId = req.params.paymentId;
+
+  const userData = req.user;
+  const userToBeMailed = await findUserData(userId);
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const paymentData = await findPaymentData(paymentId);
+  const validRole = validator.isValidRole(userData.role, "admin");
+  const file = `image/paymentImage/${paymentData.filename}`;
+
+  const validationResult = denyDormitoryPaymentValidator(
+    userToBeMailed,
+    dormitoryData,
+    paymentData,
+    validRole
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  const t = await db.sequelize.transaction();
+  try {
+    await fs.unlink(file, (err) => {
+      console.log(err);
+    });
+    await db.Payment.destroy(
+      { where: { id: paymentData.id } },
+      { transaction: t }
+    );
+    await t.commit();
+
+    deniedPaymentNotice(userToBeMailed);
+
+    return res.send({ msg: "Dormitory Payment Denied" });
   } catch (err) {
     console.log(err);
     await t.rollback();

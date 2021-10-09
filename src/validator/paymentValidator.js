@@ -70,15 +70,58 @@ exports.paymentVerification = (
   }
 
   if (dormitoryData.userId !== userToBeMailed.id) {
-    return new ValidationResult(404, "Dormitory not found");
+    return new ValidationResult(
+      404,
+      `Dormitory does not belongs to ${userToBeMailed.name}`
+    );
   }
 
   if (dormitoryData.id !== paymentData.dormitoryId) {
-    return new ValidationResult(404, "Payment not found 1");
+    return new ValidationResult(404, "Payment not found");
   }
 
   if (paymentData.userId !== userToBeMailed.id) {
-    return new ValidationResult(404, "Payment not found 2");
+    return new ValidationResult(404, "Payment not found");
+  }
+
+  return null;
+};
+
+exports.denyDormitoryPaymentValidator = (
+  userToBeMailed,
+  dormitoryData,
+  paymentData,
+  validRole
+) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!userToBeMailed) {
+    return new ValidationResult(404, "User not found");
+  }
+
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (!paymentData) {
+    return new ValidationResult(404, "Dormitory payment not found");
+  }
+
+  if (dormitoryData.userId !== userToBeMailed.id) {
+    return new ValidationResult(
+      404,
+      `Dormitory does not belongs to ${userToBeMailed.name}`
+    );
+  }
+
+  if (dormitoryData.id !== paymentData.dormitoryId) {
+    return new ValidationResult(404, "Payment not found");
+  }
+
+  if (paymentData.userId !== userToBeMailed.id) {
+    return new ValidationResult(404, "Payment not found");
   }
 
   return null;

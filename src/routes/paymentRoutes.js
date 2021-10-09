@@ -36,4 +36,10 @@ route.put(
   paymentController.verifyDormitoryPayment
 );
 
+route.delete(
+  "/deny-dormitory-payment/dormtiory-:dormitoryId/payment-:paymentId/user-:userId",
+  requireAuth,
+  paymentController.denyDormitoryPayment
+);
+
 module.exports = route;

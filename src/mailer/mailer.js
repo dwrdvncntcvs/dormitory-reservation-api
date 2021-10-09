@@ -202,3 +202,29 @@ exports.paymentVerificationNotice = (userData) => {
     console.log(message, " Successfully sent!");
   });
 };
+
+exports.deniedPaymentNotice = (userData) => {
+  const messageInfo = {
+    to: userData.email,
+    from: user_email,
+    subject: `WELCOME TO DORMRES!`,
+    text: `
+        Greetings! ${userData.name}
+
+        We are very sad to announce that your payment has been denied by our admin.
+        I hope that you'll understand this. 
+        
+        Don't worry, we will send back to you your money.
+
+        Thank you fo trusting us!
+    `,
+  };
+
+  transport.sendMail(messageInfo, (err, message) => {
+    if (err) {
+      console.log(err);
+    }
+
+    console.log(message, " Successfully sent!");
+  });
+};
