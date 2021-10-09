@@ -115,4 +115,16 @@ module.exports = {
 
     return paymentData;
   },
+  findPaymentRefData: (referenceNumber) => {
+    const paymentRefData = db.Payment.findOne({
+      where: { referenceNumber },
+    });
+    return paymentRefData;
+  },
+  findNotValidPayment: () => {
+    const notValidPayment = db.Payment.count({
+      where: { isValid: false },
+    });
+    return notValidPayment;
+  },
 };

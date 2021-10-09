@@ -1,6 +1,8 @@
 const { ValidationResult } = require("../validator/validationResult");
 
 exports.createPaymentValidator = (
+  notValidPayment,
+  isExist,
   validRole,
   userData,
   dormitoryData,
@@ -31,6 +33,16 @@ exports.createPaymentValidator = (
     return new ValidationResult(404, "Dormitory not found");
   }
 
+  if (isExist === true) {
+    return new ValidationResult(403, "Can't use this reference number anymore");
+  }
+
+  if (notValidPayment > 0) {
+    return new ValidationResult(
+      403,
+      "You will not be able to send payment until you have pending one"
+    );
+  }
   return null;
 };
 

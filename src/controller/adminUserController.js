@@ -186,7 +186,7 @@ exports.displayDormitoryDetail = async (req, res) => {
   try {
     const dormitory = await db.Dormitory.findOne({
       where: { id: dormitoryId },
-      include: [db.DormProfileImage, db.DormDocument, db.User],
+      include: [db.DormProfileImage, db.DormDocument, db.User, db.Payment],
     });
     return res.send({ dormitory });
   } catch (err) {

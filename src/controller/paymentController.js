@@ -4,6 +4,8 @@ const {
   findDormitoryData,
   findPaymentData,
   findUserData,
+  findPaymentRefData,
+  findNotValidPayment,
 } = require("../database/find");
 const {
   createPaymentValidator,
@@ -19,9 +21,15 @@ exports.createNewPayment = async (req, res) => {
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormitoryId);
   const validRole = validator.isValidRole(userData.role, "owner");
+  const paymentData = await findPaymentRefData(referenceNumber);
+  const notValidPayment = await findNotValidPayment();
+  const isRefExist = validator.isRefNumberExist(paymentData);
+
   const file = `image/paymentImage/${req.file.filename}`;
 
   const validationResult = createPaymentValidator(
+    notValidPayment,
+    isRefExist,
     validRole,
     userData,
     dormitoryData,
@@ -31,7 +39,7 @@ exports.createNewPayment = async (req, res) => {
     await fs.unlink(file, (err) => {
       console.log(err);
     });
-    
+
     return res
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
@@ -60,7 +68,9 @@ exports.createNewPayment = async (req, res) => {
       msg: "Payment Successfully Created. Please wait for the verification of the admin",
     });
   } catch (err) {
-    console.log(err);
+    await fs.unlink(file, (err) => {
+      console.log(err);
+    });
     await t.rollback();
     return res.status(500).send({ msg: "Something went wrong" });
   }

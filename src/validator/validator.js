@@ -5,3 +5,10 @@ exports.isValidRole = (userRole, role) => {
     return false;
   }
 };
+
+exports.isRefNumberExist = (paymentData) => {
+  if (paymentData !== null) {
+    return true;
+  }
+  return false;
+};
