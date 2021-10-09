@@ -30,6 +30,10 @@ exports.createPaymentValidator = (
     return new ValidationResult(404, "Dormitory not found");
   }
 
+  if (!dormitoryPaymentData) {
+    return null;
+  }
+
   if (dormitoryData.userId !== userData.id) {
     return new ValidationResult(404, "Dormitory not found");
   }

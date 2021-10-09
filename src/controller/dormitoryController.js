@@ -112,7 +112,8 @@ exports.viewDormitoryDetail = async (req, res) => {
         db.DormRating,
         db.DormLocation,
         db.Landmark,
-        db.User
+        db.User,
+        db.Payment
       ],
     });
     const questions = await db.Question.findAll({

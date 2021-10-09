@@ -138,7 +138,6 @@ exports.denyDormitoryPayment = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormitoryId);
   const paymentData = await findPaymentData(paymentId);
   const validRole = validator.isValidRole(userData.role, "admin");
-  const file = `image/paymentImage/${paymentData.filename}`;
 
   const validationResult = denyDormitoryPaymentValidator(
     userToBeMailed,
@@ -154,6 +153,7 @@ exports.denyDormitoryPayment = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
+    const file = `image/paymentImage/${paymentData.filename}`;
     await fs.unlink(file, (err) => {
       console.log(err);
     });
