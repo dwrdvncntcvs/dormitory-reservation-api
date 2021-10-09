@@ -59,6 +59,10 @@ exports.dormitorySwitchValidator = (
     return new ValidationResult(404, "Dormitory not found");
   }
 
+  if (dormitoryData.isPayed !== true) {
+    return new ValidationResult(404, "Missing Payment");
+  }
+
   if (
     dormitoryAmenitySegment.length === 0 &&
     dormitoryRoomSegment.length === 0 &&
@@ -66,7 +70,10 @@ exports.dormitorySwitchValidator = (
     dormitoryLocationSegment.length === 0 &&
     dormitoryLandmarkSegment.length === 0
   ) {
-    return new ValidationResult(404, "Please complete all of your dormitory information");
+    return new ValidationResult(
+      404,
+      "Please complete all of your dormitory information"
+    );
   }
 
   if (dormitoryAmenitySegment.length === 0) {

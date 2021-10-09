@@ -104,8 +104,12 @@ exports.verifyDormitoryPayment = async (req, res) => {
       { where: { id: paymentData.id, isValid: false } },
       { transaction: t }
     );
+    await db.Dormitory.update(
+      { isPayed: true },
+      { where: { id: dormitoryData.id } },
+      { transaction: t }
+    );
     await t.commit();
-
     paymentVerificationNotice(userToBeMailed);
 
     return res.send({ msg: "Payment Accepted" });
