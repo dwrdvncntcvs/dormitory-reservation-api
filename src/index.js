@@ -40,9 +40,6 @@ app.use(cors());
 //To allow JSON text formats
 app.use(express.json());
 
-//Use jobs
-verificationJob.scheduler();
-
 //To Connect the routes
 app.use(authRoutes);
 app.use(dormitoryRoutes);
@@ -77,5 +74,9 @@ app.listen(PORT, () => {
   console.log(` Server is up: http://localhost:${PORT}`);
   db.sequelize.authenticate();
   console.log(" Successfully connected to Postgres SQL :)");
+  console.log(divider);
+
+  //Use jobs
+  verificationJob.scheduler();
   console.log(divider);
 });
