@@ -184,11 +184,14 @@ exports.displayDormitoryDetail = async (req, res) => {
   }
 
   try {
+    const payment = await db.Payment.findOne({
+      where: { dormitoryId: dormitoryId, isValid: false },
+    });
     const dormitory = await db.Dormitory.findOne({
       where: { id: dormitoryId },
-      include: [db.DormProfileImage, db.DormDocument, db.User, db.Payment],
+      include: [db.DormProfileImage, db.DormDocument, db.User],
     });
-    return res.send({ dormitory });
+    return res.send({ dormitory, payment });
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });

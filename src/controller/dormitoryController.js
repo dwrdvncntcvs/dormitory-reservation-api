@@ -208,6 +208,7 @@ exports.displayAllDormitories = async (req, res) => {
           [Op.and]: [
             { isVerified: { [Op.eq]: true } },
             { isAccepting: { [Op.eq]: true } },
+            { isPayed: { [Op.eq]: true } },
             getValue(filter1, filter2),
           ],
         },
