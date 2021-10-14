@@ -74,34 +74,26 @@ const paymentExpirationDate = (status) => {
               })
             )
           );
-          const payment = {
-            year: newDate(paymentDate).paymentYear,
-            month: newDate(paymentDate).paymentMonth,
-            day: newDate(paymentDate).paymentDay,
-            hour: newDate(paymentDate).paymentHour,
-            minute: newDate(paymentDate).paymentMinute,
-          };
-          console.log("Payment Date: " + paymentDate, payment);
 
-          const currentDate = Date.now();
-          const current = {
-            year: newDate(currentDate).paymentYear,
-            month: newDate(currentDate).paymentMonth,
-            day: newDate(currentDate).paymentDay,
-            hour: newDate(currentDate).paymentHour,
-            minute: newDate(currentDate).paymentMinute,
-          };
-          console.log("Current Date: ", current);
-          const paymentExpirationDate = payment.year + 1;
-          console.log("EXPIRATION DATE: ", paymentExpirationDate);
+          const epoch = 31556926000;
+          const currentDateEpoch = Date.now();
+          const paymentDateEpoch = Date.parse(paymentDate);
+          const paymentExpirationDate = paymentDateEpoch + epoch;
 
-          if (
-            paymentExpirationDate <= current.year &&
-            current.month >= payment.month &&
-            current.day >= payment.day &&
-            current.hour >= payment.hour &&
-            current.minute >= payment.minute
-          ) {
+          const actualCurrentDate = new Date(currentDateEpoch).toString();
+          const actualPaymentDate = new Date(paymentDateEpoch).toString();
+
+          console.log("Payment Epoch Date: ", paymentDateEpoch);
+
+          console.log("Current Epoch Date: ", currentDateEpoch);
+
+          console.log("EXPIRATION Epoch DATE: ", paymentExpirationDate);
+
+          console.log("Current Date: ", actualCurrentDate);
+
+          console.log("Payement Date: ", actualPaymentDate);
+
+          if (currentDateEpoch >= paymentExpirationDate) {
             await db.Dormitory.update(
               {
                 isPayed: false,
@@ -111,7 +103,7 @@ const paymentExpirationDate = (status) => {
               }
             );
 
-            console.log("Dormitory Payment Expired.")
+            console.log("Dormitory Payment Expired.");
           } else {
             console.log("Nothing to show");
           }
@@ -151,4 +143,17 @@ const newDate = (date) => {
   };
 
   return payment;
+};
+
+exports.isExpired = (current, lastPaymentDate) => {
+  const epoch = 31556926000;
+  const paymentExpirationDate = lastPaymentDate + epoch;
+  const currentDate = new Date(current).toDateString();
+  const paymentDate = new Date(lastPaymentDate).toDateString();
+  const expirationDate = new Date(paymentExpirationDate).toDateString();
+
+  console.log("Current Date: ", currentDate);
+  console.log("Payement Date: ", paymentDate);
+  console.log("Expiration Date", expirationDate);
+  return current >= paymentExpirationDate;
 };
