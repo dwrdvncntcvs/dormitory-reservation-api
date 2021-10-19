@@ -258,7 +258,7 @@ exports.displayOwnerDormitories = async (req, res) => {
 };
 
 exports.searchDormitory = async (req, res) => {
-  const { search } = req.body;
+  const search = req.query.search
 
   try {
     const dormitoryResults = await db.Dormitory.findAll({
