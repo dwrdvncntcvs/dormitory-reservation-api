@@ -1,7 +1,10 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const { findDormitoryData } = require("../database/find");
-const { dormLocationValidator } = require("../validator/dormLocationValidator");
+const { findDormitoryData, findLocationData } = require("../database/find");
+const {
+  dormLocationValidator,
+  getLocationValidator,
+} = require("../validator/dormLocationValidator");
 
 exports.addDormitoryLocation = async (req, res) => {
   const { dormId, longitude, latitude } = req.body;
@@ -40,6 +43,36 @@ exports.addDormitoryLocation = async (req, res) => {
   } catch (err) {
     console.log(err);
     await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.getDormitoryLocation = async (req, res) => {
+  const dormitoryId = req.params.dormitoryId;
+  const locationId = req.params.locationId;
+
+  const userData = req.user;
+  const validRole = validator.isValidRole(userData.role, "owner");
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const locationData = await findLocationData(locationId);
+
+  const validationResult = getLocationValidator(
+    validRole,
+    dormitoryData,
+    locationData
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
+    const dormLocation = await db.DormLocation.findOne({ id: locationData.id });
+
+    return res.send({ dormLocation });
+  } catch (err) {
+    console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };

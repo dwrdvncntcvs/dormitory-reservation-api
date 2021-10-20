@@ -1,13 +1,23 @@
-const express = require('express');
+const express = require("express");
 
 //Authentication Middleware
-const requireAuth = require('../middlewares/requireAuth');
+const requireAuth = require("../middlewares/requireAuth");
 
 //Require controller or function file
 const dormLocationController = require("../controller/dormLocationController");
 
 const route = express.Router();
 
-route.post("/add-dormitory-location", requireAuth, dormLocationController.addDormitoryLocation);
+route.post(
+  "/add-dormitory-location",
+  requireAuth,
+  dormLocationController.addDormitoryLocation
+);
+
+route.get(
+  "/get-dormitory-location/dormitory-:dormitoryId/location-:locationId",
+  requireAuth,
+  dormLocationController.getDormitoryLocation
+);
 
 module.exports = route;

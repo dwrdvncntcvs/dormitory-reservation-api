@@ -133,4 +133,9 @@ module.exports = {
     });
     return dormitoryPaymentData;
   },
+  findLocationData: (locationId) => {
+    const locationData = db.DormLocation.findOne({ where: { id: locationId } });
+
+    return locationData;
+  },
 };
