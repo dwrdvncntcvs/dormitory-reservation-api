@@ -126,13 +126,17 @@ exports.addDormitoryProfileImage = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    await db.DormProfileImage.create({
-      filename: req.file.filename,
-      filepath: req.file.path,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      dormitoryId: dormitoryData.id,
-    });
+    await db.DormProfileImage.create(
+      {
+        filename: req.file.filename,
+        filepath: req.file.path,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        dormitoryId: dormitoryData.id,
+      },
+      { transaction: t }
+    );
+    await t.commit();
 
     return res.send({ msg: "Dorm Profile Image Successfully Added" });
   } catch (error) {
