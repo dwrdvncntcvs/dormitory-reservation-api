@@ -19,4 +19,10 @@ route.put(
   roomController.updateRoomPayment
 );
 
+route.delete(
+  "/delete-room/dormitory-:dormitoryId/room-:roomId",
+  requireAuth,
+  roomController.deleteRoom
+);
+
 module.exports = route;

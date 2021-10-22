@@ -4,6 +4,7 @@ const { findDormitoryData, findRoomData } = require("../database/find");
 const {
   createNewRoomValidator,
   updateRoomPaymentValidator,
+  deleteRoomValidator,
 } = require("../validator/roomValidator");
 
 // To create new room in a dormitory
@@ -83,6 +84,43 @@ exports.updateRoomPayment = async (req, res) => {
     await t.commit();
 
     return res.send({ msg: "Room Payment Update Success" });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.deleteRoom = async (req, res) => {
+  const dormitoryId = req.params.dormitoryId;
+  const roomId = req.params.roomId;
+
+  console.log("DORMITORY ID: ", dormitoryId)
+
+  const userData = req.user;
+  const roomData = await findRoomData(roomId);
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = deleteRoomValidator(
+    validRole,
+    userData,
+    dormitoryData,
+    roomData
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  const t = await db.sequelize.transaction();
+
+  try {
+    await db.Room.destroy({ where: { id: roomId } }, { transaction: t });
+    await t.commit();
+
+    return res.send({ msg: "Room deleted successfully" });
   } catch (err) {
     console.log(err);
     await t.rollback();
