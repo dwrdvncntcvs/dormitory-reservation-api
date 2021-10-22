@@ -7,7 +7,7 @@ exports.addLandmarkValidator = (
   dormitoryData,
   userData
 ) => {
-  if (landmark === "" && point === "") {
+  if (landmark === "" || point === "") {
     return new ValidationResult(403, "Invalid Input");
   }
 
