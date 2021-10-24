@@ -138,4 +138,9 @@ module.exports = {
 
     return locationData;
   },
+  findLandmarkData: (landmarkId) => {
+    const landmarkData = db.Landmark.findOne({ where: { id: landmarkId } });
+
+    return landmarkData;
+  },
 };

@@ -1,7 +1,10 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
-const { findDormitoryData } = require("../database/find");
-const { addLandmarkValidator } = require("../validator/landmarkValidator");
+const { findDormitoryData, findLandmarkData } = require("../database/find");
+const {
+  addLandmarkValidator,
+  deleteLandmarkValidator,
+} = require("../validator/landmarkValidator");
 
 exports.addLandmark = async (req, res) => {
   const { landmark, latitude, longitude, dormId } = req.body;
@@ -39,6 +42,43 @@ exports.addLandmark = async (req, res) => {
   } catch (err) {
     await t.rollback();
     console.log(err);
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.deleteLandmark = async (req, res) => {
+  const dormitoryId = req.params.dormitoryId;
+  const landmarkId = req.params.landmarkId;
+
+  const userData = req.user;
+  const validRole = validator.isValidRole(userData.role, "owner");
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const landmarkData = await findLandmarkData(landmarkId);
+
+  const validationResult = deleteLandmarkValidator(
+    validRole,
+    dormitoryData,
+    landmarkData
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  const t = await db.sequelize.transaction();
+
+  try {
+    await db.Landmark.destroy(
+      { where: { id: landmarkId } },
+      { transaction: t }
+    );
+    await t.commit();
+
+    return res.send({ msg: "Landmark deleted successfully" });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };

@@ -36,3 +36,23 @@ exports.addLandmarkValidator = (
 
   return null;
 };
+
+exports.deleteLandmarkValidator = (validRole, dormitoryData, landmarkData) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (!landmarkData) {
+    return new ValidationResult(404, "Landmark not found");
+  }
+
+  if (dormitoryData.id !== landmarkData.dormitoryId) {
+    return new ValidationResult(404, "Landmark not found");
+  }
+
+  return null;
+};
