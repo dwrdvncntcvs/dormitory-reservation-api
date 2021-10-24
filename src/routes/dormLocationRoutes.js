@@ -20,4 +20,10 @@ route.get(
   dormLocationController.getDormitoryLocation
 );
 
+route.delete(
+  "/delete-dormitory-location/dormitory-:dormitoryId/location-:locationId",
+  requireAuth,
+  dormLocationController.removeDormitoryLocation
+);
+
 module.exports = route;

@@ -105,7 +105,7 @@ route.put(
 
 //To delete dormitory information
 route.delete(
-  "/delete-dormitory",
+  "/delete-dormitory/dormitory-:id",
   requireAuth,
   dormitoryController.deleteDormitory
 );

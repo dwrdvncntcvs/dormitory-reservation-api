@@ -76,3 +76,39 @@ exports.getDormitoryLocation = async (req, res) => {
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };
+
+exports.removeDormitoryLocation = async (req, res) => {
+  const dormitoryId = req.params.dormitoryId;
+  const locationId = req.params.locationId;
+
+  const userData = req.user;
+  const validRole = validator.isValidRole(userData.role, "owner");
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const locationData = await findLocationData(locationId);
+
+  const validationResult = getLocationValidator(
+    validRole,
+    dormitoryData,
+    locationData
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  const t = await db.sequelize.transaction();
+  try {
+    await db.DormLocation.destroy(
+      { where: { id: locationId } },
+      { transaction: t }
+    );
+    await t.commit();
+
+    return res.send({msg:"Location Deleted"})
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};

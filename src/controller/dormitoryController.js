@@ -58,7 +58,7 @@ exports.createNewDormitory = async (req, res) => {
 
 //To delete dormitory
 exports.deleteDormitory = async (req, res) => {
-  const { id } = req.body;
+  const id = req.params.id;
   const userData = req.user;
   const dormitoryData = await db.Dormitory.findOne({ where: { id } });
   const validRole = validator.isValidRole(userData.role, "owner");
