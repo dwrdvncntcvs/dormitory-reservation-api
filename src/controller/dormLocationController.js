@@ -50,6 +50,7 @@ exports.addDormitoryLocation = async (req, res) => {
 exports.getDormitoryLocation = async (req, res) => {
   const dormitoryId = req.params.dormitoryId;
   const locationId = req.params.locationId;
+  console.log("LOCATION ID: ", locationId)
 
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
@@ -68,7 +69,7 @@ exports.getDormitoryLocation = async (req, res) => {
   }
 
   try {
-    const dormLocation = await db.DormLocation.findOne({ id: locationData.id });
+    const dormLocation = await db.DormLocation.findOne({where: { id: locationData.id }});
 
     return res.send({ dormLocation });
   } catch (err) {
