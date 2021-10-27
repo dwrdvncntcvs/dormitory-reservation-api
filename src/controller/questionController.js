@@ -89,7 +89,8 @@ exports.editQuestion = async (req, res) => {
 };
 
 exports.removeQuestion = async (req, res) => {
-  const { questionId, dormitoryId } = req.body;
+  const questionId = req.params.questionId;
+  const dormitoryId = req.params.dormitoryId;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormitoryId);

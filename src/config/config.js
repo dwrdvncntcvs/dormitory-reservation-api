@@ -1,3 +1,5 @@
 module.exports = {
-    secretKey: "mySecretKey"
-}
+  secretKey: "mySecretKey",
+  email: "edwardvincentcuevas7.game@gmail.com",
+  password: "Burgers07",
+};

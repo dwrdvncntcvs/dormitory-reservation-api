@@ -4,7 +4,10 @@ const {
   findDormitoryQuestion,
   findDormitoryComment,
 } = require("../database/find");
-const { validateExistingComment, validateNewComment } = require("../validator/commentValidator");
+const {
+  validateExistingComment,
+  validateNewComment,
+} = require("../validator/commentValidator");
 
 exports.addComment = async (req, res) => {
   const { comment, questionId, dormitoryId } = req.body;
@@ -13,21 +16,33 @@ exports.addComment = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormitoryId);
   const questionData = await findDormitoryQuestion(questionId);
 
-  const validationResult = validateNewComment(comment, userData, dormitoryData, questionData);
+  const validationResult = validateNewComment(
+    comment,
+    userData,
+    dormitoryData,
+    questionData
+  );
   if (validationResult !== null) {
-    res.status(validationResult.statusCode).send({ msg: validationResult.message });
+    res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
   }
 
   const t = await db.sequelize.transaction();
   try {
-    await db.Comment.create({
-      comment,
-      commenter: userData.name,
-      role: userData.role,
-      questionId: questionData.id,
-      dormitoryId: dormitoryData.id,
-      userId: userData.id,
-    });
+    await db.Comment.create(
+      {
+        comment,
+        commenter: userData.name,
+        role: userData.role,
+        questionId: questionData.id,
+        dormitoryId: dormitoryData.id,
+        userId: userData.id,
+      },
+      { transaction: t }
+    );
+
+    await t.commit();
 
     return res.send({ msg: "Comment Added" });
   } catch (err) {
@@ -45,13 +60,20 @@ exports.editComment = async (req, res) => {
   const commentData = await findDormitoryComment(commentId);
   const dormitoryData = await findDormitoryData(dormitoryId);
 
-  const validationResult = validateExistingComment(userData, dormitoryData, questionData, commentData);
+  const validationResult = validateExistingComment(
+    userData,
+    dormitoryData,
+    questionData,
+    commentData
+  );
   if (!comment || validationResult != null) {
-    res.status(validationResult.statusCode).send({ msg: validationResult.message });
+    res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
   }
 
   const t = await db.sequelize.transaction();
-P
+  P;
   try {
     await db.Comment.update(
       { comment },
@@ -83,9 +105,16 @@ exports.removeComment = async (req, res) => {
   const questionData = await findDormitoryQuestion(questionId);
   const commentData = await findDormitoryComment(commentId);
 
-  const validationResult = validateExistingComment(userData, dormitoryData, questionData, commentData);
+  const validationResult = validateExistingComment(
+    userData,
+    dormitoryData,
+    questionData,
+    commentData
+  );
   if (validationResult != null) {
-    res.status(validationResult.statusCode).send({ msg: validationResult.message });
+    res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
   }
 
   const t = await db.sequelize.transaction();
