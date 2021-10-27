@@ -98,7 +98,9 @@ exports.editComment = async (req, res) => {
 };
 
 exports.removeComment = async (req, res) => {
-  const { commentId, questionId, dormitoryId } = req.body;
+  const commentId = req.params.commentId;
+  const questionId = req.params.questionId;
+  const dormitoryId = req.params.dormitoryId;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormitoryId);
@@ -130,6 +132,7 @@ exports.removeComment = async (req, res) => {
       },
       { transaction: t }
     );
+    await t.commit();
 
     return res.send({ msg: "Comment Deleted" });
   } catch (err) {
