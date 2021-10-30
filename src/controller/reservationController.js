@@ -16,6 +16,12 @@ const {
   addUserValidator,
   acceptReservationsValidator,
 } = require("../validator/reservationValidator");
+const {
+  createReservationMailer,
+  cancelReservationMailer,
+  addUserMailer,
+  acceptReservationMailer,
+} = require("../mailer/reservationMailer");
 
 //For Tenant Users
 //To create new reservation for tenants
@@ -53,6 +59,8 @@ exports.createNewReservation = async (req, res) => {
       { transaction: t }
     );
     await t.commit();
+
+    createReservationMailer(userData);
 
     return res.send({ msg: "Reservation Created." });
   } catch (err) {
@@ -92,13 +100,15 @@ exports.cancelReservation = async (req, res) => {
       { transaction: t }
     );
 
-    await db.Room.update(
-      { activeTenant: roomData.activeTenant - 1 },
-      { where: { id: roomData.id } },
-      { transaction: t }
-    );
+    // await db.Room.update(
+    //   { activeTenant: roomData.activeTenant - 1 },
+    //   { where: { id: roomData.id } },
+    //   { transaction: t }
+    // );
 
     await t.commit();
+
+    cancelReservationMailer(userData);
 
     return res.send({ msg: "Reservation was successfully cancelled" });
   } catch (err) {
@@ -230,6 +240,8 @@ exports.addUser = async (req, res) => {
 
     await t.commit();
 
+    addUserMailer(reservationData, dormitoryData);
+
     return res.send({ updatedRoom });
   } catch (err) {
     console.error(err);
@@ -270,6 +282,8 @@ exports.acceptReservations = async (req, res) => {
     );
 
     await t.commit();
+
+    acceptReservationMailer(reservationData, dormitoryData);
 
     return res.send({ updatedReservation });
   } catch (err) {
