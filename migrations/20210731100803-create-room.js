@@ -19,6 +19,7 @@ module.exports = {
       activeTenant: {
         type: Sequelize.INTEGER,
         defaultValue: 0,
+        allowNull: false,
       },
       roomCost: {
         type: Sequelize.DECIMAL(16,2),

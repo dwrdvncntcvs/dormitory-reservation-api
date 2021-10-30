@@ -1,7 +1,7 @@
 const { ValidationResult } = require("./validationResult");
 
 exports.createNewRoomValidator = (
-  { roomName, roomCapacity, roomCost, electricBill, waterBill },
+  { roomName, roomCapacity, activeTenant, roomCost, electricBill, waterBill },
   userData,
   dormitoryData,
   validRole
@@ -13,6 +13,7 @@ exports.createNewRoomValidator = (
 
   if (
     roomName === "" ||
+    activeTenant === "" ||
     roomCapacity === "" ||
     roomCost === "" ||
     electricBill === "" ||

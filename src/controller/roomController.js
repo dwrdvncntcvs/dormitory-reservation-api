@@ -9,7 +9,7 @@ const {
 
 // To create new room in a dormitory
 exports.createNewRoom = async (req, res) => {
-  const { dormId, roomName, roomCapacity, roomCost, electricBill, waterBill } =
+  const { dormId, roomName, activeTenant, roomCapacity, roomCost, electricBill, waterBill } =
     req.body;
 
   const userData = req.user;
@@ -33,6 +33,7 @@ exports.createNewRoom = async (req, res) => {
     const roomDetail = await db.Room.create(
       {
         name: roomName,
+        activeTenant,
         capacity: roomCapacity,
         dormitoryId: dormId,
         roomCost,

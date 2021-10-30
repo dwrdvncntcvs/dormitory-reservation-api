@@ -35,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
       activeTenant: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
+        allowNull: false,
       },
       dormitoryId: {
         type: DataTypes.INTEGER,
