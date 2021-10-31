@@ -1,11 +1,16 @@
 const { ValidationResult } = require("./validationResult");
 
 exports.createNewReservationValidator = (
+  slot,
   userData,
   dormitoryData,
   roomData,
   validRole
 ) => {
+  if (slot === '') {
+    return new ValidationResult(403, "Invalid Input")
+  }
+
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");
   }
@@ -41,6 +46,10 @@ exports.createNewReservationValidator = (
 
   if (roomData.dormitoryId !== dormitoryData.id) {
     return new ValidationResult(404, "Room not found");
+  }
+
+  if (slot >  roomData.roomCapacity) {
+    return new ValidationResult(403, "Your wanted slot doesn't fit on the available space in the room")
   }
 
   return null;

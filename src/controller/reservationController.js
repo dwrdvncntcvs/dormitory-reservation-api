@@ -26,7 +26,7 @@ const {
 //For Tenant Users
 //To create new reservation for tenants
 exports.createNewReservation = async (req, res) => {
-  const { dormId, roomId } = req.body;
+  const { dormId, roomId, slot } = req.body;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
@@ -34,6 +34,7 @@ exports.createNewReservation = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "tenant");
 
   const validationResult = createNewReservationValidator(
+    slot,
     userData,
     dormitoryData,
     roomData,
@@ -50,6 +51,7 @@ exports.createNewReservation = async (req, res) => {
       {
         dormitoryId: dormId,
         roomId,
+        roomSlot: slot,
         userId: userData.id,
         name: userData.name,
         email: userData.email,

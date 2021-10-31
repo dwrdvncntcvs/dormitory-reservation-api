@@ -24,6 +24,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      roomSlot: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
       isAccepted: {
         type: Sequelize.BOOLEAN,
         allowNull: false,

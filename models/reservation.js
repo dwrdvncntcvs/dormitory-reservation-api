@@ -66,6 +66,10 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: false,
         allowNull: false,
       },
+      roomSlot: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       isCancelled: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
