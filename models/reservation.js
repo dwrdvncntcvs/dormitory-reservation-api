@@ -66,6 +66,10 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: false,
         allowNull: false,
       },
+      roomName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       roomSlot: {
         type: DataTypes.INTEGER,
         allowNull: false,

@@ -29,8 +29,8 @@ route.put(
   reservationController.acceptReservations
 );
 
-route.put(
-  "/cancel-reservation",
+route.delete(
+  "/cancel-reservation/dormitory-:dormitoryId/room-:roomId/reservation-:reservationId",
   requireAuth,
   reservationController.cancelReservation
 );

@@ -52,6 +52,7 @@ exports.createNewReservation = async (req, res) => {
         dormitoryId: dormId,
         roomId,
         roomSlot: slot,
+        roomName: roomData.name,
         userId: userData.id,
         name: userData.name,
         email: userData.email,
@@ -74,7 +75,9 @@ exports.createNewReservation = async (req, res) => {
 
 //To cancel tenant's current reservations
 exports.cancelReservation = async (req, res) => {
-  const { reservationId, dormitoryId, roomId } = req.body;
+  const reservationId = req.params.reservationId;
+  const dormitoryId = req.params.dormitoryId;
+  const roomId = req.params.roomId;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormitoryId);
@@ -96,8 +99,7 @@ exports.cancelReservation = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    await db.Reservation.update(
-      { isCancelled: true, isAccepted: false },
+    await db.Reservation.destroy(
       { where: { id: reservationData.id } },
       { transaction: t }
     );
