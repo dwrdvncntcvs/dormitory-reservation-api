@@ -23,6 +23,12 @@ route.get(
   reservationController.viewAllReservations
 );
 
+route.get(
+  "/view-reservation-detail/dormitory-:dormitoryId/room-:roomId/reservation-:reservationId",
+  requireAuth,
+  reservationController.getReservationDetail
+);
+
 route.put(
   "/accept-new-reservation",
   requireAuth,

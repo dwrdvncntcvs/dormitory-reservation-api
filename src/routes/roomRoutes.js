@@ -25,4 +25,10 @@ route.delete(
   roomController.deleteRoom
 );
 
+route.get(
+  "/get-room-detail/dormitory-:dormitoryId/room-:roomId",
+  requireAuth,
+  roomController.getRoomDetail
+);
+
 module.exports = route;

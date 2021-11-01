@@ -5,12 +5,20 @@ const {
   createNewRoomValidator,
   updateRoomPaymentValidator,
   deleteRoomValidator,
+  getRoomDetailValidator,
 } = require("../validator/roomValidator");
 
 // To create new room in a dormitory
 exports.createNewRoom = async (req, res) => {
-  const { dormId, roomName, activeTenant, roomCapacity, roomCost, electricBill, waterBill } =
-    req.body;
+  const {
+    dormId,
+    roomName,
+    activeTenant,
+    roomCapacity,
+    roomCost,
+    electricBill,
+    waterBill,
+  } = req.body;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
@@ -96,7 +104,7 @@ exports.deleteRoom = async (req, res) => {
   const dormitoryId = req.params.dormitoryId;
   const roomId = req.params.roomId;
 
-  console.log("DORMITORY ID: ", dormitoryId)
+  console.log("DORMITORY ID: ", dormitoryId);
 
   const userData = req.user;
   const roomData = await findRoomData(roomId);
@@ -125,6 +133,40 @@ exports.deleteRoom = async (req, res) => {
   } catch (err) {
     console.log(err);
     await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.getRoomDetail = async (req, res) => {
+  const roomId = req.params.roomId;
+  const dormitoryId = req.params.dormitoryId;
+
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const roomData = await findRoomData(roomId);
+
+  console.log(userData);
+
+  const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = getRoomDetailValidator(
+    dormitoryData,
+    roomData,
+    userData,
+    validRole
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
+    const roomDetail = await db.Room.findOne({ where: { id: roomId } });
+
+    return res.send({ roomDetail });
+  } catch (err) {
+    console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };

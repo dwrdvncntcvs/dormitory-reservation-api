@@ -7,8 +7,8 @@ exports.createNewReservationValidator = (
   roomData,
   validRole
 ) => {
-  if (slot === '') {
-    return new ValidationResult(403, "Invalid Input")
+  if (slot === "") {
+    return new ValidationResult(403, "Invalid Input");
   }
 
   if (validRole === false) {
@@ -48,8 +48,11 @@ exports.createNewReservationValidator = (
     return new ValidationResult(404, "Room not found");
   }
 
-  if (slot >  roomData.roomCapacity) {
-    return new ValidationResult(403, "Your wanted slot doesn't fit on the available space in the room")
+  if (slot > roomData.roomCapacity) {
+    return new ValidationResult(
+      403,
+      "Your wanted slot doesn't fit on the available space in the room"
+    );
   }
 
   return null;
@@ -150,46 +153,46 @@ exports.addUserValidator = (
   dormitoryData,
   roomData,
   reservationData,
-  validRole,
+  validRole
 ) => {
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");
   }
 
   if (!dormitoryData) {
-    return new ValidationResult(404, "Dormitory not found")
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (!roomData) {
-    return new ValidationResult(404, "Room not found")
+    return new ValidationResult(404, "Room not found");
   }
 
   if (!reservationData) {
-    return new ValidationResult(404, "Reservation not found")
+    return new ValidationResult(404, "Reservation not found");
   }
 
   if (userData.id !== dormitoryData.userId) {
-    return new ValidationResult(404, "Dormitory not found")
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (dormitoryData.id !== roomData.dormitoryId) {
-    return new ValidationResult(404, "Room not found")
+    return new ValidationResult(404, "Room not found");
   }
 
   if (roomData.id !== reservationData.roomId) {
-    return new ValidationResult(404, "Reservation not found")
+    return new ValidationResult(404, "Reservation not found");
   }
 
   if (roomData.activeTenant >= roomData.capacity) {
-    return new ValidationResult(401, "Room is full")
+    return new ValidationResult(401, "Room is full");
   }
 
   if (reservationData.isAccepted === false) {
-    return new ValidationResult(401, "Your are not yet accepted")
+    return new ValidationResult(401, "Your are not yet accepted");
   }
 
   if (reservationData.isAdded === true) {
-    return new ValidationResult(403, "User already added")
+    return new ValidationResult(403, "User already added");
   }
 
   return null;
@@ -200,34 +203,74 @@ exports.acceptReservationsValidator = (
   dormitoryData,
   roomData,
   reservationData,
-  validRole,
+  validRole
 ) => {
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");
   }
 
   if (!dormitoryData) {
-    return new ValidationResult(404, "Dormitory not found")
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (!roomData) {
-    return new ValidationResult(404, "Room not found")
+    return new ValidationResult(404, "Room not found");
   }
 
   if (!reservationData) {
-    return new ValidationResult(404, "Reservation not found")
+    return new ValidationResult(404, "Reservation not found");
   }
 
   if (dormitoryData.userId !== userData.id) {
-    return new ValidationResult(404, "Dormitory not found")
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   if (dormitoryData.id !== roomData.dormitoryId) {
-    return new ValidationResult(404, "Room not found")
+    return new ValidationResult(404, "Room not found");
   }
 
   if (reservationData.roomId !== roomData.id) {
-    return new ValidationResult(404, "Reservation not found")
+    return new ValidationResult(404, "Reservation not found");
+  }
+
+  return null;
+};
+
+exports.getReservationDetailValidator = (
+  userData,
+  dormitoryData,
+  roomData,
+  reservationData,
+  validRole
+) => {
+  console.log("User Id: ", userData.id)
+  console.log("Dormitory User Id: ", dormitoryData.userId)
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (!roomData) {
+    return new ValidationResult(404, "Room not found");
+  }
+
+  if (!reservationData) {
+    return new ValidationResult(404, "Reservation not found");
+  }
+
+  if (dormitoryData.userId !== userData.id) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (dormitoryData.id !== roomData.dormitoryId) {
+    return new ValidationResult(404, "Room not found");
+  }
+
+  if (reservationData.roomId !== roomData.id) {
+    return new ValidationResult(404, "Reservation not found");
   }
 
   return null;

@@ -15,6 +15,7 @@ const {
   removeUserValidator,
   addUserValidator,
   acceptReservationsValidator,
+  getReservationDetailValidator,
 } = require("../validator/reservationValidator");
 const {
   createReservationMailer,
@@ -293,6 +294,43 @@ exports.acceptReservations = async (req, res) => {
   } catch (err) {
     console.error(err);
     await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.getReservationDetail = async (req, res) => {
+  const reservationId = req.params.reservationId;
+  const dormitoryId = req.params.dormitoryId;
+  const roomId = req.params.roomId;
+
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const roomData = await findRoomData(roomId);
+  const reservationData = await findReservationData(reservationId);
+
+  const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = getReservationDetailValidator(
+    userData,
+    dormitoryData,
+    roomData,
+    reservationData,
+    validRole
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
+    const reservationDetail = await db.Reservation.findOne({
+      where: { id: reservationId },
+    });
+
+    return res.send({ reservationDetail });
+  } catch (err) {
+    console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };

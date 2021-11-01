@@ -111,3 +111,31 @@ exports.deleteRoomValidator = (
 
   return null;
 };
+
+exports.getRoomDetailValidator = (dormitoryData, roomData, userData, validRole) => {
+  if (validRole == false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  // Checks if the dormitory does exist in the database
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  //Checks if the room does exist in the database
+  if (!roomData) {
+    return new ValidationResult(404, "Room not found");
+  }
+
+  // Checks if the dormitory is owned by the signed in user
+  if (dormitoryData.userId !== userData.id) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  //Checks if the room belongs to the dormitory
+  if (dormitoryData.id !== roomData.dormitoryId) {
+    return new ValidationResult(404, "Room not found");
+  }
+
+  return null;
+};
