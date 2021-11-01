@@ -145,8 +145,6 @@ exports.getRoomDetail = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormitoryId);
   const roomData = await findRoomData(roomId);
 
-  console.log(userData);
-
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const validationResult = getRoomDetailValidator(
