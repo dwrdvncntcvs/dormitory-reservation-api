@@ -53,4 +53,10 @@ route.delete(
   reservationController.removeUser
 );
 
+route.delete(
+  "/reject-user-reservation/dormitory-:dormitoryId/room-:roomId/reservation-:reservationId",
+  requireAuth,
+  reservationController.rejectUserReservation
+);
+
 module.exports = route;

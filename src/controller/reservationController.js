@@ -199,7 +199,7 @@ exports.removeUser = async (req, res) => {
     );
     await t.commit();
 
-    return res.send({ msg: "Reservation removed." });
+    return res.send({ msg: "User Removed as Active Tenant" });
   } catch (err) {
     console.log(err);
     await t.rollback();
@@ -247,7 +247,7 @@ exports.addUser = async (req, res) => {
 
     addUserMailer(reservationData, dormitoryData);
 
-    return res.send({ updatedRoom });
+    return res.send({ msg: "User Added as Active Tenant" });
   } catch (err) {
     console.error(err);
     await t.rollback();
@@ -257,7 +257,7 @@ exports.addUser = async (req, res) => {
 
 //To accept new reservations
 exports.acceptReservations = async (req, res) => {
-  const { dormId, roomId, reservationId, isAccepted } = req.body;
+  const { dormId, roomId, reservationId } = req.body;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
@@ -280,8 +280,8 @@ exports.acceptReservations = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    const updatedReservation = await db.Reservation.update(
-      { isAccepted },
+    await db.Reservation.update(
+      { isAccepted: true },
       { where: { id: reservationData.id } },
       { transaction: t }
     );
@@ -290,9 +290,48 @@ exports.acceptReservations = async (req, res) => {
 
     acceptReservationMailer(reservationData, dormitoryData);
 
-    return res.send({ updatedReservation });
+    return res.send({ msg: "User Reservation Accepted" });
   } catch (err) {
     console.error(err);
+    await t.rollback();
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.rejectUserReservation = async (req, res) => {
+  const dormitoryId = req.params.dormitoryId;
+  const roomId = req.params.roomId;
+  const reservationId = req.params.reservationId;
+
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const roomData = await findRoomData(roomId);
+  const reservationData = await findReservationData(reservationId);
+  const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = removeUserValidator(
+    dormitoryId,
+    roomData,
+    reservationData,
+    validRole
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.status)
+      .send({ msg: validationResult.message });
+  }
+
+  const t = await db.sequelize.transaction();
+  try {
+    await db.Reservation.destroy(
+      { where: { id: reservationId } },
+      { transaction: t }
+    );
+    await t.commit();
+
+    return res.send({ msg: "User Reservation Rejected" });
+  } catch (err) {
+    console.log(err);
     await t.rollback();
     return res.status(500).send({ msg: "Something went wrong" });
   }
