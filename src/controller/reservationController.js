@@ -23,6 +23,7 @@ const {
   cancelReservationMailer,
   addUserMailer,
   acceptReservationMailer,
+  rejectTenantReservationMailer,
 } = require("../mailer/reservationMailer");
 
 const { Op } = require("sequelize");
@@ -157,7 +158,9 @@ exports.viewAllReservations = async (req, res) => {
 
 //To remove reservation of the user
 exports.removeUser = async (req, res) => {
-  const { dormId, roomId, reservationId } = req.body;
+  const dormId = req.params.dormId;
+  const roomId = req.params.roomId;
+  const reservationId = req.params.reservationId;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
@@ -181,7 +184,6 @@ exports.removeUser = async (req, res) => {
     await db.Reservation.destroy(
       {
         where: {
-          isAccepted: true,
           id: reservationData.id,
         },
       },
@@ -189,7 +191,7 @@ exports.removeUser = async (req, res) => {
     );
 
     await db.Room.update(
-      { activeTenant: roomData.activeTenant - 1 },
+      { activeTenant: roomData.activeTenant - reservationData.roomSlot },
       { where: { id: roomData.id } },
       { transaction: t }
     );
@@ -228,7 +230,7 @@ exports.addUser = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     const updatedRoom = await db.Room.update(
-      { activeTenant: roomData.activeTenant + 1 },
+      { activeTenant: roomData.activeTenant + reservationData.roomSlot },
       { where: { id: roomData.id } },
       { transaction: t }
     );
@@ -325,6 +327,8 @@ exports.rejectUserReservation = async (req, res) => {
     );
     await t.commit();
 
+    rejectTenantReservationMailer(reservationData, dormitoryData);
+
     return res.send({ msg: "User Reservation Rejected" });
   } catch (err) {
     console.log(err);
@@ -396,10 +400,10 @@ exports.filterReservation = async (req, res) => {
 
   try {
     const filteredReservation = await db.Reservation.findAll({
-      where: {isPending, isActive, isAccepted },
+      where: { isPending, isActive, isAccepted },
     });
-    
-    return res.send({filteredReservation});
+
+    return res.send({ filteredReservation });
   } catch (e) {
     console.log(e);
     return res.status(500).send({ msg: "Something went wrong" });

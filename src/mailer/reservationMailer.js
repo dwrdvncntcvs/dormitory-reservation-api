@@ -82,9 +82,9 @@ exports.addUserMailer = ({ email, name }, dormitoryData) => {
 
     console.log(message, " Successfully sent!");
   });
-}; 
+};
 
-exports.acceptReservationMailer = ({name, email}, dormitoryData) => {
+exports.acceptReservationMailer = ({ name, email }, dormitoryData) => {
   const messageInfo = {
     to: email,
     from: user_email,
@@ -97,6 +97,29 @@ exports.acceptReservationMailer = ({name, email}, dormitoryData) => {
         After these, the owner will add you as their active tenants! 
 
         Remember to always be safe and stay healthy!
+
+        Thank you!
+        `,
+  };
+
+  transport.sendMail(messageInfo, (err, message) => {
+    if (err) {
+      console.log(err);
+    }
+
+    console.log(message, " Successfully sent!");
+  });
+};
+
+exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData) => {
+  const messageInfo = {
+    to: email,
+    from: user_email,
+    subject: `WELCOME TO ${title}!`,
+    text: `
+        Greetings!! ${name},
+
+        The owner of ${dormitoryData.name} was unfortunately rejected your reservation. They have their own reasons why they did reject your reservation but we hope that you will understand them. 
 
         Thank you!
         `,

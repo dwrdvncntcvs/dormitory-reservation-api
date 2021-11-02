@@ -54,7 +54,7 @@ route.put(
 );
 
 route.delete(
-  "/remove-tenant-user",
+  "/remove-tenant-user/dormitory-:dormId/room-:roomId/reservation-:reservationId",
   requireAuth,
   reservationController.removeUser
 );
