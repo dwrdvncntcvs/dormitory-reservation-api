@@ -183,11 +183,11 @@ exports.addUserValidator = (
     return new ValidationResult(404, "Reservation not found");
   }
 
-  if (roomData.activeTenant >= roomData.capacity) {
+  if (roomData.activeTenant > roomData.capacity) {
     return new ValidationResult(401, "Room is full");
   }
 
-  if (roomData.activeTenant >= reservationData.roomSlot) {
+  if (roomData.activeTenant > reservationData.roomSlot) {
     return new ValidationResult(403, "Room Slots doesn't fit to the room")
   }
 
