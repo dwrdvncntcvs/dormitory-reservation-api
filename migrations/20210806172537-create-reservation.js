@@ -37,7 +37,7 @@ module.exports = {
         allowNull: false,
         defaultValue: false,
       },
-      isCancelled: {
+      isPending: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false,

@@ -74,7 +74,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      isCancelled: {
+      isPending: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
         allowNull: false,

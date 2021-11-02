@@ -16,6 +16,7 @@ const {
   addUserValidator,
   acceptReservationsValidator,
   getReservationDetailValidator,
+  filterReservationValidator,
 } = require("../validator/reservationValidator");
 const {
   createReservationMailer,
@@ -23,6 +24,8 @@ const {
   addUserMailer,
   acceptReservationMailer,
 } = require("../mailer/reservationMailer");
+
+const { Op } = require("sequelize");
 
 //For Tenant Users
 //To create new reservation for tenants
@@ -59,6 +62,7 @@ exports.createNewReservation = async (req, res) => {
         email: userData.email,
         address: userData.address,
         contactNumber: userData.contactNumber,
+        isPending: true,
       },
       { transaction: t }
     );
@@ -105,12 +109,6 @@ exports.cancelReservation = async (req, res) => {
       { transaction: t }
     );
 
-    // await db.Room.update(
-    //   { activeTenant: roomData.activeTenant - 1 },
-    //   { where: { id: roomData.id } },
-    //   { transaction: t }
-    // );
-
     await t.commit();
 
     cancelReservationMailer(userData);
@@ -146,7 +144,6 @@ exports.viewAllReservations = async (req, res) => {
     const reservations = await db.Reservation.findAll({
       where: {
         dormitoryId: dormitoryData.id,
-        isCancelled: false,
       },
       include: [db.Dormitory, db.Room, db.User],
     });
@@ -185,7 +182,6 @@ exports.removeUser = async (req, res) => {
       {
         where: {
           isAccepted: true,
-          isCancelled: false,
           id: reservationData.id,
         },
       },
@@ -238,7 +234,7 @@ exports.addUser = async (req, res) => {
     );
 
     await db.Reservation.update(
-      { isActive: true },
+      { isActive: true, isAccepted: false, isPending: false },
       { where: { id: reservationData.id } },
       { transaction: t }
     );
@@ -281,7 +277,7 @@ exports.acceptReservations = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     await db.Reservation.update(
-      { isAccepted: true },
+      { isAccepted: true, isPending: false, isActive: false },
       { where: { id: reservationData.id } },
       { transaction: t }
     );
@@ -310,7 +306,7 @@ exports.rejectUserReservation = async (req, res) => {
   const validRole = validator.isValidRole(userData.role, "owner");
 
   const validationResult = removeUserValidator(
-    dormitoryId,
+    dormitoryData,
     roomData,
     reservationData,
     validRole
@@ -358,7 +354,7 @@ exports.getReservationDetail = async (req, res) => {
   );
   if (validationResult !== null) {
     return res
-      .status(validationResult.statusCode)
+      .statusCode(validationResult.statusCode)
       .send({ msg: validationResult.message });
   }
 
@@ -370,6 +366,42 @@ exports.getReservationDetail = async (req, res) => {
     return res.send({ reservationDetail });
   } catch (err) {
     console.log(err);
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.filterReservation = async (req, res) => {
+  const dormitoryId = req.params.dormitoryId;
+  const isActive = req.query.isActive;
+  const isAccepted = req.query.isAccepted;
+  const isPending = req.query.isPending;
+
+  console.log(dormitoryId);
+  console.log(isActive, isAccepted, isPending);
+
+  const userData = req.user;
+  const dormitoryData = await findDormitoryData(dormitoryId);
+  const validRole = validator.isValidRole(userData.role, "owner");
+
+  const validationResult = filterReservationValidator(
+    userData,
+    dormitoryData,
+    validRole
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
+    const filteredReservation = await db.Reservation.findAll({
+      where: {isPending, isActive, isAccepted },
+    });
+    
+    return res.send({filteredReservation});
+  } catch (e) {
+    console.log(e);
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };

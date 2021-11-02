@@ -243,8 +243,8 @@ exports.getReservationDetailValidator = (
   reservationData,
   validRole
 ) => {
-  console.log("User Id: ", userData.id)
-  console.log("Dormitory User Id: ", dormitoryData.userId)
+  console.log("User Id: ", userData.id);
+  console.log("Dormitory User Id: ", dormitoryData.userId);
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");
   }
@@ -271,6 +271,22 @@ exports.getReservationDetailValidator = (
 
   if (reservationData.roomId !== roomData.id) {
     return new ValidationResult(404, "Reservation not found");
+  }
+
+  return null;
+};
+
+exports.filterReservationValidator = (userData, dormitoryData, validRole) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (dormitoryData.userId !== userData.id) {
+    return new ValidationResult(404, "Dormitory not found");
   }
 
   return null;

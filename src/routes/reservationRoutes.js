@@ -29,6 +29,12 @@ route.get(
   reservationController.getReservationDetail
 );
 
+route.get(
+  "/filter-reservation/dormitory-:dormitoryId",
+  requireAuth,
+  reservationController.filterReservation
+);
+
 route.put(
   "/accept-new-reservation",
   requireAuth,
