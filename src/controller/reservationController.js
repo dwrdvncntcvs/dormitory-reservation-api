@@ -17,6 +17,7 @@ const {
   acceptReservationsValidator,
   getReservationDetailValidator,
   filterReservationValidator,
+  filterReservationByUserIdValidator,
 } = require("../validator/reservationValidator");
 const {
   createReservationMailer,
@@ -406,6 +407,29 @@ exports.filterReservation = async (req, res) => {
     return res.send({ filteredReservation });
   } catch (e) {
     console.log(e);
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};
+
+exports.filterReservationByUserId = async (req, res) => {
+  const userData = req.user;
+  const validRole = validator.isValidRole(userData.role, "tenant");
+
+  const validationResult = filterReservationByUserIdValidator(validRole);
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
+    const userReservation = await db.Reservation.findAll({
+      where: { userId: userData.id },
+    });
+
+    return res.send({ userReservation });
+  } catch (err) {
+    console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };

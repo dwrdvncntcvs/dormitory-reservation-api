@@ -188,7 +188,7 @@ exports.addUserValidator = (
   }
 
   if (roomData.activeTenant === reservationData.roomSlot) {
-    return new ValidationResult(403, "Room Slots doesn't fit to the room")
+    return new ValidationResult(403, "Room Slots doesn't fit to the room");
   }
 
   if (reservationData.isAccepted === false) {
@@ -291,6 +291,14 @@ exports.filterReservationValidator = (userData, dormitoryData, validRole) => {
 
   if (dormitoryData.userId !== userData.id) {
     return new ValidationResult(404, "Dormitory not found");
+  }
+
+  return null;
+};
+
+exports.filterReservationByUserIdValidator = (validRole) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
   }
 
   return null;

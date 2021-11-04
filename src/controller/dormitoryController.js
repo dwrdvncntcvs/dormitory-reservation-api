@@ -7,6 +7,7 @@ const {
   findDormitoryLandmarkSegment,
   findDormitoryLocationSegment,
   findDormitoryRoomSegment,
+  findReservationData,
 } = require("../database/find");
 const {
   createNewDormitoryValidator,
@@ -113,7 +114,7 @@ exports.viewDormitoryDetail = async (req, res) => {
         db.DormLocation,
         db.Landmark,
         db.User,
-        db.Payment
+        db.Payment,
       ],
     });
     const questions = await db.Question.findAll({
@@ -223,7 +224,7 @@ exports.displayAllDormitories = async (req, res) => {
       });
 
       return res.status(200).send({ dormitories });
-    } 
+    }
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
@@ -258,7 +259,7 @@ exports.displayOwnerDormitories = async (req, res) => {
 };
 
 exports.searchDormitory = async (req, res) => {
-  const search = req.query.search
+  const search = req.query.search;
 
   try {
     const dormitoryResults = await db.Dormitory.findAll({
@@ -288,3 +289,13 @@ exports.searchDormitory = async (req, res) => {
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };
+
+// exports.getDormitoriesByUserReservation = (req, res) => {
+//   const reservationId = req.params.reservationId;
+
+//   const userData = req.user;
+//   const reservationData = await findReservationData(reservationId);
+//   const validRole = validator.isValidRole(userData.role, "tenant");
+
+//   const validationResult;
+// };

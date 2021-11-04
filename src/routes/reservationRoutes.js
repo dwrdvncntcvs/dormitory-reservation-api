@@ -35,6 +35,12 @@ route.get(
   reservationController.filterReservation
 );
 
+route.get(
+  "/filter-reservation-by-userId",
+  requireAuth,
+  reservationController.filterReservationByUserId
+);
+
 route.put(
   "/accept-new-reservation",
   requireAuth,
