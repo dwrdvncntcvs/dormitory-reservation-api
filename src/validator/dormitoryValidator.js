@@ -113,3 +113,23 @@ exports.dormitorySwitchValidator = (
 
   return null;
 };
+
+exports.getDormitoriesByUserReservationValidator = (
+  userData,
+  reservationData,
+  validRole
+) => {
+  if (validRole === false) {
+    return new ValidationResult(401, "Invalid User");
+  }
+
+  if (!reservationData) {
+    return new ValidationResult(404, "Reservation not found");
+  }
+
+  if (reservationData.userId !== userData.id) {
+    return new ValidationResult(404, "Reservation not found");
+  }
+
+  return null;
+};

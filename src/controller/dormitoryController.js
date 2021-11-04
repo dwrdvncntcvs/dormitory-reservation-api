@@ -13,6 +13,7 @@ const {
   createNewDormitoryValidator,
   deleteDormitoryValidator,
   dormitorySwitchValidator,
+  getDormitoriesByUserReservationValidator,
 } = require("../validator/dormitoryValidator");
 const { Landmark, Room } = require("../../models");
 const { Op } = require("sequelize");
@@ -290,12 +291,39 @@ exports.searchDormitory = async (req, res) => {
   }
 };
 
-// exports.getDormitoriesByUserReservation = (req, res) => {
-//   const reservationId = req.params.reservationId;
+exports.getDormitoriesByUserReservation = async (req, res) => {
+  const reservationId = req.params.reservationId;
 
-//   const userData = req.user;
-//   const reservationData = await findReservationData(reservationId);
-//   const validRole = validator.isValidRole(userData.role, "tenant");
+  const userData = req.user;
+  const reservationData = await findReservationData(reservationId);
+  const validRole = validator.isValidRole(userData.role, "tenant");
 
-//   const validationResult;
-// };
+  const validationResult = getDormitoriesByUserReservationValidator(
+    userData,
+    reservationData,
+    validRole
+  );
+  if (validationResult !== null) {
+    return res
+      .status(validationResult.statusCode)
+      .send({ msg: validationResult.message });
+  }
+
+  try {
+    const dormitoryData = await db.Dormitory.findOne({
+      where: { id: reservationData.dormitoryId },
+      include: [
+        db.DormProfileImage,
+        db.User,
+        db.DormProfileImage,
+        db.DormRating,
+        db.DormLocation,
+      ],
+    });
+
+    return res.send({ dormitoryData });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({ msg: "Something went wrong" });
+  }
+};

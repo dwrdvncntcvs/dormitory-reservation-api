@@ -73,6 +73,12 @@ route.get(
   dormitoryController.displayOwnerDormitories
 );
 
+route.get(
+  "/get-dormitory-by-reservation/reservation-:reservationId",
+  requireAuth,
+  dormitoryController.getDormitoriesByUserReservation
+);
+
 //To get specific dormitory information created by the user.
 route.get(
   "/view-dormitory-detail/:dormId",
