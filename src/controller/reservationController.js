@@ -359,7 +359,7 @@ exports.getReservationDetail = async (req, res) => {
   );
   if (validationResult !== null) {
     return res
-      .statusCode(validationResult.statusCode)
+      .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
   }
 
@@ -401,7 +401,7 @@ exports.filterReservation = async (req, res) => {
 
   try {
     const filteredReservation = await db.Reservation.findAll({
-      where: { isPending, isActive, isAccepted },
+      where: { dormitoryId, isPending, isActive, isAccepted },
     });
 
     return res.send({ filteredReservation });
