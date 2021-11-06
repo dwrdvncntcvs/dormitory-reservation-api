@@ -48,6 +48,9 @@ exports.createNewDormitory = async (req, res) => {
       },
       { transaction: t }
     );
+    await db.RatingAve.create({
+      dormitoryId: dormitory.id
+    }, { transaction: t})
     await t.commit();
 
     return res.send({ msg: "Dormitory Successfully Created.", dormitory });
@@ -116,6 +119,7 @@ exports.viewDormitoryDetail = async (req, res) => {
         db.Landmark,
         db.User,
         db.Payment,
+        db.RatingAve
       ],
     });
     const questions = await db.Question.findAll({

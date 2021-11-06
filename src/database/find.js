@@ -143,4 +143,9 @@ module.exports = {
 
     return landmarkData;
   },
+  findRatingAveData: (ratingAveId) => {
+    const ratingAveData = db.RatingAve.findOne({ where: { id: ratingAveId } });
+
+    return ratingAveData;
+  },
 };

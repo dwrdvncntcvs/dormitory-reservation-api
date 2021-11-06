@@ -53,3 +53,19 @@ exports.removeRatingValidator = (
 
   return null;
 };
+
+exports.updateTotalRatingValidator = (dormitoryData, ratingAveData) => {
+  if (!dormitoryData) {
+    return new ValidationResult(404, "Dormitory not found");
+  }
+
+  if (!ratingAveData) {
+    return new ValidationResult(404, "No Total Rating");
+  }
+
+  if (dormitoryData.id !== ratingAveData.dormitoryId) {
+    return new ValidationResult(404, "No Total Rating");
+  }
+
+  return null;
+};
