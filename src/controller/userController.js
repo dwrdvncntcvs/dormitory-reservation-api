@@ -253,7 +253,7 @@ exports.checkUserEmail = async (req, res) => {
 
     mailer.changePassword(user, hostAddress,);
 
-    return res.status(200).send({ msg: "Please open your email to fully change your password." });
+    return res.status(200).send({ msg: "Please open your email to fully change your password.", userId: user.id, userRole: user.role});
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
