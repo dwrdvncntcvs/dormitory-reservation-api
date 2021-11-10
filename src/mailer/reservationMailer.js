@@ -111,7 +111,7 @@ exports.acceptReservationMailer = ({ name, email }, dormitoryData) => {
   });
 };
 
-exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData) => {
+exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData, message) => {
   const messageInfo = {
     to: email,
     from: user_email,
@@ -120,6 +120,9 @@ exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData) => {
         Greetings!! ${name},
 
         The owner of ${dormitoryData.name} was unfortunately rejected your reservation. They have their own reasons why they did reject your reservation but we hope that you will understand them. 
+
+        Message from the owner of ${dormitoryData.name}:
+        " ${message} "
 
         Thank you!
         `,

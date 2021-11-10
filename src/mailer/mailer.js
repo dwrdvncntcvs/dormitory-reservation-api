@@ -12,33 +12,36 @@ const transport = nodemailer.createTransport({
   },
 });
 
-var title = 'DORMRES'
+var title = 'AREDNA'
 
 exports.verifyEmail = (
   { id, name, email, username, contactNumber, address, role },
   host
 ) => {
-  const messageInfo = {
+    const messageInfo = {
     to: email,
     from: user_email,
     subject: `WELCOME TO ${title}!`,
-    text: `
-        Greetings! 😁😁
-        Please check the following:
-
-            Account ID:             ${id}
-            Account Name:           ${name}
-            Account Username:       ${username}
-            Account Email:          ${email}
-            Account Contact:        ${contactNumber}
-            Account Address:        ${address}
-            Account Role:           ${role}
+    html: `
+        <h1> Greetings! ${name}</h1>
+        <h3>Please check the following:</h3>
+        <ul>
+          <li>Account ID:             ${id}</li>
+          <li>Account Name:           ${name}</li>
+          <li>Account Username:       ${username}</li>
+          <li>Account Email:          ${email}</li>
+          <li>Account Contact:        ${contactNumber}</li>
+          <li>Account Address:        ${address}</li>
+          <li>Account Role:           ${role}</li>
+        </ul>       
         
-        To verify your account, kindly click the link below:
+        <h3>To verify your account, kindly click the link below:</h3>
             
-            > http://${host}/verify-account/${id}
+        <ul>
+          <li>http://${host}/verify-account/${id}</li>
+        </ul>
 
-        Thank you for signing up! Have a nice day. 👍
+        <h3>Thank you for signing up! Have a nice day. 👍</h3>
     `,
   };
 
