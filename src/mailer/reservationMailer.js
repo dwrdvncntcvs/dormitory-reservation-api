@@ -1,8 +1,8 @@
 const nodemailer = require("nodemailer");
 const config = require("../config/config");
 
-const user_email = config.email;
-const user_password = config.password;
+const user_email = process.env.AREDNA_EMAIL;
+const user_password = process.env.AREDNA_PASS;
 
 const transport = nodemailer.createTransport({
   service: "gmail",
