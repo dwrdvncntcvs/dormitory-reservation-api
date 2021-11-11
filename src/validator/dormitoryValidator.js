@@ -59,8 +59,8 @@ exports.dormitorySwitchValidator = (
     return new ValidationResult(404, "Dormitory not found");
   }
 
-  if (dormitoryData.isPayed !== true) {
-    return new ValidationResult(404, "Missing Payment");
+  if (dormitoryData.isVerified === false) {
+    return new ValidationResult(401, "Dormitory is not verified")
   }
 
   if (
@@ -100,6 +100,10 @@ exports.dormitorySwitchValidator = (
 
   if (dormitoryRoomSegment.length === 0) {
     return new ValidationResult(404, "Please add a room for your dormitory");
+  }
+
+  if (dormitoryData.isPayed !== true) {
+    return new ValidationResult(404, "Missing Payment");
   }
 
   //Check if the dormitory is owned by the user

@@ -1,8 +1,8 @@
 const nodemailer = require("nodemailer");
 const config = require("../config/config");
 
-const user_email = config.email;
-const user_password = config.password;
+const user_email = process.env.AREDNA_EMAIL;
+const user_password = process.env.AREDNA_PASS;
 
 const transport = nodemailer.createTransport({
   service: "gmail",
@@ -12,39 +12,46 @@ const transport = nodemailer.createTransport({
   },
 });
 
-var title = 'DORMRES'
+var title = 'AREDNA'
 
 exports.verifyEmail = (
   { id, name, email, username, contactNumber, address, role },
   host
 ) => {
-  const messageInfo = {
+    
+
+    const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
-    text: `
-        Greetings! 😁😁
-        Please check the following:
-
-            Account ID:             ${id}
-            Account Name:           ${name}
-            Account Username:       ${username}
-            Account Email:          ${email}
-            Account Contact:        ${contactNumber}
-            Account Address:        ${address}
-            Account Role:           ${role}
+    html: `
+        <h1> Greetings! ${name}</h1>
+        <h3>Please check the following:</h3>
+        <ul>
+          <li>Account ID:             ${id}</li>
+          <li>Account Name:           ${name}</li>
+          <li>Account Username:       ${username}</li>
+          <li>Account Email:          ${email}</li>
+          <li>Account Contact:        ${contactNumber}</li>
+          <li>Account Address:        ${address}</li>
+          <li>Account Role:           ${role}</li>
+        </ul>       
         
-        To verify your account, kindly click the link below:
+        <h3>To verify your account, kindly click the link below:</h3>
             
-            > http://${host}/verify-account/${id}
+        <ul>
+          <li>http://${host}/verify-account/${id}</li>
+        </ul>
 
-        Thank you for signing up! Have a nice day. 👍
+        <h3>Thank you for signing up! Have a nice day. 👍</h3>
     `,
   };
 
   transport.sendMail(messageInfo, (err, message) => {
     if (err) {
       console.log(err);
+      console.log("Email: ", user_email);
+      console.log("Password: ", user_password);
     }
 
     console.log(message, " Successfully sent!");
@@ -56,7 +63,7 @@ exports.changePassword = ({ id, name, email, role }, host) => {
 
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${name}
@@ -78,7 +85,7 @@ exports.changePassword = ({ id, name, email, role }, host) => {
 exports.dormitoryVerifiedNotice = (userData, dormitoryData) => {
   const messageInfo = {
     to: userData.email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -104,7 +111,7 @@ exports.dormitoryVerifiedNotice = (userData, dormitoryData) => {
 exports.userVerifiedNotice = (userData) => {
   const messageInfo = {
     to: userData.email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -127,7 +134,7 @@ exports.userVerifiedNotice = (userData) => {
 exports.deniedDormitoryNotice = (dormitoryData, userData) => {
   const messageInfo = {
     to: userData.email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -155,7 +162,7 @@ exports.deniedDormitoryNotice = (dormitoryData, userData) => {
 exports.deniedUserNotice = (userData) => {
   const messageInfo = {
     to: userData.email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -184,7 +191,7 @@ exports.deniedUserNotice = (userData) => {
 exports.paymentVerificationNotice = (userData) => {
   const messageInfo = {
     to: userData.email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -208,7 +215,7 @@ exports.paymentVerificationNotice = (userData) => {
 exports.deniedPaymentNotice = (userData) => {
   const messageInfo = {
     to: userData.email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}

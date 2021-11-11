@@ -17,7 +17,7 @@ var title = "DORMRES";
 exports.createReservationMailer = ({ email, name }) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
@@ -41,7 +41,7 @@ exports.createReservationMailer = ({ email, name }) => {
 exports.cancelReservationMailer = ({ email, name }) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
@@ -64,7 +64,7 @@ exports.cancelReservationMailer = ({ email, name }) => {
 exports.addUserMailer = ({ email, name }, dormitoryData) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
@@ -87,7 +87,7 @@ exports.addUserMailer = ({ email, name }, dormitoryData) => {
 exports.acceptReservationMailer = ({ name, email }, dormitoryData) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
@@ -111,15 +111,18 @@ exports.acceptReservationMailer = ({ name, email }, dormitoryData) => {
   });
 };
 
-exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData) => {
+exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData, message) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
 
         The owner of ${dormitoryData.name} was unfortunately rejected your reservation. They have their own reasons why they did reject your reservation but we hope that you will understand them. 
+
+        Message from the owner of ${dormitoryData.name}:
+        " ${message} "
 
         Thank you!
         `,

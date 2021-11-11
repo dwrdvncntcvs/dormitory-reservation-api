@@ -112,7 +112,11 @@ exports.verifyEmail = async (req, res) => {
     );
     await t.commit();
 
-    return res.send({ msg: "Email Verified" });
+    const context = {
+      userData
+    }
+
+    return res.render(`emailVerification`, { context })
   } catch (err) {
     console.log(err);
     await t.rollback();

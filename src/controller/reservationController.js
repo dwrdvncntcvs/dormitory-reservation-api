@@ -302,6 +302,8 @@ exports.rejectUserReservation = async (req, res) => {
   const roomId = req.params.roomId;
   const reservationId = req.params.reservationId;
 
+  const { message } = req.body;
+
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormitoryId);
   const roomData = await findRoomData(roomId);
@@ -328,7 +330,7 @@ exports.rejectUserReservation = async (req, res) => {
     );
     await t.commit();
 
-    rejectTenantReservationMailer(reservationData, dormitoryData);
+    rejectTenantReservationMailer(reservationData, dormitoryData, message);
 
     return res.send({ msg: "User Reservation Rejected" });
   } catch (err) {
