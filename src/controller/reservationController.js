@@ -25,6 +25,7 @@ const {
   addUserMailer,
   acceptReservationMailer,
   rejectTenantReservationMailer,
+  createReservationMailerOwner,
 } = require("../mailer/reservationMailer");
 
 const { Op } = require("sequelize");
@@ -38,6 +39,9 @@ exports.createNewReservation = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormId);
   const roomData = await findRoomData(roomId);
   const validRole = validator.isValidRole(userData.role, "tenant");
+  const userToBeMailed = await db.User.findOne({
+    where: { id: dormitoryData.userId },
+  });
 
   const validationResult = createNewReservationValidator(
     slot,
@@ -71,6 +75,7 @@ exports.createNewReservation = async (req, res) => {
     await t.commit();
 
     createReservationMailer(userData);
+    createReservationMailerOwner(userToBeMailed, userData);
 
     return res.send({ msg: "Reservation Created." });
   } catch (err) {
@@ -330,7 +335,7 @@ exports.rejectUserReservation = async (req, res) => {
     );
     await t.commit();
 
-    rejectTenantReservationMailer(reservationData, dormitoryData, message);
+    rejectTenantReservationMailer(reservationData, dormitoryData, message, userData);
 
     return res.send({ msg: "User Reservation Rejected" });
   } catch (err) {
