@@ -1,8 +1,8 @@
 const nodemailer = require("nodemailer");
 const config = require("../config/config");
 
-const user_email = config.email;
-const user_password = config.password;
+const user_email = process.env.AREDNA_EMAIL;
+const user_password = process.env.AREDNA_PASS;
 
 const transport = nodemailer.createTransport({
   service: "gmail",
@@ -12,7 +12,7 @@ const transport = nodemailer.createTransport({
   },
 });
 
-var title = "DORMRES";
+var title = "AREDNA";
 
 exports.createReservationMailer = ({ email, name }) => {
   const messageInfo = {
@@ -38,6 +38,29 @@ exports.createReservationMailer = ({ email, name }) => {
   });
 };
 
+exports.createReservationMailerOwner = ({email, name}, userData) => {
+  const messageInfo = {
+    to: email,
+    from: 'aredna',
+    subject: `WELCOME TO ${title}!`,
+    text: `
+        Greetings!! ${name},
+
+            ${userData.name} wants to reserve a room on your dormitory. Please check their reservation as soon as possible.
+
+        Thank you!
+        `,
+  };
+
+  transport.sendMail(messageInfo, (err, message) => {
+    if (err) {
+      console.log(err);
+    }
+
+    console.log(message, " Successfully sent!");
+  });
+}
+
 exports.cancelReservationMailer = ({ email, name }) => {
   const messageInfo = {
     to: email,
@@ -46,7 +69,7 @@ exports.cancelReservationMailer = ({ email, name }) => {
     text: `
         Greetings!! ${name},
 
-        Your reservation was successfully cancelled.
+        Your reservation was cancelled.
 
         Thank you!
         `,
@@ -111,7 +134,7 @@ exports.acceptReservationMailer = ({ name, email }, dormitoryData) => {
   });
 };
 
-exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData, message) => {
+exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData, message, userData) => {
   const messageInfo = {
     to: email,
     from: 'aredna',
@@ -119,10 +142,10 @@ exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData, message
     text: `
         Greetings!! ${name},
 
-        The owner of ${dormitoryData.name} was unfortunately rejected your reservation. They have their own reasons why they did reject your reservation but we hope that you will understand them. 
+        ${message}
 
-        Message from the owner of ${dormitoryData.name}:
-        " ${message} "
+        From,
+        ${userData.name}
 
         Thank you!
         `,

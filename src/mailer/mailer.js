@@ -12,17 +12,15 @@ const transport = nodemailer.createTransport({
   },
 });
 
-var title = 'AREDNA'
+var title = "AREDNA";
 
 exports.verifyEmail = (
   { id, name, email, username, contactNumber, address, role },
   host
 ) => {
-    
-
-    const messageInfo = {
+  const messageInfo = {
     to: email,
-    from: 'aredna',
+    from: "aredna",
     subject: `WELCOME TO ${title}!`,
     html: `
         <h1> Greetings! ${name}</h1>
@@ -63,7 +61,7 @@ exports.changePassword = ({ id, name, email, role }, host) => {
 
   const messageInfo = {
     to: email,
-    from: 'aredna',
+    from: "aredna",
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${name}
@@ -85,7 +83,7 @@ exports.changePassword = ({ id, name, email, role }, host) => {
 exports.dormitoryVerifiedNotice = (userData, dormitoryData) => {
   const messageInfo = {
     to: userData.email,
-    from: 'aredna',
+    from: "aredna",
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -111,7 +109,7 @@ exports.dormitoryVerifiedNotice = (userData, dormitoryData) => {
 exports.userVerifiedNotice = (userData) => {
   const messageInfo = {
     to: userData.email,
-    from: 'aredna',
+    from: "aredna",
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -134,7 +132,7 @@ exports.userVerifiedNotice = (userData) => {
 exports.deniedDormitoryNotice = (dormitoryData, userData) => {
   const messageInfo = {
     to: userData.email,
-    from: 'aredna',
+    from: "aredna",
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -162,7 +160,7 @@ exports.deniedDormitoryNotice = (dormitoryData, userData) => {
 exports.deniedUserNotice = (userData) => {
   const messageInfo = {
     to: userData.email,
-    from: 'aredna',
+    from: "aredna",
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -191,7 +189,7 @@ exports.deniedUserNotice = (userData) => {
 exports.paymentVerificationNotice = (userData) => {
   const messageInfo = {
     to: userData.email,
-    from: 'aredna',
+    from: "aredna",
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
@@ -215,7 +213,7 @@ exports.paymentVerificationNotice = (userData) => {
 exports.deniedPaymentNotice = (userData) => {
   const messageInfo = {
     to: userData.email,
-    from: 'aredna',
+    from: "aredna",
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings! ${userData.name}
