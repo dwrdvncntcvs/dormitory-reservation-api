@@ -1,8 +1,8 @@
 const nodemailer = require("nodemailer");
 const config = require("../config/config");
 
-const user_email = process.env.AREDNA_EMAIL;
-const user_password = process.env.AREDNA_PASS;
+const user_email = config.email;
+const user_password = config.password;
 
 const transport = nodemailer.createTransport({
   service: "gmail",
@@ -17,7 +17,7 @@ var title = "DORMRES";
 exports.createReservationMailer = ({ email, name }) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
@@ -41,7 +41,7 @@ exports.createReservationMailer = ({ email, name }) => {
 exports.cancelReservationMailer = ({ email, name }) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
@@ -64,7 +64,7 @@ exports.cancelReservationMailer = ({ email, name }) => {
 exports.addUserMailer = ({ email, name }, dormitoryData) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
@@ -87,7 +87,7 @@ exports.addUserMailer = ({ email, name }, dormitoryData) => {
 exports.acceptReservationMailer = ({ name, email }, dormitoryData) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
@@ -114,7 +114,7 @@ exports.acceptReservationMailer = ({ name, email }, dormitoryData) => {
 exports.rejectTenantReservationMailer = ({ name, email }, dormitoryData, message) => {
   const messageInfo = {
     to: email,
-    from: user_email,
+    from: 'aredna',
     subject: `WELCOME TO ${title}!`,
     text: `
         Greetings!! ${name},
