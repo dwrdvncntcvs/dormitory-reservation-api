@@ -7,14 +7,16 @@
     <title>Email Verification</title>
 
     <link rel="stylesheet" href="/public/css/emailVerification.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet"/>
   </head>
   <body>
     <div class="main-container">
       <div class="message-container">
-        <h1 class="custom-layout title-text">
+        <h1 class="custom-layout title-text" data-text="Welcome to aredna! <%= context.userData.name %>">
           Welcome to aredna! <%= context.userData.name %>
         </h1>
         <div class="additional-message-container">
+          <hr class="top-hr" color="#258741">
           <h2 class="custom-layout message-text">
             Your email "<%= context.userData.email %>" was successfully
             verified!
@@ -22,10 +24,15 @@
           <h2 class="custom-layout  message-text">
             You are now able to sign in to the application!
           </h2>
+          <hr class="bottom-hr"  color="#258741">
         </div>
+        <p class="custom-layout note-message"><i>Note: You may now close this and login to the website</i></p>
       </div>
-      <p class="custom-layout note-message"><i>Note: You may now close this and login to the website</i></p>
-
     </div>
+    <div class="custom-shape-divider-top-1636644309">
+      <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M1200 0L0 0 598.97 114.72 1200 0z" class="shape-fill"></path>
+      </svg>
+  </div>
   </body>
 </html>
