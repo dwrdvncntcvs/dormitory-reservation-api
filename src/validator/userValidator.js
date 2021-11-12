@@ -22,7 +22,7 @@ exports.signUpValidator = ({
     gender === "" ||
     role === ""
   ) {
-    return new ValidationResult(401, "Invalid Imputs");
+    return new ValidationResult(401, "Invalid Inputs");
   }
 
   return null;
