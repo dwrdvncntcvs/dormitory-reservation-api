@@ -314,6 +314,9 @@ exports.rejectUserReservation = async (req, res) => {
   const roomData = await findRoomData(roomId);
   const reservationData = await findReservationData(reservationId);
   const validRole = validator.isValidRole(userData.role, "owner");
+  const userToBeMailed = await db.User.findOne({
+    where: { id: reservationData.userId },
+  });
 
   const validationResult = removeUserValidator(
     dormitoryData,
@@ -335,7 +338,12 @@ exports.rejectUserReservation = async (req, res) => {
     );
     await t.commit();
 
-    rejectTenantReservationMailer(reservationData, dormitoryData, message, userData);
+    rejectTenantReservationMailer(
+      reservationData,
+      dormitoryData,
+      message,
+      userToBeMailed
+    );
 
     return res.send({ msg: "User Reservation Rejected" });
   } catch (err) {
