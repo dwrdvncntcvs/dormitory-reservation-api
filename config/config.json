@@ -9,15 +9,15 @@
   "test": {
     "username": "postgres",
     "password": null,
-    "database": "database_test",
+    "database": "dormitory_database",
     "host": "127.0.0.1",
-    "dialect": "postgres"
+    "dialect": "mysql"
   },
   "production": {
     "username": "postgres",
     "password": null,
-    "database": "database_production",
+    "database": "dormitory_database",
     "host": "127.0.0.1",
-    "dialect": "postgres"
+    "dialect": "mysql"
   }
 }
