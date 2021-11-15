@@ -7,8 +7,9 @@ exports.createNewReservationValidator = (
   roomData,
   validRole
 ) => {
-  if (slot === "") {
-    return new ValidationResult(403, "Invalid Input");
+  console.log(slot, "Room Data: ", roomData.capacity)
+  if (slot === "" || slot === null) {
+    return new ValidationResult(403, "Please enter slot");
   }
 
   if (validRole === false) {
@@ -48,7 +49,7 @@ exports.createNewReservationValidator = (
     return new ValidationResult(404, "Room not found");
   }
 
-  if (slot > roomData.roomCapacity) {
+  if (slot >= roomData.capacity) {
     return new ValidationResult(
       403,
       "Your wanted slot doesn't fit on the available space in the room"
