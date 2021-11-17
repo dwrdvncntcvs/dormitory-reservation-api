@@ -80,6 +80,6 @@ app.listen(PORT, () => {
   console.log(divider);
 
   //Use jobs
-  // verificationJob.scheduler();
+  verificationJob.scheduler();
   console.log(divider);
 });
