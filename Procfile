@@ -1,1 +1,1 @@
-web: npm run migrate && npm run start
+web: sequelize db:create && npm run migrate && npm run start
