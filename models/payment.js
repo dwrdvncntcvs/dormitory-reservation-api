@@ -18,6 +18,16 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         targetKey: "id",
       });
+
+      this.belongsTo(models.User, {
+        foreignKey: {
+          name: "userId",
+          allowNull: false,
+        },
+        hooks: true,
+        onDelete: "CASCADE",
+        targetKey: "id",
+      });
     }
   }
   Payment.init(
