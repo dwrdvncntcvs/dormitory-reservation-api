@@ -24,9 +24,6 @@ const { Op } = require("sequelize");
 const userFilter = require("../database/userFilter");
 const fs = require("fs");
 
-//For ADMIN only.
-//This function will let the admins to manually or perssonaly validate
-//users depends on the documents or ids that they will uploading.
 exports.displayAllUsers = async (req, res) => {
   const role = req.params.role;
   const filter = req.query.filter;
@@ -49,7 +46,6 @@ exports.displayAllUsers = async (req, res) => {
           role: "admin",
           [Op.or]: [userFilter.getValue(filter, "admin")],
         },
-        // include: [db.ProfileImage, db.Document],
       });
 
       const ownerUsers = await db.User.findAll({
@@ -57,7 +53,6 @@ exports.displayAllUsers = async (req, res) => {
           role: "owner",
           [Op.or]: [userFilter.getValue(filter, "owner")],
         },
-        // include: [db.ProfileImage, db.Document, db.Dormitory],
       });
 
       const tenantUsers = await db.User.findAll({
@@ -65,7 +60,6 @@ exports.displayAllUsers = async (req, res) => {
           role: "tenant",
           [Op.or]: [userFilter.getValue(filter, "tenant")],
         },
-        // include: [db.ProfileImage, db.Document],
       });
 
       return res.send({ adminUsers, ownerUsers, tenantUsers });
@@ -75,7 +69,6 @@ exports.displayAllUsers = async (req, res) => {
           role: role,
           [Op.or]: [userFilter.getValue(filter, role)],
         },
-        // include: [db.ProfileImage, db.Document],
       });
 
       return res.send({ adminUsers });
@@ -85,7 +78,6 @@ exports.displayAllUsers = async (req, res) => {
           role: role,
           [Op.or]: [userFilter.getValue(filter, role)],
         },
-        // include: [db.ProfileImage, db.Document, db.Dormitory],
       });
 
       return res.send({ ownerUsers });
@@ -95,7 +87,6 @@ exports.displayAllUsers = async (req, res) => {
           role: role,
           [Op.or]: [userFilter.getValue(filter, role)],
         },
-        // include: [db.ProfileImage, db.Document],
       });
 
       return res.send({ tenantUsers });
@@ -198,7 +189,6 @@ exports.displayDormitoryDetail = async (req, res) => {
   }
 };
 
-//TO VERIFY THE USERS
 exports.verifyUser = async (req, res) => {
   const { id, isVerified } = req.body;
   const user = req.user;
@@ -227,9 +217,6 @@ exports.verifyUser = async (req, res) => {
   }
 };
 
-//DELETE USER INFORMATION
-//Delete functionality that an admin user can only access.
-//This function is not yet complete until this comment is deleted.
 exports.deleteUser = async (req, res) => {
   const id = req.params.id;
   const user = req.user;
@@ -258,7 +245,6 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-//To verify a dormitory to add things such as rooms and payments
 exports.verifyDormitory = async (req, res) => {
   const { userId, dormId, isVerified } = req.body;
 

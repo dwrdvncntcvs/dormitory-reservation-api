@@ -1,7 +1,6 @@
 const db = require("../../models");
 const validator = require("../validator/validator");
 
-//To Find Values in Database
 const {
   findDormitoryData,
   findRoomData,
@@ -30,8 +29,6 @@ const {
 
 const { Op } = require("sequelize");
 
-//For Tenant Users
-//To create new reservation for tenants
 exports.createNewReservation = async (req, res) => {
   const { dormId, roomId, slot } = req.body;
 
@@ -85,7 +82,6 @@ exports.createNewReservation = async (req, res) => {
   }
 };
 
-//To cancel tenant's current reservations
 exports.cancelReservation = async (req, res) => {
   const reservationId = req.params.reservationId;
   const dormitoryId = req.params.dormitoryId;
@@ -128,8 +124,6 @@ exports.cancelReservation = async (req, res) => {
   }
 };
 
-//For Owner users
-//To see all the new reservation of tenant Users
 exports.viewAllReservations = async (req, res) => {
   const dormId = req.params.dormId;
 
@@ -162,7 +156,6 @@ exports.viewAllReservations = async (req, res) => {
   }
 };
 
-//To remove reservation of the user
 exports.removeUser = async (req, res) => {
   const dormId = req.params.dormId;
   const roomId = req.params.roomId;
@@ -259,7 +252,6 @@ exports.addUser = async (req, res) => {
   }
 };
 
-//To accept new reservations
 exports.acceptReservations = async (req, res) => {
   const { dormId, roomId, reservationId } = req.body;
 

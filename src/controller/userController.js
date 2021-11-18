@@ -12,7 +12,6 @@ const {
   editAccountValidator,
 } = require("../validator/userValidator");
 
-//CREATE NEW INFORMATION
 exports.signUp = async (req, res) => {
   const {
     name,
@@ -62,7 +61,6 @@ exports.signUp = async (req, res) => {
   }
 };
 
-//SIGN IN WITH EXISTING INFORMATION
 exports.signIn = async (req, res) => {
   const { username, plainPassword, role } = req.body;
 
@@ -113,10 +111,10 @@ exports.verifyEmail = async (req, res) => {
     await t.commit();
 
     const context = {
-      userData
-    }
+      userData,
+    };
 
-    return res.render(`emailVerification`, { context })
+    return res.render(`emailVerification`, { context });
   } catch (err) {
     console.log(err);
     await t.rollback();
@@ -124,8 +122,6 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
-//This needs the user to be authenticated before the user view his/her profile details
-//This is not only for showing user information but also their dormitories and some images
 exports.userProfile = async (req, res) => {
   const userData = req.user;
   try {
@@ -157,8 +153,6 @@ exports.userProfile = async (req, res) => {
   }
 };
 
-//EDIT USER INFORMATION
-//EDIT ONLY NAME
 exports.editProfileName = async (req, res) => {
   const { name } = req.body;
 
@@ -187,7 +181,6 @@ exports.editProfileName = async (req, res) => {
   }
 };
 
-//EDIT ONLY USERNAME
 exports.editProfileUsername = async (req, res) => {
   const { username } = req.body;
 
@@ -216,7 +209,6 @@ exports.editProfileUsername = async (req, res) => {
   }
 };
 
-//EDIT ONLY ADDRESS
 exports.editProfileAddress = async (req, res) => {
   const { address } = req.body;
 
@@ -245,7 +237,6 @@ exports.editProfileAddress = async (req, res) => {
   }
 };
 
-//Checks email address to change user's password.
 exports.checkUserEmail = async (req, res) => {
   const email = req.params.email;
   const { hostAddress } = req.body;
@@ -255,25 +246,28 @@ exports.checkUserEmail = async (req, res) => {
 
     if (!user) return res.status(401).send({ msg: "Invalid Email Address" });
 
-    mailer.changePassword(user, hostAddress,);
+    mailer.changePassword(user, hostAddress);
 
-    return res.status(200).send({ msg: "Please open your email to fully change your password.", userId: user.id, userRole: user.role});
+    return res
+      .status(200)
+      .send({
+        msg: "Please open your email to fully change your password.",
+        userId: user.id,
+        userRole: user.role,
+      });
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });
   }
 };
 
-//Checks the uuid of the user to let them change their password.
 exports.changeUserPassword = async (req, res) => {
   const { id, plainPassword, plainConfirmPassword } = req.body;
 
-  //Checking if fields are null or not.
   if (plainPassword === "" || plainConfirmPassword === "") {
     return res.status(401).send({ msg: "Invalid Passwords" });
   }
 
-  //For salting and hashing password
   const salt = await bcrypt.genSalt(10, "a");
   const password = await bcrypt.hash(plainPassword, salt);
 

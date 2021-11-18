@@ -19,7 +19,6 @@ const { Landmark, Room } = require("../../models");
 const { Op } = require("sequelize");
 const { getValue } = require("../database/roomFilter");
 
-//To create and input new information of a dormitory in the system.
 exports.createNewDormitory = async (req, res) => {
   const { name, address, contactNumber, allowedGender } = req.body;
 
@@ -48,9 +47,12 @@ exports.createNewDormitory = async (req, res) => {
       },
       { transaction: t }
     );
-    await db.RatingAve.create({
-      dormitoryId: dormitory.id
-    }, { transaction: t})
+    await db.RatingAve.create(
+      {
+        dormitoryId: dormitory.id,
+      },
+      { transaction: t }
+    );
     await t.commit();
 
     return res.send({ msg: "Dormitory Successfully Created.", dormitory });
@@ -61,7 +63,6 @@ exports.createNewDormitory = async (req, res) => {
   }
 };
 
-//To delete dormitory
 exports.deleteDormitory = async (req, res) => {
   const id = req.params.id;
   const userData = req.user;
@@ -94,13 +95,11 @@ exports.deleteDormitory = async (req, res) => {
   }
 };
 
-//To view the dormitories detail of an owner.
 exports.viewDormitoryDetail = async (req, res) => {
   const dormId = req.params.dormId;
 
   const dormitoryData = await findDormitoryData(dormId);
 
-  //Check if the dormitory does exist
   if (!dormitoryData)
     return res.status(401).send({ msg: "Dormitory not found" });
 
@@ -119,7 +118,7 @@ exports.viewDormitoryDetail = async (req, res) => {
         db.Landmark,
         db.User,
         db.Payment,
-        db.RatingAve
+        db.RatingAve,
       ],
     });
     const questions = await db.Question.findAll({
@@ -134,13 +133,12 @@ exports.viewDormitoryDetail = async (req, res) => {
   }
 };
 
-//To determine if the availability of the dormitory
 exports.dormitorySwitch = async (req, res) => {
   const { dormId, isAccepting } = req.body;
 
   const userData = req.user;
   const dormitoryData = await findDormitoryData(dormId);
-  //Dormitory Segments
+
   const dormitoryAmenitySegment = await findDormitoryAmenitySegment(dormId);
   const dormitoryDocumentSegment = await findDormitoryDocumentSegment(dormId);
   const dormitoryLandmarkSegment = await findDormitoryLandmarkSegment(dormId);
@@ -183,7 +181,6 @@ exports.dormitorySwitch = async (req, res) => {
   }
 };
 
-//To View all dormitories depends on filter with their user information
 exports.displayAllDormitories = async (req, res) => {
   const filter1 = req.query.filter1;
   const filter2 = req.query.filter2;

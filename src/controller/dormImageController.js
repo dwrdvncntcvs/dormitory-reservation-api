@@ -22,7 +22,6 @@ exports.addDormImage = async (req, res) => {
   const dormitoryData = await findDormitoryData(dormId);
   const filePath = `image/dormImage/${req.file.filename}`;
 
-  //New Validator
   const validationResult = addDormImagevalidator(
     dormitoryData,
     name,
