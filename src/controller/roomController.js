@@ -8,7 +8,6 @@ const {
   getRoomDetailValidator,
 } = require("../validator/roomValidator");
 
-// To create new room in a dormitory
 exports.createNewRoom = async (req, res) => {
   const {
     dormId,
@@ -60,7 +59,6 @@ exports.createNewRoom = async (req, res) => {
   }
 };
 
-//To update the payment bills of a room
 exports.updateRoomPayment = async (req, res) => {
   const { dormId, roomId, roomCost, electricBill, waterBill } = req.body;
 
@@ -84,7 +82,6 @@ exports.updateRoomPayment = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    //To update the payment bills of the specific room
     await db.Room.update(
       { roomCost, electricBill, waterBill },
       { where: { id: roomId } },

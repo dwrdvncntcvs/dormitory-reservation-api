@@ -1,9 +1,7 @@
 const express = require("express");
 
-//Authentication Middleware
 const requireAuth = require("../middlewares/requireAuth");
 
-//Require controller or function file
 const dormLocationController = require("../controller/dormLocationController");
 
 const route = express.Router();

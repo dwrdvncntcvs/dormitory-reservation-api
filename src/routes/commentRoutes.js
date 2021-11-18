@@ -1,7 +1,6 @@
 const express = require("express");
 const requireAuth = require("../middlewares/requireAuth");
 
-//Functions
 const commentController = require("../controller/commentController");
 
 const route = express.Router();
