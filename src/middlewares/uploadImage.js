@@ -11,15 +11,9 @@ class UploadImage {
   }
 
   imageStorage(imagePath) {
-    const multerStorage = multer.diskStorage({
+    const multerStorage = multer.memoryStorage({
       destination: (req, file, cb) => {
         cb(null, imagePath);
-      },
-      filename: (req, file, cb) => {
-        cb(
-          null,
-          file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-        );
       },
     });
 

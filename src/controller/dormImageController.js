@@ -12,7 +12,7 @@ const {
   addDormitoryDocuments,
   removeDormitoryProfileImageValidator,
 } = require("../validator/dormImageValidator");
-const fs = require("fs");
+const { s3, createParams, getImageDetails } = require("../aws/s3");
 
 exports.addDormImage = async (req, res) => {
   const { name, dormId } = req.body;
@@ -20,19 +20,14 @@ exports.addDormImage = async (req, res) => {
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(dormId);
-  const filePath = `image/dormImage/${req.file.filename}`;
 
   const validationResult = addDormImagevalidator(
     dormitoryData,
     name,
     userData,
-    validRole,
-    filePath
+    validRole
   );
   if (validationResult !== null) {
-    await fs.unlink(filePath, (err) => {
-      console.log(err);
-    });
     return res
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
@@ -40,20 +35,30 @@ exports.addDormImage = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    await db.DormImage.create(
-      {
-        name,
-        filename: req.file.filename,
-        filepath: req.file.path,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        dormitoryId: dormId,
-      },
-      { transaction: t }
-    );
-    await t.commit();
+    const file = req.file;
+    const { imageName, imageType } = getImageDetails(file);
+    const params = createParams(file, imageName, imageType);
 
-    return res.send({ msg: "Image Successfully Added" });
+    s3.upload(params, async (err, data) => {
+      if (err) {
+        res.status(500).send(err);
+      }
+
+      await db.DormImage.create(
+        {
+          name,
+          filename: imageName + imageType,
+          filepath: data.Location,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          dormitoryId: dormId,
+        },
+        { transaction: t }
+      );
+      await t.commit();
+
+      return res.send({ msg: "Image Successfully Added" });
+    });
   } catch (err) {
     console.log(err);
     await t.rollback();
@@ -83,10 +88,6 @@ exports.deleteDormImage = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    await fs.unlink(`image/dormImage/${dormImageData.filename}`, (err) => {
-      if (err) console.log(err);
-    });
-
     await db.DormImage.destroy(
       { where: { id: dormImageData.id } },
       { transaction: t }
@@ -107,7 +108,6 @@ exports.addDormitoryProfileImage = async (req, res) => {
   const userData = req.user;
   const validRole = validator.isValidRole(userData.role, "owner");
   const dormitoryData = await findDormitoryData(id);
-  const filePath = `image/dormitoryProfileImage/${req.file.filename}`;
 
   const validationResult = addDormitoryProfileImageValidator(
     validRole,
@@ -115,9 +115,6 @@ exports.addDormitoryProfileImage = async (req, res) => {
     userData
   );
   if (validationResult !== null) {
-    await fs.unlink(filePath, (err) => {
-      console.log(err);
-    });
     return res
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
@@ -125,19 +122,29 @@ exports.addDormitoryProfileImage = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    await db.DormProfileImage.create(
-      {
-        filename: req.file.filename,
-        filepath: req.file.path,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        dormitoryId: dormitoryData.id,
-      },
-      { transaction: t }
-    );
-    await t.commit();
+    const file = req.file;
+    const { imageName, imageType } = getImageDetails(file);
+    const params = createParams(file, imageName, imageType);
 
-    return res.send({ msg: "Dorm Profile Image Successfully Added" });
+    s3.upload(params, async (err, data) => {
+      if (err) {
+        res.status(500).send(err);
+      }
+
+      await db.DormProfileImage.create(
+        {
+          filename: imageName + imageType,
+          filepath: data.Location,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          dormitoryId: dormitoryData.id,
+        },
+        { transaction: t }
+      );
+      await t.commit();
+
+      return res.send({ msg: "Dorm Profile Image Successfully Added" });
+    });
   } catch (error) {
     console.log(error);
     await t.rollback();
@@ -165,14 +172,8 @@ exports.removeDormitoryProfileImage = async (req, res) => {
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
 
-  const filePath = `image/dormitoryProfileImage/${dormProfileImageData.filename}`;
-
   const t = await db.sequelize.transaction();
   try {
-    await fs.unlink(filePath, (err) => {
-      console.log(err);
-    });
-
     await db.DormProfileImage.destroy(
       {
         where: { id: dormProfileImageData.id },
@@ -212,20 +213,30 @@ exports.addDormitoryDocuments = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    await db.DormDocument.create(
-      {
-        documentType,
-        dormitoryId: dormitoryData.id,
-        filename: req.file.filename,
-        filepath: req.file.path,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-      },
-      { transaction: t }
-    );
-    await t.commit();
+    const file = req.file;
+    const { imageName, imageType } = getImageDetails(file);
+    const params = createParams(file, imageName, imageType);
 
-    return res.send({ msg: "Dormitory Documents Successfully Added" });
+    s3.upload(params, async (err, data) => {
+      if (err) {
+        res.status(500).send(err);
+      }
+
+      await db.DormDocument.create(
+        {
+          documentType,
+          dormitoryId: dormitoryData.id,
+          filename: imageName + imageType,
+          filepath: data.Location,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+        },
+        { transaction: t }
+      );
+      await t.commit();
+
+      return res.send({ msg: "Dormitory Documents Successfully Added" });
+    });
   } catch (err) {
     console.log(err);
     await t.rollback();

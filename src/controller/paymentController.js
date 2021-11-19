@@ -17,7 +17,7 @@ const {
   paymentVerificationNotice,
   deniedPaymentNotice,
 } = require("../mailer/mailer");
-const fs = require("fs");
+const { s3, createParams, getImageDetails } = require("../aws/s3");
 
 exports.createNewPayment = async (req, res) => {
   const { sender, recipientNumber, amount, referenceNumber, dormitoryId } =
@@ -32,8 +32,6 @@ exports.createNewPayment = async (req, res) => {
   const isRefExist = validator.isRefNumberExist(paymentData);
   console.log(notValidPayment);
 
-  const file = `image/paymentImage/${req.file.filename}`;
-
   const validationResult = createPaymentValidator(
     dormitoryPaymentData,
     notValidPayment,
@@ -44,10 +42,6 @@ exports.createNewPayment = async (req, res) => {
     req.body
   );
   if (validationResult !== null) {
-    await fs.unlink(file, (err) => {
-      console.log(err);
-    });
-
     return res
       .status(validationResult.statusCode)
       .send({ msg: validationResult.message });
@@ -55,30 +49,37 @@ exports.createNewPayment = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    await db.Payment.create(
-      {
-        sender,
-        recipientNumber,
-        amount,
-        referenceNumber,
-        filename: req.file.filename,
-        filepath: req.file.path,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        dormitoryId: dormitoryData.id,
-        userId: userData.id,
-      },
-      { transaction: t }
-    );
-    await t.commit();
+    const file = req.file;
+    const { imageName, imageType } = getImageDetails(file);
+    const params = createParams(file, imageName, imageType);
 
-    return res.send({
-      msg: "Payment Successfully Created. Please wait for the verification of the admin",
+    s3.upload(params, async (err, data) => {
+      if (err) {
+        res.status(500).send(err);
+      }
+
+      await db.Payment.create(
+        {
+          sender,
+          recipientNumber,
+          amount,
+          referenceNumber,
+          filename: imageName + imageType,
+          filepath: data.Location,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          dormitoryId: dormitoryData.id,
+          userId: userData.id,
+        },
+        { transaction: t }
+      );
+      await t.commit();
+
+      return res.send({
+        msg: "Payment Successfully Created. Please wait for the verification of the admin",
+      });
     });
   } catch (err) {
-    await fs.unlink(file, (err) => {
-      console.log(err);
-    });
     await t.rollback();
     return res.status(500).send({ msg: "Something went wrong" });
   }
@@ -153,10 +154,6 @@ exports.denyDormitoryPayment = async (req, res) => {
 
   const t = await db.sequelize.transaction();
   try {
-    const file = `image/paymentImage/${paymentData.filename}`;
-    await fs.unlink(file, (err) => {
-      console.log(err);
-    });
     await db.Payment.destroy(
       { where: { id: paymentData.id } },
       { transaction: t }
