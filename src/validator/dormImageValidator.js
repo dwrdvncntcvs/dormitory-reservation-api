@@ -6,7 +6,6 @@ exports.addDormImagevalidator = (
   name,
   userData,
   validRole,
-  filePath
 ) => {
   if (validRole === false) {
     return new ValidationResult(401, "Invalid User");

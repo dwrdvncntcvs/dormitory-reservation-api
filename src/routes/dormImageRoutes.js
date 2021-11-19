@@ -5,7 +5,7 @@ const { UploadImage } = require("../middlewares/uploadImage");
 
 const dormImageController = require("../controller/dormImageController");
 
-const uploadDormImage = new UploadImage("image/dormImage", "dormImage")
+const uploadDormImage = new UploadImage("''", "dormImage")
   .uploadImage;
 
 const route = express.Router();
