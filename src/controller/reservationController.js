@@ -334,7 +334,7 @@ exports.rejectUserReservation = async (req, res) => {
       reservationData,
       dormitoryData,
       message,
-      userToBeMailed
+      userData
     );
 
     return res.send({ msg: "User Reservation Rejected" });
