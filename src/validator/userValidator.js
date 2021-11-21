@@ -1,16 +1,21 @@
 const { ValidationResult } = require("./validationResult");
 
-exports.signUpValidator = ({
-  name,
-  username,
-  email,
-  plainPassword,
-  plainConfirmPassword,
-  contactNumber,
-  address,
-  gender,
-  role,
-}) => {
+exports.signUpValidator = (
+  {
+    name,
+    username,
+    email,
+    plainPassword,
+    plainConfirmPassword,
+    contactNumber,
+    address,
+    gender,
+    role,
+  },
+  userEmail,
+  userUsername,
+  userContactNumber
+) => {
   if (
     name === "" ||
     username === "" ||
@@ -23,6 +28,18 @@ exports.signUpValidator = ({
     role === ""
   ) {
     return new ValidationResult(401, "Invalid Inputs");
+  }
+
+  if (userEmail !== null) {
+    return new ValidationResult(403, "Please use different email address");
+  }
+
+  if (userUsername !== null) {
+    return new ValidationResult(403, "Please use different username");
+  }
+
+  if (userContactNumber !== null) {
+    return new ValidationResult(403, "Please use different contact number");
   }
 
   return null;

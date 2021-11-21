@@ -24,8 +24,13 @@ exports.signUp = async (req, res) => {
     gender,
     role,
   } = req.body;
+  const userEmail = await db.User.findOne({ where: { email } });
+  const userUsername = await db.User.findOne({ where: { username } });
+  const userContactNumber = await db.User.findOne({ where: { contactNumber } });
 
-  const validationResult = signUpValidator(req.body);
+  console.log(userEmail)
+
+  const validationResult = signUpValidator(req.body, userEmail, userUsername, userContactNumber);
   if (validationResult !== null) {
     return res
       .status(validationResult.statusCode)
@@ -248,13 +253,11 @@ exports.checkUserEmail = async (req, res) => {
 
     mailer.changePassword(user, hostAddress);
 
-    return res
-      .status(200)
-      .send({
-        msg: "Please open your email to fully change your password.",
-        userId: user.id,
-        userRole: user.role,
-      });
+    return res.status(200).send({
+      msg: "Please open your email to fully change your password.",
+      userId: user.id,
+      userRole: user.role,
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).send({ msg: "Something went wrong" });

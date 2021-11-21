@@ -49,7 +49,7 @@ exports.createNewReservationValidator = (
     return new ValidationResult(404, "Room not found");
   }
 
-  if (slot >= roomData.capacity) {
+  if (slot > roomData.capacity) {
     return new ValidationResult(
       403,
       "Your wanted slot doesn't fit on the available space in the room"
