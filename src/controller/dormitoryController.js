@@ -250,6 +250,7 @@ exports.displayOwnerDormitories = async (req, res) => {
         db.DormProfileImage,
         db.DormRating,
         db.DormLocation,
+        db.Reservation
       ],
     });
 
