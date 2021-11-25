@@ -320,6 +320,7 @@ exports.getDormitoriesByUserReservation = async (req, res) => {
         db.DormProfileImage,
         db.DormRating,
         db.DormLocation,
+        db.RatingAve
       ],
     });
 
