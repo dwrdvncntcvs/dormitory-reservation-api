@@ -125,7 +125,7 @@ exports.filterDormitoryByRating = async (req, res) => {
   try {
     const dormitoryData = await db.Dormitory.findAll({
       where: { "$RatingAve.totalRating$": {[Op.between]: [4, 5]} },
-      include: [{model: RatingAve}, db.DormProfileImage, db.DormRating, db.RatingAve]
+      include: [{model: RatingAve}, db.DormProfileImage, db.DormRating]
     });
 
     return res.send({ dormitoryData });
