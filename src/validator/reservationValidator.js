@@ -188,7 +188,7 @@ exports.addUserValidator = (
     return new ValidationResult(401, "Room is full");
   }
 
-  if (roomData.capacity < reservationData.roomSlot) {
+  if ((roomData.capacity - roomData.activeTenant) < reservationData.roomSlot) {
     return new ValidationResult(403, "Room Slots doesn't fit to the room");
   }
 
@@ -238,7 +238,7 @@ exports.acceptReservationsValidator = (
     return new ValidationResult(404, "Reservation not found");
   }
 
-  if (roomData.capacity < reservationData.roomSlot) {
+  if ((roomData.capacity - roomData.activeTenant) < reservationData.roomSlot) {
     return new ValidationResult(403, "Room Slots doesn't fit to the room");
   }
 
