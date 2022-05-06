@@ -1,14 +1,14 @@
 {
   "development": {
     "username": "postgres",
-    "password": "passwordhere",
+    "password": "0ut0fth!sw0rld&",
     "database": "dormitory_database",
     "host": "localhost",
     "dialect": "postgres"
   },
   "test": {
     "username": "postgres",
-    "password": "passwordhere",
+    "password": "0ut0fth!sw0rld&",
     "database": "dormitory_database",
     "host": "127.0.0.1",
     "dialect": "postgres"

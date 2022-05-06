@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const config = require("../config/config");
+require("dotenv/config");
 
 const user_email = process.env.AREDNA_EMAIL;
 const user_password = process.env.AREDNA_PASS;
