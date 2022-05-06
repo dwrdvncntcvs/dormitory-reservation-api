@@ -6,11 +6,18 @@ const user_email = process.env.AREDNA_EMAIL;
 const user_password = process.env.AREDNA_PASS;
 
 const transport = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
+    type: "OAuth2", 
+    clientId:
+      "157327610190-peu575v637upc64hej8u70ff6ou87lle.apps.googleusercontent.com",
+    clientSecret: "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",
+
     user: `${user_email}`,
     pass: `${user_password}`,
-  },
+  },  
 });
 
 var title = "AREDNA";
